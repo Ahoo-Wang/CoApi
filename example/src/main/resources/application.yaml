@@ -1,0 +1,15 @@
+github:
+  url: https://api.github.com
+
+spring:
+  application:
+    name: example-service
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            github-service:
+              - host: api.github.com
+                secure: true
+                port: 443
