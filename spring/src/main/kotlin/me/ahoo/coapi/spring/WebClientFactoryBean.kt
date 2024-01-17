@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient
 /**
  * @see org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
  */
-class WebClientFactoryBean(private val definition: ApiClientDefinition) :
+class WebClientFactoryBean(private val definition: CoApiDefinition) :
     FactoryBean<WebClient>,
     ApplicationContextAware {
 

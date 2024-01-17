@@ -10,5 +10,6 @@ dependencies {
     api("org.springframework:spring-context")
     api("org.springframework:spring-webflux")
     "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
+    testImplementation(project(":example-api"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
