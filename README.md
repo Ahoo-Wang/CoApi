@@ -1,5 +1,7 @@
 # CoApi
 
+[中文文档](./README.zh-CN.md)
+
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://github.com/Ahoo-Wang/CoApi/blob/mvp/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/Ahoo-Wang/CoApi.svg)](https://github.com/Ahoo-Wang/CoApi/releases)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/me.ahoo.coapi/api/badge.svg)](https://maven-badges.herokuapp.com/maven-central/me.ahoo.coapi/api)
