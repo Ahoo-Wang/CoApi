@@ -17,6 +17,15 @@ plugins {
     alias(libs.plugins.kotlinSpring)
     kotlin("kapt")
 }
+
+kotlin {
+    jvmToolchain(17)
+}
+
+application {
+    mainClass.set("me.ahoo.coapi.example.ExampleServerKt")
+}
+
 dependencies {
     implementation(platform(project(":dependencies")))
     kapt(platform(project(":dependencies")))

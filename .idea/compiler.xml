@@ -2,8 +2,6 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="17">
-      <module name="me.ahoo.apiclient.CoApi.example-server.main" target="21" />
-      <module name="me.ahoo.apiclient.CoApi.example-server.test" target="21" />
     </bytecodeTargetLevel>
   </component>
 </project>
