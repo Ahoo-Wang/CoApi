@@ -96,3 +96,83 @@ class GithubController(
 ## Case Reference
 
 [Example](./example)
+
+### Service Provider
+
+[Example-Provider](./example/example-provider-server)
+
+```mermaid
+classDiagram
+direction BT
+class TodoApi {
+<<Interface>>
+
+}
+class TodoClient {
+<<Interface>>
+
+}
+class TodoController
+
+TodoClient  -->  TodoApi 
+TodoController  ..>  TodoApi
+```
+
+- `TodoApi` : Specifies a public contract between the client-side consumer and the service provider.
+- `TodoClient` :The client consumer accesses the service provider's API via `TodoClient`.
+- `TodoController` : The service provider is responsible for implementing the `TodoApi` interface.
+
+#### Define API
+
+```kotlin
+@HttpExchange("todo")
+interface TodoApi {
+
+    @GetExchange
+    fun getTodo(): Flux<Todo>
+}
+```
+
+#### Define Client
+
+```kotlin
+@CoApi(serviceId = "provider-service")
+interface TodoClient : TodoApi
+```
+
+#### Implement API
+
+```kotlin
+@RestController
+class TodoController : TodoApi {
+    override fun getTodo(): Flux<Todo> {
+        return Flux.range(1, 10)
+            .map {
+                Todo("todo-$it")
+            }
+    }
+}
+```
+
+### Service Consumer
+
+[Example-Consumer](./example/example-consumer-server)
+
+The service consumer turns on the automatic configuration of the `CoApi` via the `@EnableCoApi` annotation.
+
+```kotlin
+@EnableCoApi(apis = [TodoClient::class])
+@SpringBootApplication
+class ConsumerServer
+```
+
+```kotlin
+@RestController
+class TodoController(private val todoClient: TodoClient) {
+
+    @GetExchange
+    fun getProviderTodo(): Flux<Todo> {
+        return todoClient.getTodo()
+    }
+}
+```

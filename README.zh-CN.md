@@ -98,3 +98,83 @@ class GithubController(
 ## 案例参考
 
 [Example](./example)
+
+### 服务提供者
+
+[Example-Provider](./example/example-provider-server)
+
+```mermaid
+classDiagram
+direction BT
+class TodoApi {
+<<Interface>>
+
+}
+class TodoClient {
+<<Interface>>
+
+}
+class TodoController
+
+TodoClient  -->  TodoApi 
+TodoController  ..>  TodoApi
+```
+
+- `TodoApi` : 规定了客户端消费方与服务提供者之间的通用契约。
+- `TodoClient` : 客户端消费方通过 `TodoClient` 访问服务提供者的API。
+- `TodoController` : 服务提供者负责实现 `TodoApi` 接口。
+
+#### 定义 API
+
+```kotlin
+@HttpExchange("todo")
+interface TodoApi {
+
+    @GetExchange
+    fun getTodo(): Flux<Todo>
+}
+```
+
+#### 定义 Client
+
+```kotlin
+@CoApi(serviceId = "provider-service")
+interface TodoClient : TodoApi
+```
+
+#### 实现 API
+
+```kotlin
+@RestController
+class TodoController : TodoApi {
+    override fun getTodo(): Flux<Todo> {
+        return Flux.range(1, 10)
+            .map {
+                Todo("todo-$it")
+            }
+    }
+}
+```
+
+### 服务消费者
+
+[Example-Consumer](./example/example-consumer-server)
+
+服务消费者通过 `@EnableCoApi` 注解开启 `CoApi` 的自动配置。
+
+```kotlin
+@EnableCoApi(apis = [TodoClient::class])
+@SpringBootApplication
+class ConsumerServer
+```
+
+```kotlin
+@RestController
+class TodoController(private val todoClient: TodoClient) {
+
+    @GetExchange
+    fun getProviderTodo(): Flux<Todo> {
+        return todoClient.getTodo()
+    }
+}
+```
