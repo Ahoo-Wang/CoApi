@@ -1,0 +1,93 @@
+# CoApi
+
+在 Spring Framework 6 中，引入了全新的 HTTP 客户端 - [Spring6 HTTP Interface](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-http-interface)。
+该接口允许开发者通过使用 `@HttpExchange` 注解将 HTTP 服务定义为 Java 接口。
+
+然而，当前版本尚未提供自动配置的支持，需要开发者自己实现配置。
+
+虽然 *Spring* 生态中已经存在 [Spring Cloud OpenFeign](https://github.com/spring-cloud/spring-cloud-openfeign) ，但它并未支持响应式编程模型。
+为解决这个问题，*Spring Cloud OpenFeign* 推荐了替代方案 [feign-reactive](https://github.com/PlaytikaOSS/feign-reactive)。然而，这个替代方案目前已处于不积极维护状态，并且不支持 Spring Boot 3.2.x。
+
+**CoApi** 应运而生，它提供了类似于 *Spring Cloud OpenFeign* 的零样板代码自动配置的支持。开发者只需定义接口，即可轻松使用。
+
+## 安装
+
+> 使用 *Gradle(Kotlin)* 安装依赖
+
+```kotlin
+implementation("me.ahoo.coapi:spring-boot-starter")
+```
+
+> 使用 *Gradle(Groovy)* 安装依赖
+
+```groovy
+implementation 'me.ahoo.coapi:spring-boot-starter'
+```
+
+> 使用 *Maven* 安装依赖
+
+```xml
+<dependency>
+    <groupId>me.ahoo.coapi</groupId>
+    <artifactId>spring-boot-starter</artifactId>
+    <version>${coapi.version}</version>
+</dependency>
+```
+
+## 使用
+
+### 定义 `CoApi` - 第三方接口
+
+> `baseUrl` ： 定义请求的基础地址，该参数可以从配置文件中获取，如：`baseUrl = "\${github.url}"`，`github.url` 是配置文件中的配置项
+
+```kotlin
+@CoApi(baseUrl = "\${github.url}")
+interface GitHubApiClient {
+
+    @GetExchange("repos/{owner}/{repo}/issues")
+    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+}
+```
+
+> 配置文件：
+
+```yaml
+github:
+  url: https://api.github.com
+```
+
+### 定义 `CoApi` - 客户端负载均衡
+
+```kotlin
+@CoApi(serviceId = "github-service")
+interface ServiceApiClient {
+
+    @GetExchange("repos/{owner}/{repo}/issues")
+    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+}
+```
+
+### 使用 `CoApi`
+
+```kotlin
+@RestController
+class GithubController(
+    private val gitHubApiClient: GitHubApiClient,
+    private val serviceApiClient: ServiceApiClient
+) {
+
+    @GetMapping("/baseUrl")
+    fun baseUrl(): Flux<Issue> {
+        return gitHubApiClient.getIssue("Ahoo-Wang", "CoApi")
+    }
+
+    @GetMapping("/serviceId")
+    fun serviceId(): Flux<Issue> {
+        return serviceApiClient.getIssue("Ahoo-Wang", "CoApi")
+    }
+}
+```
+
+## 案例参考
+
+[Example](./example)
