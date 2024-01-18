@@ -1,0 +1,21 @@
+server:
+  port: 8080
+github:
+  url: https://api.github.com
+
+spring:
+  application:
+    name: consumer-service
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            github-service:
+              - host: api.github.com
+                secure: true
+                port: 443
+            provider-service:
+              - host: localhost
+                port: 8010
+

@@ -23,8 +23,8 @@ env:
   CI: GITHUB_ACTIONS
 
 jobs:
-  example-test:
-    name: Example Test
+  example-provider-test:
+    name: Example Provider Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,5 +38,22 @@ jobs:
           server-id: github
           settings-path: ${{ github.workspace }}
 
-      - name: Test Example
-        run: ./gradlew example-server:clean example-server:check --stacktrace
+      - name: Test Example Provider
+        run: ./gradlew example-provider-server:clean example-provider-server:check --stacktrace
+  example-consumer-test:
+    name: Example Consumer Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+      - name: Test Example Consumer
+        run: ./gradlew example-consumer-server:clean example-consumer-server:check --stacktrace

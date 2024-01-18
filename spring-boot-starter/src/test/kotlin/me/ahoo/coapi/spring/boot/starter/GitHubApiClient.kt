@@ -14,7 +14,7 @@
 package me.ahoo.coapi.spring.boot.starter
 
 import me.ahoo.coapi.api.CoApi
-import me.ahoo.coapi.example.api.Issue
+import me.ahoo.coapi.example.consumer.client.Issue
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.service.annotation.GetExchange

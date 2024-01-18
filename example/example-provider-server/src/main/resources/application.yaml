@@ -1,0 +1,10 @@
+server:
+  port: 8010
+github:
+  url: https://api.github.com
+
+spring:
+  application:
+    name: provider-service
+
+

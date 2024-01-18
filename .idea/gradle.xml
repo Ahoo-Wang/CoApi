@@ -12,8 +12,10 @@
             <option value="$PROJECT_DIR$/bom" />
             <option value="$PROJECT_DIR$/code-coverage-report" />
             <option value="$PROJECT_DIR$/dependencies" />
-            <option value="$PROJECT_DIR$/example/example-api" />
-            <option value="$PROJECT_DIR$/example/example-server" />
+            <option value="$PROJECT_DIR$/example/example-consumer-client" />
+            <option value="$PROJECT_DIR$/example/example-consumer-server" />
+            <option value="$PROJECT_DIR$/example/example-provider-api" />
+            <option value="$PROJECT_DIR$/example/example-provider-server" />
             <option value="$PROJECT_DIR$/spring" />
             <option value="$PROJECT_DIR$/spring-boot-starter" />
           </set>

@@ -11,19 +11,21 @@
  * limitations under the License.
  */
 
-java {
-    registerFeature("lbSupport") {
-        usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
-        capability(group.toString(), "lb-support", version.toString())
-    }
-}
+package me.ahoo.coapi.example.consumer
 
-dependencies {
-    api(project(":api"))
-    api("org.springframework:spring-context")
-    api("org.springframework:spring-webflux")
-    "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
-    testImplementation(project(":example-provider-api"))
-    testImplementation(project(":example-consumer-client"))
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+import me.ahoo.coapi.example.provider.api.Todo
+import me.ahoo.coapi.example.provider.client.TodoClient
+import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
+import reactor.core.publisher.Flux
+
+@RestController
+@HttpExchange("todo")
+class TodoController(private val todoClient: TodoClient) {
+
+    @GetExchange
+    fun getProviderTodo(): Flux<Todo> {
+        return todoClient.getTodo()
+    }
 }
