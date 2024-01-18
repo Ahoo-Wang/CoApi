@@ -11,7 +11,6 @@
  * limitations under the License.
  */
 
-
 rootProject.name = "CoApi"
 
 include("api")
@@ -22,9 +21,14 @@ include("dependencies")
 include("code-coverage-report")
 
 //region example
-include(":example-api")
-project(":example-api").projectDir = file("example/example-api")
+include(":example-provider-api")
+project(":example-provider-api").projectDir = file("example/example-provider-api")
+include(":example-provider-server")
+project(":example-provider-server").projectDir = file("example/example-provider-server")
 
-include(":example-server")
-project(":example-server").projectDir = file("example/example-server")
+include(":example-consumer-client")
+project(":example-consumer-client").projectDir = file("example/example-consumer-client")
+include(":example-consumer-server")
+project(":example-consumer-server").projectDir = file("example/example-consumer-server")
 //endregion
+

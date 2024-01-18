@@ -14,10 +14,11 @@
 package me.ahoo.coapi.spring.boot.starter
 
 import io.mockk.mockk
-import me.ahoo.coapi.example.api.GitHubApiClient
-import me.ahoo.coapi.example.api.ServiceApiClient
-import me.ahoo.coapi.example.api.ServiceApiClientUseFilterBeanName
-import me.ahoo.coapi.example.api.ServiceApiClientUseFilterType
+import me.ahoo.coapi.example.consumer.client.GitHubApiClient
+import me.ahoo.coapi.example.consumer.client.ServiceApiClient
+import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterBeanName
+import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterType
+import me.ahoo.coapi.example.provider.client.TodoClient
 import me.ahoo.coapi.spring.EnableCoApi
 import org.assertj.core.api.AssertionsForInterfaceTypes
 import org.junit.jupiter.api.Test
@@ -54,7 +55,9 @@ class CoApiAutoConfigurationTest {
         GitHubApiClient::class,
         ServiceApiClient::class,
         ServiceApiClientUseFilterBeanName::class,
-        ServiceApiClientUseFilterType::class
+        ServiceApiClientUseFilterType::class,
+        TodoClient::class,
+        me.ahoo.coapi.spring.boot.starter.GitHubApiClient::class
     ]
 )
 class EnableCoApiConfiguration

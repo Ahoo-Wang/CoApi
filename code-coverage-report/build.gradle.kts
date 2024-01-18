@@ -21,9 +21,6 @@ val libraryProjects = rootProject.ext.get("libraryProjects") as Iterable<Project
 
 dependencies {
     libraryProjects.forEach {
-        if (it.name.startsWith("example")) {
-            return@forEach
-        }
         jacocoAggregation(it)
     }
 }

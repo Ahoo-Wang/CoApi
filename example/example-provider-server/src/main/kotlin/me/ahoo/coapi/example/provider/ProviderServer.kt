@@ -11,19 +11,15 @@
  * limitations under the License.
  */
 
-java {
-    registerFeature("lbSupport") {
-        usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
-        capability(group.toString(), "lb-support", version.toString())
-    }
-}
+package me.ahoo.coapi.example.provider
 
-dependencies {
-    api(project(":api"))
-    api("org.springframework:spring-context")
-    api("org.springframework:spring-webflux")
-    "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
-    testImplementation(project(":example-provider-api"))
-    testImplementation(project(":example-consumer-client"))
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+
+
+@SpringBootApplication
+class ProviderServer
+
+fun main(args: Array<String>) {
+    runApplication<ProviderServer>(*args)
 }

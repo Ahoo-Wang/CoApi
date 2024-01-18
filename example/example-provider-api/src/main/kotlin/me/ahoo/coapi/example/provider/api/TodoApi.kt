@@ -11,19 +11,17 @@
  * limitations under the License.
  */
 
-java {
-    registerFeature("lbSupport") {
-        usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
-        capability(group.toString(), "lb-support", version.toString())
-    }
+package me.ahoo.coapi.example.provider.api
+
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
+import reactor.core.publisher.Flux
+
+@HttpExchange("todo")
+interface TodoApi {
+
+    @GetExchange
+    fun getTodo(): Flux<Todo>
 }
 
-dependencies {
-    api(project(":api"))
-    api("org.springframework:spring-context")
-    api("org.springframework:spring-webflux")
-    "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
-    testImplementation(project(":example-provider-api"))
-    testImplementation(project(":example-consumer-client"))
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
+data class Todo(val title: String)

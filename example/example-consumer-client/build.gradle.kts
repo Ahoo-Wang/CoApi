@@ -10,20 +10,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+plugins {
+    `java-library`
+    alias(libs.plugins.kotlin)
+}
 
-java {
-    registerFeature("lbSupport") {
-        usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
-        capability(group.toString(), "lb-support", version.toString())
-    }
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {
-    api(project(":api"))
-    api("org.springframework:spring-context")
-    api("org.springframework:spring-webflux")
-    "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
-    testImplementation(project(":example-provider-api"))
-    testImplementation(project(":example-consumer-client"))
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation(platform(project(":dependencies")))
+    implementation(project(":api"))
+    implementation("io.projectreactor:reactor-core")
+    implementation("org.springframework:spring-context")
+    implementation("org.springframework:spring-webflux")
+    implementation("org.springframework.cloud:spring-cloud-commons")
 }

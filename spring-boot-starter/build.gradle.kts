@@ -24,5 +24,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.springframework.cloud:spring-cloud-commons")
-    testImplementation(project(":example-api"))
+    testImplementation(project(":example-provider-api"))
+    testImplementation(project(":example-consumer-client"))
 }
