@@ -36,7 +36,7 @@ val bomProjects = setOf(
 val exampleApi = project(":example-api")
 val exampleServer = project(":example-server")
 val codeCoverageReportProject = project(":code-coverage-report")
-val publishProjects = subprojects - codeCoverageReportProject - exampleServer
+val publishProjects = subprojects - codeCoverageReportProject - exampleServer - exampleApi
 val libraryProjects = publishProjects - bomProjects + exampleApi
 val isInCI = !System.getenv("CI").isNullOrEmpty()
 ext.set("libraryProjects", libraryProjects)
