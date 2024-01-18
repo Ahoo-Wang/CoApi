@@ -120,7 +120,7 @@ TodoClient  -->  TodoApi
 TodoController  ..>  TodoApi
 ```
 
-- `TodoApi` : 规定了客户端消费方与服务提供者之间的通用契约。
+- `TodoApi` : 确定了客户端消费方与服务提供者之间的共同契约，旨在防范重复冗余定义的风险，同时消除了服务提供者实现与客户端 SDK 的不一致性。
 - `TodoClient` : 客户端消费方通过 `TodoClient` 访问服务提供者的API。
 - `TodoController` : 服务提供者负责实现 `TodoApi` 接口。
 
