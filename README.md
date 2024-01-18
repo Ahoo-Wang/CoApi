@@ -118,7 +118,7 @@ TodoClient  -->  TodoApi
 TodoController  ..>  TodoApi
 ```
 
-- `TodoApi` : A common contract between the client consumer and the service provider is defined to prevent the risk of duplicate redundant definitions while eliminating inconsistencies between the service provider implementation and the client SDK.
+- `TodoApi` : A common contract between the client consumer and the service provider is defined to prevent the risk of duplicate redundant definitions and to eliminate inconsistencies between the service provider implementation and the client SDK.
 - `TodoClient` :The client consumer accesses the service provider's API via `TodoClient`.
 - `TodoController` : The service provider is responsible for implementing the `TodoApi` interface.
 
