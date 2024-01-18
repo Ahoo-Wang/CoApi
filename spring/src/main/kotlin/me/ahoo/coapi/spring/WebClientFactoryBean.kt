@@ -13,57 +13,5 @@
 
 package me.ahoo.coapi.spring
 
-import org.springframework.beans.factory.FactoryBean
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
-import org.springframework.web.reactive.function.client.WebClient
-
-/**
- * @see org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
- */
-class WebClientFactoryBean(private val definition: CoApiDefinition) :
-    FactoryBean<WebClient>,
-    ApplicationContextAware {
-    companion object {
-        private val loadBalancedFilterClass = LoadBalancedExchangeFilterFunction::class.java
-    }
-
-    private lateinit var applicationContext: ApplicationContext
-    override fun getObject(): WebClient {
-        val clientBuilder = applicationContext.getBean(WebClient.Builder::class.java)
-        clientBuilder.baseUrl(definition.baseUrl)
-        val filters = buildList<ExchangeFilterFunction> {
-            definition.filters.forEach { filterName ->
-                val filter = applicationContext.getBean(filterName, ExchangeFilterFunction::class.java)
-                add(filter)
-            }
-            definition.filterTypes.forEach { filterType ->
-                val filter = applicationContext.getBean(filterType)
-                add(filter)
-            }
-            if (definition.loadBalanced) {
-                val hasLoadBalancedFilter = any { filter ->
-                    filter is LoadBalancedExchangeFilterFunction
-                }
-                if (!hasLoadBalancedFilter) {
-                    val loadBalancedExchangeFilterFunction = applicationContext.getBean(loadBalancedFilterClass)
-                    add(loadBalancedExchangeFilterFunction)
-                }
-            }
-        }
-        filters.distinct().forEach {
-            clientBuilder.filter(it)
-        }
-        return clientBuilder.build()
-    }
-
-    override fun getObjectType(): Class<*> {
-        return WebClient::class.java
-    }
-
-    override fun setApplicationContext(applicationContext: ApplicationContext) {
-        this.applicationContext = applicationContext
-    }
-}
+class WebClientFactoryBean(definition: CoApiDefinition) :
+    AbstractWebClientFactoryBean(definition)

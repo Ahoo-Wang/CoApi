@@ -46,7 +46,12 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry) {
             }
             return
         }
-        val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(WebClientFactoryBean::class.java)
+        val webClientFactoryBeanClass = if (coApiDefinition.loadBalanced) {
+            LoadBalancedWebClientFactoryBean::class.java
+        } else {
+            WebClientFactoryBean::class.java
+        }
+        val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(webClientFactoryBeanClass)
         beanDefinitionBuilder.addConstructorArgValue(coApiDefinition)
         registry.registerBeanDefinition(coApiDefinition.webClientBeanName, beanDefinitionBuilder.beanDefinition)
     }
