@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.service.annotation.GetExchange
 import reactor.core.publisher.Flux
 
-@CoApi(serviceId = "github-service", filters = ["loadBalancerExchangeFilterFunction"])
+@CoApi(serviceId = "github-service")
 interface ServiceApiClientUseFilterBeanName {
 
     @GetExchange("repos/{owner}/{repo}/issues")

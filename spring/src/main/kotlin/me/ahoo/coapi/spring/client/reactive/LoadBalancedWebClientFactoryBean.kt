@@ -11,14 +11,12 @@
  * limitations under the License.
  */
 
-package me.ahoo.coapi.spring
+package me.ahoo.coapi.spring.client.reactive
 
+import me.ahoo.coapi.spring.CoApiDefinition
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 
-/**
- * @see org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
- */
 class LoadBalancedWebClientFactoryBean(definition: CoApiDefinition) :
     AbstractWebClientFactoryBean(definition) {
     companion object {

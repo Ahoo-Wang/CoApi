@@ -15,19 +15,16 @@ package me.ahoo.coapi.spring
 
 import me.ahoo.coapi.api.CoApi
 import org.springframework.core.env.Environment
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 
 data class CoApiDefinition(
     val name: String,
     val apiType: Class<*>,
     val baseUrl: String,
-    val loadBalanced: Boolean,
-    val filters: List<String>,
-    val filterTypes: List<Class<out ExchangeFilterFunction>>
+    val loadBalanced: Boolean
 ) {
     companion object {
-        private const val WEB_CLIENT_BEAN_NAME_SUFFIX = ".WebClient"
-        private const val CO_API_BEAN_NAME_SUFFIX = ".CoApi"
+        private const val CLIENT_BEAN_NAME_SUFFIX = ".HttpClient"
+        private const val COAPI_BEAN_NAME_SUFFIX = ".CoApi"
         private const val LB_SCHEME_PREFIX = "http://"
 
         fun Class<*>.toCoApiDefinition(environment: Environment): CoApiDefinition {
@@ -41,9 +38,7 @@ data class CoApiDefinition(
                 name = resolveClientName(coApi),
                 apiType = this,
                 baseUrl = baseUrl,
-                loadBalanced = coApi.serviceId.isNotBlank(),
-                filters = coApi.filters.distinct().toList(),
-                filterTypes = coApi.filterTypes.map { it.java }.distinct().toList()
+                loadBalanced = coApi.serviceId.isNotBlank()
             )
         }
 
@@ -62,11 +57,11 @@ data class CoApiDefinition(
         }
     }
 
-    val webClientBeanName: String by lazy {
-        name + WEB_CLIENT_BEAN_NAME_SUFFIX
+    val httpClientBeanName: String by lazy {
+        name + CLIENT_BEAN_NAME_SUFFIX
     }
 
     val coApiBeanName: String by lazy {
-        name + CO_API_BEAN_NAME_SUFFIX
+        name + COAPI_BEAN_NAME_SUFFIX
     }
 }

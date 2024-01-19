@@ -13,8 +13,11 @@
 
 package me.ahoo.coapi.spring.boot.starter
 
+import me.ahoo.coapi.spring.client.ClientProperties
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.sameInstance
 import org.junit.jupiter.api.Test
 
 class CoApiPropertiesTest {
@@ -30,5 +33,63 @@ class CoApiPropertiesTest {
         val properties = CoApiProperties(false)
         properties.enabled = true
         assertThat(properties.enabled, equalTo(true))
+    }
+
+    @Test
+    fun getFilterIfDefault() {
+        val properties = CoApiProperties()
+        assertThat(properties.getFilter("test").names, Matchers.empty())
+        assertThat(properties.getFilter("test").types, Matchers.empty())
+    }
+
+    @Test
+    fun getFilter() {
+        val properties = CoApiProperties(
+            clients = mutableMapOf(
+                "test" to ClientDefinition(
+                    reactive = ReactiveClientDefinition(
+                        filter = ClientProperties.FilterDefinition(
+                            listOf("test")
+                        )
+                    )
+                )
+            )
+        )
+        assertThat(properties.getFilter("test").names, Matchers.hasSize(1))
+        assertThat(properties.getFilter("test").types, Matchers.empty())
+    }
+
+    @Test
+    fun getInterceptor() {
+        val properties = CoApiProperties()
+        assertThat(properties.getInterceptor("test").names, Matchers.empty())
+        assertThat(properties.getInterceptor("test").types, Matchers.empty())
+    }
+
+    @Test
+    fun setClientDefinition() {
+        val properties = ClientDefinition()
+        val reactive = ReactiveClientDefinition()
+        properties.reactive = reactive
+        assertThat(properties.reactive, sameInstance(reactive))
+        val sync = SyncClientDefinition()
+        properties.sync = sync
+        assertThat(properties.sync, sameInstance(sync))
+    }
+
+    @Test
+    fun setReactiveClientDefinition() {
+        val properties = ReactiveClientDefinition()
+        val filter = ClientProperties.FilterDefinition()
+        properties.filter = filter
+        assertThat(properties.filter, sameInstance(filter))
+    }
+
+    @Test
+    fun setSyncClientDefinition() {
+        val properties = SyncClientDefinition()
+        val interceptor = ClientProperties.InterceptorDefinition()
+        properties.interceptor = interceptor
+        assertThat(properties.interceptor, sameInstance(interceptor))
     }
 }

@@ -16,8 +16,6 @@ package me.ahoo.coapi.spring
 import org.springframework.beans.factory.FactoryBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.support.WebClientAdapter
 import org.springframework.web.service.invoker.HttpServiceProxyFactory
 
 class CoApiFactoryBean(
@@ -26,9 +24,12 @@ class CoApiFactoryBean(
 
     private lateinit var applicationContext: ApplicationContext
     override fun getObject(): Any {
-        val webClient = applicationContext.getBean(coApiDefinition.webClientBeanName, WebClient::class.java)
-        val clientAdapter = WebClientAdapter.create(webClient)
-        val httpServiceProxyFactory = HttpServiceProxyFactory.builderFor(clientAdapter).build()
+        val httpExchangeAdapterFactory = applicationContext.getBean(HttpExchangeAdapterFactory::class.java)
+        val httpExchangeAdapter = httpExchangeAdapterFactory.create(
+            beanFactory = applicationContext,
+            httpClientName = coApiDefinition.httpClientBeanName
+        )
+        val httpServiceProxyFactory = HttpServiceProxyFactory.builderFor(httpExchangeAdapter).build()
         return httpServiceProxyFactory.createClient(coApiDefinition.apiType)
     }
 

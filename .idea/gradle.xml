@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/example/example-consumer-server" />
             <option value="$PROJECT_DIR$/example/example-provider-api" />
             <option value="$PROJECT_DIR$/example/example-provider-server" />
+            <option value="$PROJECT_DIR$/example/example-sync" />
             <option value="$PROJECT_DIR$/spring" />
             <option value="$PROJECT_DIR$/spring-boot-starter" />
           </set>

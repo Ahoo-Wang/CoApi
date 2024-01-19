@@ -12,6 +12,10 @@
  */
 
 java {
+    registerFeature("reactiveSupport") {
+        usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
+        capability(group.toString(), "reactive-support", version.toString())
+    }
     registerFeature("lbSupport") {
         usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
         capability(group.toString(), "lb-support", version.toString())
@@ -21,7 +25,8 @@ java {
 dependencies {
     api(project(":api"))
     api("org.springframework:spring-context")
-    api("org.springframework:spring-webflux")
+    api("org.springframework:spring-web")
+    "reactiveSupportImplementation"("org.springframework:spring-webflux")
     "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
     testImplementation(project(":example-provider-api"))
     testImplementation(project(":example-consumer-client"))

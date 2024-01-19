@@ -13,11 +13,15 @@
 
 package me.ahoo.coapi.spring
 
+import me.ahoo.coapi.spring.client.reactive.LoadBalancedWebClientFactoryBean
+import me.ahoo.coapi.spring.client.reactive.WebClientFactoryBean
+import me.ahoo.coapi.spring.client.sync.LoadBalancedRestClientFactoryBean
+import me.ahoo.coapi.spring.client.sync.RestClientFactoryBean
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 
-class CoApiRegistrar(private val registry: BeanDefinitionRegistry) {
+class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val clientMode: ClientMode) {
     companion object {
         private val log = LoggerFactory.getLogger(CoApiRegistrar::class.java)
     }
@@ -29,31 +33,58 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry) {
     }
 
     fun register(coApiDefinition: CoApiDefinition) {
-        registerWebClient(registry, coApiDefinition)
+        if (clientMode == ClientMode.SYNC) {
+            registerRestClient(registry, coApiDefinition)
+        } else {
+            registerWebClient(registry, coApiDefinition)
+        }
         registerApiClient(registry, coApiDefinition)
     }
 
-    private fun registerWebClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {
+    private fun registerRestClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {
         if (log.isInfoEnabled) {
-            log.info("Register WebClient [{}].", coApiDefinition.webClientBeanName)
+            log.info("Register RestClient [{}].", coApiDefinition.httpClientBeanName)
         }
-        if (registry.containsBeanDefinition(coApiDefinition.webClientBeanName)) {
+        if (registry.containsBeanDefinition(coApiDefinition.httpClientBeanName)) {
             if (log.isWarnEnabled) {
                 log.warn(
-                    "WebClient [{}] already exists - Ignore.",
-                    coApiDefinition.webClientBeanName
+                    "RestClient [{}] already exists - Ignore.",
+                    coApiDefinition.httpClientBeanName
                 )
             }
             return
         }
-        val webClientFactoryBeanClass = if (coApiDefinition.loadBalanced) {
+        val clientFactoryBeanClass = if (coApiDefinition.loadBalanced) {
+            LoadBalancedRestClientFactoryBean::class.java
+        } else {
+            RestClientFactoryBean::class.java
+        }
+        val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clientFactoryBeanClass)
+        beanDefinitionBuilder.addConstructorArgValue(coApiDefinition)
+        registry.registerBeanDefinition(coApiDefinition.httpClientBeanName, beanDefinitionBuilder.beanDefinition)
+    }
+
+    private fun registerWebClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {
+        if (log.isInfoEnabled) {
+            log.info("Register WebClient [{}].", coApiDefinition.httpClientBeanName)
+        }
+        if (registry.containsBeanDefinition(coApiDefinition.httpClientBeanName)) {
+            if (log.isWarnEnabled) {
+                log.warn(
+                    "WebClient [{}] already exists - Ignore.",
+                    coApiDefinition.httpClientBeanName
+                )
+            }
+            return
+        }
+        val clientFactoryBeanClass = if (coApiDefinition.loadBalanced) {
             LoadBalancedWebClientFactoryBean::class.java
         } else {
             WebClientFactoryBean::class.java
         }
-        val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(webClientFactoryBeanClass)
+        val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clientFactoryBeanClass)
         beanDefinitionBuilder.addConstructorArgValue(coApiDefinition)
-        registry.registerBeanDefinition(coApiDefinition.webClientBeanName, beanDefinitionBuilder.beanDefinition)
+        registry.registerBeanDefinition(coApiDefinition.httpClientBeanName, beanDefinitionBuilder.beanDefinition)
     }
 
     private fun registerApiClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {

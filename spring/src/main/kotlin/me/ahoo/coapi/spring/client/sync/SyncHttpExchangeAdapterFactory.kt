@@ -11,17 +11,17 @@
  * limitations under the License.
  */
 
-package me.ahoo.coapi.spring.boot.starter
+package me.ahoo.coapi.spring.client.sync
 
-import me.ahoo.coapi.api.CoApi
-import me.ahoo.coapi.example.consumer.client.Issue
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.service.annotation.GetExchange
-import reactor.core.publisher.Flux
+import me.ahoo.coapi.spring.HttpExchangeAdapterFactory
+import org.springframework.beans.factory.BeanFactory
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.support.RestClientAdapter
+import org.springframework.web.service.invoker.HttpExchangeAdapter
 
-@CoApi(baseUrl = "\${github.url}")
-interface GitHubApiClient {
-
-    @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+class SyncHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
+    override fun create(beanFactory: BeanFactory, httpClientName: String): HttpExchangeAdapter {
+        val webClient = beanFactory.getBean(httpClientName, RestClient::class.java)
+        return RestClientAdapter.create(webClient)
+    }
 }

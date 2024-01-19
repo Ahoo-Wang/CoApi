@@ -11,17 +11,14 @@
  * limitations under the License.
  */
 
-package me.ahoo.coapi.spring.boot.starter
+package me.ahoo.coapi.spring
 
-import me.ahoo.coapi.api.CoApi
-import me.ahoo.coapi.example.consumer.client.Issue
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.service.annotation.GetExchange
-import reactor.core.publisher.Flux
+import org.springframework.beans.factory.BeanFactory
+import org.springframework.web.service.invoker.HttpExchangeAdapter
 
-@CoApi(baseUrl = "\${github.url}")
-interface GitHubApiClient {
-
-    @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+fun interface HttpExchangeAdapterFactory {
+    companion object {
+        const val BEAN_NAME = "CoApi.HttpExchangeAdapterFactory"
+    }
+    fun create(beanFactory: BeanFactory, httpClientName: String): HttpExchangeAdapter
 }
