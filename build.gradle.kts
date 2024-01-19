@@ -35,7 +35,7 @@ val bomProjects = setOf(
 )
 val examples = setOf(
     project(":example-provider-api"), project(":example-provider-server"),
-    project(":example-consumer-client"), project(":example-consumer-server")
+    project(":example-consumer-client"), project(":example-consumer-server"), project(":example-sync")
 )
 val codeCoverageReportProject = project(":code-coverage-report")
 val publishProjects = subprojects - codeCoverageReportProject - examples
