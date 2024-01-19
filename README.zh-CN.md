@@ -1,4 +1,4 @@
-# CoApi
+# CoApi - An HTTP client that supports both reactive programming and synchronous programming models
 
 [英文文档](./README.md)
 
