@@ -15,7 +15,7 @@ However, automatic configuration support is not yet provided in the current vers
 
 While the *Spring* ecosystem already has [Spring Cloud OpenFeign](https://github.com/spring-cloud/spring-cloud-openfeign), it lacks support for the reactive programming model. To address this, *Spring Cloud OpenFeign* recommends an alternative solution, [feign-reactive](https://github.com/PlaytikaOSS/feign-reactive). However, this alternative is currently not actively maintained and does not support Spring Boot 3.2.x.
 
-**CoApi** comes into play to address these challenges. It offers support for zero boilerplate code auto-configuration, similar to *Spring Cloud OpenFeign*. Developers only need to define interfaces, making usage straightforward.
+**CoApi** is here to help with zero-boilerplate code auto-configuration similar to *Spring Cloud OpenFeign*, as well as support for both reactive and synchronous programming models. Developers only need to define the interface, and it is easy to use.
 
 ## Installation
 

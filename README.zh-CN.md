@@ -17,7 +17,7 @@
 虽然 *Spring* 生态中已经存在 [Spring Cloud OpenFeign](https://github.com/spring-cloud/spring-cloud-openfeign) ，但它并未支持响应式编程模型。
 为解决这个问题，*Spring Cloud OpenFeign* 推荐了替代方案 [feign-reactive](https://github.com/PlaytikaOSS/feign-reactive)。然而，这个替代方案目前已处于不积极维护状态，并且不支持 Spring Boot 3.2.x。
 
-**CoApi** 应运而生，它提供了类似于 *Spring Cloud OpenFeign* 的零样板代码自动配置的支持。开发者只需定义接口，即可轻松使用。
+**CoApi** 应运而生，它提供了类似于 *Spring Cloud OpenFeign* 的零样板代码自动配置的支持，同时支持响应式编程模型和同步编程模型。开发者只需定义接口，即可轻松使用。
 
 ## 安装
 
