@@ -19,23 +19,76 @@ import me.ahoo.coapi.example.consumer.client.ServiceApiClient
 import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterBeanName
 import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterType
 import me.ahoo.coapi.example.provider.client.TodoClient
+import me.ahoo.coapi.spring.client.ClientProperties
+import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
+import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
 import org.assertj.core.api.AssertionsForInterfaceTypes
 import org.junit.jupiter.api.Test
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
+import org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
+import org.springframework.web.client.RestClient
 
 class CoApiContextTest {
+    private val loadBalancedExchangeFilterName =
+        ClientProperties.FilterDefinition(names = listOf("loadBalancerExchangeFilterFunction"))
+    private val loadBalancedExchangeFilterType =
+        ClientProperties.FilterDefinition(types = listOf(LoadBalancedExchangeFilterFunction::class.java))
+    private val loadBalancedExchangeInterceptorName =
+        ClientProperties.InterceptorDefinition(names = listOf("loadBalancerInterceptor"))
+    private val loadBalancedExchangeInterceptorType =
+        ClientProperties.InterceptorDefinition(types = listOf(LoadBalancerInterceptor::class.java))
 
     @Test
-    fun `should create ApiClient bean`() {
+    fun `should create Reactive CoApi bean`() {
         ApplicationContextRunner()
             .withPropertyValues("github.url=https://api.github.com")
             .withBean("loadBalancerExchangeFilterFunction", LoadBalancedExchangeFilterFunction::class.java, { mockk() })
+            .withBean("clientProperties", ClientProperties::class.java, {
+                MockClientProperties(
+                    filter = mapOf(
+                        "ServiceApiClientUseFilterBeanName" to loadBalancedExchangeFilterName,
+                        "ServiceApiClientUseFilterType" to loadBalancedExchangeFilterType
+                    )
+                )
+            })
             .withUserConfiguration(WebClientAutoConfiguration::class.java)
             .withUserConfiguration(EnableCoApiConfiguration::class.java)
             .run { context ->
                 AssertionsForInterfaceTypes.assertThat(context)
+                    .hasSingleBean(ReactiveHttpExchangeAdapterFactory::class.java)
+                    .hasSingleBean(GitHubApiClient::class.java)
+                    .hasSingleBean(ServiceApiClient::class.java)
+
+                context.getBean(GitHubApiClient::class.java)
+                context.getBean(ServiceApiClient::class.java)
+                context.getBean(ServiceApiClientUseFilterBeanName::class.java)
+                context.getBean(ServiceApiClientUseFilterType::class.java)
+            }
+    }
+
+    @Test
+    fun `should create Sync CoApi bean`() {
+        ApplicationContextRunner()
+            .withPropertyValues("${ClientMode.COAPI_CLIENT_MODE_PROPERTY}=SYNC")
+            .withPropertyValues("github.url=https://api.github.com")
+            .withBean("loadBalancerInterceptor", LoadBalancerInterceptor::class.java, { mockk() })
+            .withBean(RestClient.Builder::class.java, {
+                RestClient.builder()
+            })
+            .withBean("clientProperties", ClientProperties::class.java, {
+                MockClientProperties(
+                    interceptor = mapOf(
+                        "ServiceApiClientUseFilterBeanName" to loadBalancedExchangeInterceptorName,
+                        "ServiceApiClientUseFilterType" to loadBalancedExchangeInterceptorType
+                    )
+                )
+            })
+            .withUserConfiguration(EnableCoApiConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasSingleBean(SyncHttpExchangeAdapterFactory::class.java)
                     .hasSingleBean(GitHubApiClient::class.java)
                     .hasSingleBean(ServiceApiClient::class.java)
 
@@ -57,3 +110,16 @@ class CoApiContextTest {
     ]
 )
 class EnableCoApiConfiguration
+
+data class MockClientProperties(
+    val filter: Map<String, ClientProperties.FilterDefinition> = emptyMap(),
+    val interceptor: Map<String, ClientProperties.InterceptorDefinition> = emptyMap(),
+) : ClientProperties {
+    override fun getFilter(coApiName: String): ClientProperties.FilterDefinition {
+        return filter[coApiName] ?: ClientProperties.FilterDefinition()
+    }
+
+    override fun getInterceptor(coApiName: String): ClientProperties.InterceptorDefinition {
+        return interceptor[coApiName] ?: ClientProperties.InterceptorDefinition()
+    }
+}

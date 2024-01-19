@@ -10,27 +10,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-java {
-    registerFeature("reactiveSupport") {
-        usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
-        capability(group.toString(), "reactive-support", version.toString())
-    }
-}
 
 plugins {
+    application
+    alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlinSpring)
     kotlin("kapt")
 }
+
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
+    implementation(platform(project(":dependencies")))
     kapt(platform(project(":dependencies")))
-    api(project(":spring"))
-    "reactiveSupportImplementation"("org.springframework:spring-webflux")
-    api("org.springframework.boot:spring-boot-starter")
+    implementation(project(":spring-boot-starter"))
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
-    kapt("org.springframework.boot:spring-boot-autoconfigure-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
-    testImplementation("org.springframework.cloud:spring-cloud-commons")
-    testImplementation(project(":example-provider-api"))
-    testImplementation(project(":example-consumer-client"))
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(listOf("-parameters"))
 }

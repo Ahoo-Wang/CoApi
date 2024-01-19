@@ -13,6 +13,8 @@
 
 package me.ahoo.coapi.spring.boot.starter
 
+import me.ahoo.coapi.spring.ClientMode
+import me.ahoo.coapi.spring.client.ClientProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.bind.DefaultValue
 
@@ -21,5 +23,28 @@ const val ENABLED_SUFFIX_KEY = ".enabled"
 
 @ConfigurationProperties(prefix = COAPI_PREFIX)
 data class CoApiProperties(
-    @DefaultValue("true") var enabled: Boolean = true
+    @DefaultValue("true") var enabled: Boolean = true,
+    val mode: ClientMode = ClientMode.AUTO,
+    val clients: Map<String, ClientDefinition> = emptyMap(),
+) : ClientProperties {
+    override fun getFilter(coApiName: String): ClientProperties.FilterDefinition {
+        return clients[coApiName]?.reactive?.filter ?: ClientProperties.FilterDefinition()
+    }
+
+    override fun getInterceptor(coApiName: String): ClientProperties.InterceptorDefinition {
+        return clients[coApiName]?.sync?.interceptor ?: ClientProperties.InterceptorDefinition()
+    }
+}
+
+data class ClientDefinition(
+    var reactive: ReactiveClientDefinition = ReactiveClientDefinition(),
+    var sync: SyncClientDefinition = SyncClientDefinition()
+)
+
+data class ReactiveClientDefinition(
+    var filter: ClientProperties.FilterDefinition = ClientProperties.FilterDefinition()
+)
+
+data class SyncClientDefinition(
+    var interceptor: ClientProperties.InterceptorDefinition = ClientProperties.InterceptorDefinition()
 )

@@ -15,6 +15,9 @@ package me.ahoo.coapi.example.consumer
 
 import me.ahoo.coapi.example.consumer.client.GitHubApiClient
 import me.ahoo.coapi.example.consumer.client.ServiceApiClient
+import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
+import org.hamcrest.MatcherAssert
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,10 +25,18 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 class ConsumerServerTest {
     @Autowired
+    private lateinit var httpExchangeAdapterFactory: ReactiveHttpExchangeAdapterFactory
+
+    @Autowired
     private lateinit var gitHubApiClient: GitHubApiClient
 
     @Autowired
     private lateinit var serviceApiClient: ServiceApiClient
+
+    @Test
+    fun httpExchangeAdapterFactoryIsNotNull() {
+        MatcherAssert.assertThat(httpExchangeAdapterFactory, Matchers.notNullValue())
+    }
 
     @Test
     fun getIssueByGitHubApiClient() {

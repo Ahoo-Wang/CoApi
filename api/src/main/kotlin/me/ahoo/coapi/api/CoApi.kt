@@ -14,15 +14,11 @@
 package me.ahoo.coapi.api
 
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
-import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CLASS)
 @Component
 annotation class CoApi(
     val serviceId: String = "",
     val baseUrl: String = "",
-    val name: String = "",
-    val filters: Array<String> = [],
-    val filterTypes: Array<KClass<out ExchangeFilterFunction>> = [],
+    val name: String = ""
 )

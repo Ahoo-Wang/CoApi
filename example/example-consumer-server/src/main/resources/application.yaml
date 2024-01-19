@@ -18,4 +18,15 @@ spring:
             provider-service:
               - host: localhost
                 port: 8010
-
+coapi:
+  clients:
+    ServiceApiClientUseFilterBeanName:
+      reactive:
+        filter:
+          names:
+            -loadBalancerExchangeFilterFunction
+    ServiceApiClientUseFilterType:
+      reactive:
+        filter:
+          types:
+            - org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction

@@ -11,7 +11,15 @@
  * limitations under the License.
  */
 
-package me.ahoo.coapi.spring
+package me.ahoo.coapi.example.sync
 
-class WebClientFactoryBean(definition: CoApiDefinition) :
-    AbstractWebClientFactoryBean(definition)
+import me.ahoo.coapi.api.CoApi
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.service.annotation.GetExchange
+
+@CoApi(serviceId = "github-service")
+interface GitHubSyncLbClient {
+
+    @GetExchange("repos/{owner}/{repo}/issues")
+    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): List<Issue>
+}

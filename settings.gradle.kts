@@ -30,5 +30,8 @@ include(":example-consumer-client")
 project(":example-consumer-client").projectDir = file("example/example-consumer-client")
 include(":example-consumer-server")
 project(":example-consumer-server").projectDir = file("example/example-consumer-server")
+
+include("example-sync")
+project(":example-sync").projectDir = file("example/example-sync")
 //endregion
 
