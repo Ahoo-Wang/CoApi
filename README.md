@@ -1,4 +1,4 @@
-# CoApi - 同时支持响应式编程和同步编程模型的 HTTP 客户端
+# CoApi - HTTP Client that supports both reactive programming and synchronous programming models
 
 [中文文档](./README.zh-CN.md)
 
