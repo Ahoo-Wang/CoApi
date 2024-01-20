@@ -16,19 +16,23 @@ package me.ahoo.coapi.example.consumer
 import me.ahoo.coapi.example.consumer.client.GitHubApiClient
 import me.ahoo.coapi.example.consumer.client.Issue
 import me.ahoo.coapi.example.consumer.client.ServiceApiClient
+import me.ahoo.coapi.example.consumer.client.UriApiClient
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.service.annotation.GetExchange
 import org.springframework.web.service.annotation.HttpExchange
+import org.springframework.web.util.DefaultUriBuilderFactory
 import reactor.core.publisher.Flux
+import java.net.URI
 
 @RestController
 @HttpExchange("github")
 class GithubController(
     private val gitHubApiClient: GitHubApiClient,
-    private val serviceApiClient: ServiceApiClient
+    private val serviceApiClient: ServiceApiClient,
+    private val uriApiClient: UriApiClient
 ) {
     companion object {
         private val log = LoggerFactory.getLogger(GithubController::class.java)
@@ -44,5 +48,17 @@ class GithubController(
         return serviceApiClient.getIssue("Ahoo-Wang", "CoApi").doOnError(WebClientResponseException::class.java) {
             log.error(it.responseBodyAsString)
         }
+    }
+
+    @GetExchange("/uri")
+    fun uri(): Flux<Issue> {
+        val uri = URI.create("https://api.github.com/repos/Ahoo-Wang/CoApi/issues")
+        return uriApiClient.getIssueByUri(uri)
+    }
+
+    @GetExchange("/uriBuilder")
+    fun uriBuilder(): Flux<Issue> {
+        val uriBuilderFactory = DefaultUriBuilderFactory("https://api.github.com/repos/{owner}/{repo}/issues")
+        return uriApiClient.getIssue(uriBuilderFactory, "Ahoo-Wang", "Wow")
     }
 }
