@@ -18,6 +18,7 @@ import me.ahoo.coapi.example.consumer.client.GitHubApiClient
 import me.ahoo.coapi.example.consumer.client.ServiceApiClient
 import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterBeanName
 import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterType
+import me.ahoo.coapi.example.consumer.client.UriApiClient
 import me.ahoo.coapi.example.provider.client.TodoClient
 import me.ahoo.coapi.spring.EnableCoApi
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -29,6 +30,7 @@ import org.springframework.boot.runApplication
         ServiceApiClient::class,
         ServiceApiClientUseFilterBeanName::class,
         ServiceApiClientUseFilterType::class,
+        UriApiClient::class,
         TodoClient::class
     ]
 )

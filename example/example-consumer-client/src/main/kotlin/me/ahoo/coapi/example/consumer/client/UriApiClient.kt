@@ -11,18 +11,25 @@
  * limitations under the License.
  */
 
-package me.ahoo.coapi.spring
+package me.ahoo.coapi.example.consumer.client
 
-import io.mockk.mockk
-import me.ahoo.coapi.spring.CoApiDefinition.Companion.toCoApiDefinition
-import org.junit.jupiter.api.Test
+import me.ahoo.coapi.api.CoApi
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.util.UriBuilderFactory
+import reactor.core.publisher.Flux
+import java.net.URI
 
-class CoApiDefinitionTest {
+@CoApi
+interface UriApiClient {
 
-    @Test
-    fun toCoApiDefinitionIfNoCoApi() {
-        org.junit.jupiter.api.assertThrows<IllegalArgumentException> {
-            CoApiDefinitionTest::class.java.toCoApiDefinition(mockk())
-        }
-    }
+    @GetExchange
+    fun getIssueByUri(uri: URI): Flux<Issue>
+
+    @GetExchange
+    fun getIssue(
+        uriBuilderFactory: UriBuilderFactory,
+        @PathVariable owner: String,
+        @PathVariable repo: String
+    ): Flux<Issue>
 }

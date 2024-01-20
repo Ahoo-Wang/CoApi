@@ -30,9 +30,6 @@ data class CoApiDefinition(
         fun Class<*>.toCoApiDefinition(environment: Environment): CoApiDefinition {
             val coApi = getAnnotation(CoApi::class.java)
                 ?: throw IllegalArgumentException("The class must be annotated by @CoApi.")
-            require(coApi.serviceId.isNotBlank() || coApi.baseUrl.isNotBlank()) {
-                "The @CoApi must be configured by serviceId or baseUrl."
-            }
             val baseUrl = coApi.resolveBaseUrl(environment)
             return CoApiDefinition(
                 name = resolveClientName(coApi),
