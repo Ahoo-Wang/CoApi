@@ -19,6 +19,8 @@ spring:
               - host: localhost
                 port: 8010
 coapi:
+  base-packages:
+    - me.ahoo.coapi.example.consumer.client
   clients:
     ServiceApiClientUseFilterBeanName:
       reactive:
