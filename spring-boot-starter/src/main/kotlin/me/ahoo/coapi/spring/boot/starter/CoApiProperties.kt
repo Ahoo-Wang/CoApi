@@ -25,8 +25,13 @@ const val ENABLED_SUFFIX_KEY = ".enabled"
 data class CoApiProperties(
     @DefaultValue("true") var enabled: Boolean = true,
     val mode: ClientMode = ClientMode.AUTO,
+    val basePackages: List<String> = emptyList(),
     val clients: Map<String, ClientDefinition> = emptyMap(),
 ) : ClientProperties {
+    companion object {
+        const val COAPI_BASE_PACKAGES = "$COAPI_PREFIX.base-packages"
+    }
+
     override fun getFilter(coApiName: String): ClientProperties.FilterDefinition {
         return clients[coApiName]?.reactive?.filter ?: ClientProperties.FilterDefinition()
     }

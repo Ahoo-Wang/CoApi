@@ -34,7 +34,7 @@ import org.springframework.boot.runApplication
         TodoClient::class
     ]
 )
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = ["me.ahoo.coapi.example.consumer.client"])
 class ConsumerServer
 
 fun main(args: Array<String>) {

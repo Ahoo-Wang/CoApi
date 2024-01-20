@@ -95,6 +95,67 @@ class CoApiAutoConfigurationTest {
                 context.getBean(ServiceApiClientUseFilterType::class.java)
             }
     }
+
+    @Test
+    fun basePackages() {
+        ApplicationContextRunner()
+            .withPropertyValues("github.url=https://api.github.com")
+            .withPropertyValues("${CoApiProperties.COAPI_BASE_PACKAGES}=me.ahoo.coapi.spring.boot.starter")
+            .withPropertyValues(filterNameProperty)
+            .withPropertyValues(filterTypeProperty)
+            .withBean("loadBalancerExchangeFilterFunction", LoadBalancedExchangeFilterFunction::class.java, { mockk() })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasSingleBean(ReactiveHttpExchangeAdapterFactory::class.java)
+                    .hasSingleBean(me.ahoo.coapi.spring.boot.starter.GitHubApiClient::class.java)
+            }
+    }
+
+    @Test
+    fun basePackagesMultiple() {
+        ApplicationContextRunner()
+            .withPropertyValues("github.url=https://api.github.com")
+            .withPropertyValues(
+                "${CoApiProperties.COAPI_BASE_PACKAGES}=me.ahoo.coapi.spring.boot.starter" +
+                    ",me.ahoo.coapi.example.consumer.client"
+            )
+            .withPropertyValues(filterNameProperty)
+            .withPropertyValues(filterTypeProperty)
+            .withBean("loadBalancerExchangeFilterFunction", LoadBalancedExchangeFilterFunction::class.java, { mockk() })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasSingleBean(ReactiveHttpExchangeAdapterFactory::class.java)
+                    .hasSingleBean(me.ahoo.coapi.spring.boot.starter.GitHubApiClient::class.java)
+                    .hasSingleBean(ServiceApiClient::class.java)
+            }
+    }
+
+    @Test
+    fun basePackagesYaml() {
+        ApplicationContextRunner()
+            .withPropertyValues("github.url=https://api.github.com")
+            .withPropertyValues(
+                "${CoApiProperties.COAPI_BASE_PACKAGES}[0]=me.ahoo.coapi.spring.boot.starter"
+            )
+            .withPropertyValues(
+                "${CoApiProperties.COAPI_BASE_PACKAGES}[1]=me.ahoo.coapi.example.consumer.client"
+            )
+            .withPropertyValues(filterNameProperty)
+            .withPropertyValues(filterTypeProperty)
+            .withBean("loadBalancerExchangeFilterFunction", LoadBalancedExchangeFilterFunction::class.java, { mockk() })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasSingleBean(ReactiveHttpExchangeAdapterFactory::class.java)
+                    .hasSingleBean(me.ahoo.coapi.spring.boot.starter.GitHubApiClient::class.java)
+                    .hasSingleBean(ServiceApiClient::class.java)
+            }
+    }
 }
 
 @SpringBootApplication

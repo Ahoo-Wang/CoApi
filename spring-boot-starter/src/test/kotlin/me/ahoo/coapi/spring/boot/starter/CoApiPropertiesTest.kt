@@ -36,6 +36,12 @@ class CoApiPropertiesTest {
     }
 
     @Test
+    fun getBasePackages() {
+        val properties = CoApiProperties()
+        assertThat(properties.basePackages, Matchers.empty())
+    }
+
+    @Test
     fun getFilterIfDefault() {
         val properties = CoApiProperties()
         assertThat(properties.getFilter("test").names, Matchers.empty())
