@@ -15,21 +15,28 @@ package me.ahoo.coapi.spring.client.sync
 
 import me.ahoo.coapi.spring.CoApiDefinition
 import org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor
-import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
+import org.springframework.web.client.RestClient
 
 class LoadBalancedRestClientFactoryBean(definition: CoApiDefinition) : AbstractRestClientFactoryBean(definition) {
     companion object {
         private val loadBalancerInterceptorClass = LoadBalancerInterceptor::class.java
     }
 
-    override val interceptorCustomizer: (MutableList<ClientHttpRequestInterceptor>) -> Unit
-        get() = { requestInterceptors ->
-            val hasLoadBalancerInterceptor = requestInterceptors.any { interceptor ->
-                interceptor is LoadBalancerInterceptor
-            }
-            if (!hasLoadBalancerInterceptor) {
-                val loadBalancerInterceptor = appContext.getBean(loadBalancerInterceptorClass)
-                requestInterceptors.add(loadBalancerInterceptor)
+    override val builderCustomizer: RestClientBuilderCustomizer = LoadBalancedRestClientBuilderCustomizer()
+
+    inner class LoadBalancedRestClientBuilderCustomizer : RestClientBuilderCustomizer {
+        override fun customize(coApiDefinition: CoApiDefinition, builder: RestClient.Builder) {
+            builder.requestInterceptors {
+                val hasLoadBalancedFilter = it.any { filter ->
+                    filter is LoadBalancedExchangeFilterFunction
+                }
+                if (!hasLoadBalancedFilter) {
+                    val loadBalancerInterceptor =
+                        appContext.getBean(loadBalancerInterceptorClass)
+                    it.add(loadBalancerInterceptor)
+                }
             }
         }
+    }
 }

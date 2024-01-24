@@ -21,6 +21,8 @@ import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterType
 import me.ahoo.coapi.example.provider.client.TodoClient
 import me.ahoo.coapi.spring.client.ClientProperties
 import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
+import me.ahoo.coapi.spring.client.reactive.WebClientBuilderCustomizer
+import me.ahoo.coapi.spring.client.sync.RestClientBuilderCustomizer
 import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
 import org.assertj.core.api.AssertionsForInterfaceTypes
 import org.junit.jupiter.api.Test
@@ -45,6 +47,7 @@ class CoApiContextTest {
         ApplicationContextRunner()
             .withPropertyValues("github.url=https://api.github.com")
             .withBean("loadBalancerExchangeFilterFunction", LoadBalancedExchangeFilterFunction::class.java, { mockk() })
+            .withBean(WebClientBuilderCustomizer::class.java, { WebClientBuilderCustomizer.NoOp })
             .withBean("clientProperties", ClientProperties::class.java, {
                 MockClientProperties(
                     filter = mapOf(
@@ -74,6 +77,7 @@ class CoApiContextTest {
             .withPropertyValues("${ClientMode.COAPI_CLIENT_MODE_PROPERTY}=SYNC")
             .withPropertyValues("github.url=https://api.github.com")
             .withBean("loadBalancerInterceptor", LoadBalancerInterceptor::class.java, { mockk() })
+            .withBean(RestClientBuilderCustomizer::class.java, { RestClientBuilderCustomizer.NoOp })
             .withBean(RestClient.Builder::class.java, {
                 RestClient.builder()
             })
