@@ -21,7 +21,7 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter
 
 class SyncHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
     override fun create(beanFactory: BeanFactory, httpClientName: String): HttpExchangeAdapter {
-        val webClient = beanFactory.getBean(httpClientName, RestClient::class.java)
-        return RestClientAdapter.create(webClient)
+        val httpClient = beanFactory.getBean(httpClientName, RestClient::class.java)
+        return RestClientAdapter.create(httpClient)
     }
 }
