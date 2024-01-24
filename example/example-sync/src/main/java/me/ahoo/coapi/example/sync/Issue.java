@@ -11,20 +11,7 @@
  * limitations under the License.
  */
 
-package me.ahoo.coapi.example.sync
+package me.ahoo.coapi.example.sync;
 
-import me.ahoo.coapi.spring.EnableCoApi
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
-
-@EnableCoApi(
-    apis = [
-        GitHubSyncClient::class
-    ]
-)
-@SpringBootApplication
-class ExampleServer
-
-fun main(args: Array<String>) {
-    runApplication<ExampleServer>(*args)
+public record Issue(String url) {
 }

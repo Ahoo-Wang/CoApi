@@ -16,6 +16,7 @@ package me.ahoo.coapi.example.sync
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.service.annotation.HttpExchange
+import reactor.core.publisher.Flux
 
 @RestController
 @HttpExchange("github")
@@ -27,6 +28,11 @@ class GithubController(
     @GetMapping("/baseUrl")
     fun baseUrl(): List<Issue> {
         return gitHubApiClient.getIssue("Ahoo-Wang", "Wow")
+    }
+
+    @GetMapping("/getIssueWithReactive")
+    fun getIssueWithReactive(): Flux<Issue> {
+        return gitHubApiClient.getIssueWithReactive("Ahoo-Wang", "Wow")
     }
 
     @GetMapping("/serviceId")

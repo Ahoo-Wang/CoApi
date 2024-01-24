@@ -47,12 +47,12 @@ implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
 
 > `baseUrl` : Define the base address of the request, which can be obtained from the configuration file, for example: `baseUrl = "\{github.url}"`, `github.url` is the configuration item in the configuration file
 
-```kotlin
-@CoApi(baseUrl = "\${github.url}")
-interface GitHubApiClient {
+```java
+@CoApi(baseUrl = "${github.url}")
+public interface GitHubApiClient {
 
     @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+    Flux<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
 }
 ```
 
@@ -65,12 +65,12 @@ github:
 
 ### Define `CoApi` - Client Load Balancing
 
-```kotlin
+```java
 @CoApi(serviceId = "github-service")
-interface ServiceApiClient {
+public interface ServiceApiClient {
 
     @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+    Flux<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
 }
 ```
 

@@ -11,19 +11,17 @@
  * limitations under the License.
  */
 
-package me.ahoo.coapi.example.sync
+package me.ahoo.coapi.example.sync;
 
-import me.ahoo.coapi.api.CoApi
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.service.annotation.GetExchange
+import me.ahoo.coapi.api.CoApi;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.service.annotation.GetExchange;
 
-@CoApi(baseUrl = "\${github.url}")
-interface GitHubSyncClient {
+import java.util.List;
 
+@CoApi(serviceId = "github-service")
+public interface GitHubSyncLbClient {
     @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): List<Issue>
+    List<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
 }
 
-data class Issue(
-    val url: String
-)
