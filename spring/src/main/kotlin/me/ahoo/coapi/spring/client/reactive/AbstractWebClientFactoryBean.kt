@@ -26,35 +26,39 @@ abstract class AbstractWebClientFactoryBean(private val definition: CoApiDefinit
     ApplicationContextAware {
     protected lateinit var appContext: ApplicationContext
 
-    protected open val filterCustomizer: (MutableList<ExchangeFilterFunction>) -> Unit = {}
+    protected open val builderCustomizer: WebClientBuilderCustomizer = WebClientBuilderCustomizer.NoOp
 
     override fun getObjectType(): Class<*> {
         return WebClient::class.java
     }
 
     override fun getObject(): WebClient {
-        val clientBuilder = appContext.getBean(WebClient.Builder::class.java)
+        val clientBuilder = appContext
+            .getBean(WebClient.Builder::class.java)
+
         clientBuilder.baseUrl(definition.baseUrl)
         val clientProperties = appContext.getBean(ClientProperties::class.java)
         val filterDefinition = clientProperties.getFilter(definition.name)
-        val filters = getFilters(filterDefinition)
-        filters.distinct().forEach {
-            clientBuilder.filter(it)
+        clientBuilder.filters {
+            filterDefinition.initFilters(it)
         }
+        builderCustomizer.customize(definition, clientBuilder)
+        appContext.getBeanProvider(WebClientBuilderCustomizer::class.java)
+            .orderedStream()
+            .forEach { customizer ->
+                customizer.customize(definition, clientBuilder)
+            }
         return clientBuilder.build()
     }
 
-    private fun getFilters(filterDefinition: ClientProperties.FilterDefinition): List<ExchangeFilterFunction> {
-        return buildList {
-            filterDefinition.names.forEach { filterName ->
-                val filter = appContext.getBean(filterName, ExchangeFilterFunction::class.java)
-                add(filter)
-            }
-            filterDefinition.types.forEach { filterType ->
-                val filter = appContext.getBean(filterType)
-                add(filter)
-            }
-            filterCustomizer(this)
+    private fun ClientProperties.FilterDefinition.initFilters(filters: MutableList<ExchangeFilterFunction>) {
+        names.forEach { filterName ->
+            val filter = appContext.getBean(filterName, ExchangeFilterFunction::class.java)
+            filters.add(filter)
+        }
+        types.forEach { filterType ->
+            val filter = appContext.getBean(filterType)
+            filters.add(filter)
         }
     }
 

@@ -27,33 +27,36 @@ abstract class AbstractRestClientFactoryBean(private val definition: CoApiDefini
 
     protected lateinit var appContext: ApplicationContext
 
-    protected open val interceptorCustomizer: (MutableList<ClientHttpRequestInterceptor>) -> Unit = {}
+    protected open val builderCustomizer: RestClientBuilderCustomizer = RestClientBuilderCustomizer.NoOp
 
     override fun getObject(): RestClient {
-        val clientBuilder = appContext.getBean(RestClient.Builder::class.java)
+        val clientBuilder = appContext
+            .getBean(RestClient.Builder::class.java)
         clientBuilder.baseUrl(definition.baseUrl)
         val clientProperties = appContext.getBean(ClientProperties::class.java)
         val interceptorDefinition = clientProperties.getInterceptor(definition.name)
-        val requestInterceptors = getRequestInterceptors(interceptorDefinition)
-        requestInterceptors.distinct().forEach {
-            clientBuilder.requestInterceptor(it)
+        clientBuilder.requestInterceptors {
+            interceptorDefinition.initInterceptors(it)
         }
+        builderCustomizer.customize(definition, clientBuilder)
+        appContext.getBeanProvider(RestClientBuilderCustomizer::class.java)
+            .orderedStream()
+            .forEach { customizer ->
+                customizer.customize(definition, clientBuilder)
+            }
         return clientBuilder.build()
     }
 
-    private fun getRequestInterceptors(
-        interceptorDefinition: ClientProperties.InterceptorDefinition
-    ): List<ClientHttpRequestInterceptor> {
-        return buildList {
-            interceptorDefinition.names.forEach { interceptorName ->
-                val interceptor = appContext.getBean(interceptorName, ClientHttpRequestInterceptor::class.java)
-                add(interceptor)
-            }
-            interceptorDefinition.types.forEach { interceptorType ->
-                val interceptor = appContext.getBean(interceptorType)
-                add(interceptor)
-            }
-            interceptorCustomizer(this)
+    private fun ClientProperties.InterceptorDefinition.initInterceptors(
+        interceptors: MutableList<ClientHttpRequestInterceptor>
+    ) {
+        names.forEach { filterName ->
+            val filter = appContext.getBean(filterName, ClientHttpRequestInterceptor::class.java)
+            interceptors.add(filter)
+        }
+        types.forEach { filterType ->
+            val filter = appContext.getBean(filterType)
+            interceptors.add(filter)
         }
     }
 
