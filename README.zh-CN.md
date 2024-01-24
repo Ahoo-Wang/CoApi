@@ -24,13 +24,13 @@
 > 使用 *Gradle(Kotlin)* 安装依赖
 
 ```kotlin
-implementation("me.ahoo.coapi:spring-boot-starter")
+implementation("me.ahoo.coapi:coapi-spring-boot-starter")
 ```
 
 > 使用 *Gradle(Groovy)* 安装依赖
 
 ```groovy
-implementation 'me.ahoo.coapi:spring-boot-starter'
+implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
 ```
 
 > 使用 *Maven* 安装依赖
@@ -38,7 +38,7 @@ implementation 'me.ahoo.coapi:spring-boot-starter'
 ```xml
 <dependency>
     <groupId>me.ahoo.coapi</groupId>
-    <artifactId>spring-boot-starter</artifactId>
+    <artifactId>coapi-spring-boot-starter</artifactId>
     <version>${coapi.version}</version>
 </dependency>
 ```

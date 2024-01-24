@@ -22,13 +22,13 @@ While the *Spring* ecosystem already has [Spring Cloud OpenFeign](https://github
 > Use *Gradle(Kotlin)* to install dependencies
 
 ```kotlin
-implementation("me.ahoo.coapi:spring-boot-starter")
+implementation("me.ahoo.coapi:coapi-spring-boot-starter")
 ```
 
 > Use *Gradle(Groovy)* to install dependencies
 
 ```groovy
-implementation 'me.ahoo.coapi:spring-boot-starter'
+implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
 ```
 
 > Use *Maven* to install dependencies
@@ -36,7 +36,7 @@ implementation 'me.ahoo.coapi:spring-boot-starter'
 ```xml
 <dependency>
     <groupId>me.ahoo.coapi</groupId>
-    <artifactId>spring-boot-starter</artifactId>
+    <artifactId>coapi-spring-boot-starter</artifactId>
     <version>${coapi.version}</version>
 </dependency>
 ```
