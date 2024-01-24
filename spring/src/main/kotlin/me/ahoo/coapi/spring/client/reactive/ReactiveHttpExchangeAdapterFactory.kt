@@ -21,7 +21,7 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter
 
 class ReactiveHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
     override fun create(beanFactory: BeanFactory, httpClientName: String): HttpExchangeAdapter {
-        val webClient = beanFactory.getBean(httpClientName, WebClient::class.java)
-        return WebClientAdapter.create(webClient)
+        val httpClient = beanFactory.getBean(httpClientName, WebClient::class.java)
+        return WebClientAdapter.create(httpClient)
     }
 }

@@ -14,7 +14,6 @@
 package me.ahoo.coapi.spring
 
 import me.ahoo.coapi.spring.CoApiDefinition.Companion.toCoApiDefinition
-import org.springframework.core.env.Environment
 import org.springframework.core.type.AnnotationMetadata
 
 class EnableCoApiRegistrar : AbstractCoApiRegistrar() {
@@ -27,9 +26,5 @@ class EnableCoApiRegistrar : AbstractCoApiRegistrar() {
         return apis.map { clientType ->
             clientType.toCoApiDefinition(env)
         }.toSet()
-    }
-
-    override fun setEnvironment(environment: Environment) {
-        this.env = environment
     }
 }
