@@ -45,7 +45,7 @@ implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
 
 ### Define `CoApi` - a third-party interface
 
-> `baseUrl` : Define the base address of the request, which can be obtained from the configuration file, for example: `baseUrl = "\{github.url}"`, `github.url` is the configuration item in the configuration file
+> `baseUrl` : Define the base address of the request, which can be obtained from the configuration file, for example: `baseUrl = "${github.url}"`, `github.url` is the configuration item in the configuration file
 
 ```java
 @CoApi(baseUrl = "${github.url}")

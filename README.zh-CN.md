@@ -47,7 +47,7 @@ implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
 
 ### 定义 `CoApi` - 第三方接口
 
-> `baseUrl` ： 定义请求的基础地址，该参数可以从配置文件中获取，如：`baseUrl = "\${github.url}"`，`github.url` 是配置文件中的配置项
+> `baseUrl` ： 定义请求的基础地址，该参数可以从配置文件中获取，如：`baseUrl = "${github.url}"`，`github.url` 是配置文件中的配置项
 
 ```java
 @CoApi(baseUrl = "${github.url}")
