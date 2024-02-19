@@ -165,7 +165,7 @@ class TodoController : TodoApi {
 服务消费者通过 `@EnableCoApi` 注解开启 `CoApi` 的自动配置。
 
 ```kotlin
-@EnableCoApi(apis = [TodoClient::class])
+@EnableCoApi(clients = [TodoClient::class])
 @SpringBootApplication
 class ConsumerServer
 ```

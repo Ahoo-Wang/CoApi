@@ -25,7 +25,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @EnableCoApi(
-    apis = [
+    clients = [
         GitHubApiClient::class,
         ServiceApiClient::class,
         ServiceApiClientUseFilterBeanName::class,

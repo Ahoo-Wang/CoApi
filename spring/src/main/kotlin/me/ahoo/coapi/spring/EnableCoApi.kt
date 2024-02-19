@@ -19,5 +19,5 @@ import kotlin.reflect.KClass
 @Import(EnableCoApiRegistrar::class)
 @Target(AnnotationTarget.CLASS)
 annotation class EnableCoApi(
-    val apis: Array<KClass<*>> = []
+    val clients: Array<KClass<*>> = []
 )

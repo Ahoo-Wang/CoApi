@@ -105,7 +105,7 @@ class CoApiContextTest {
 }
 
 @EnableCoApi(
-    apis = [
+    clients = [
         GitHubApiClient::class,
         ServiceApiClient::class,
         ServiceApiClientUseFilterBeanName::class,

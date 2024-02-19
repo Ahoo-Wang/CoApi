@@ -163,7 +163,7 @@ class TodoController : TodoApi {
 The service consumer turns on the automatic configuration of the `CoApi` via the `@EnableCoApi` annotation.
 
 ```kotlin
-@EnableCoApi(apis = [TodoClient::class])
+@EnableCoApi(clients = [TodoClient::class])
 @SpringBootApplication
 class ConsumerServer
 ```
