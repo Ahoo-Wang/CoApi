@@ -160,7 +160,7 @@ class CoApiAutoConfigurationTest {
 
 @SpringBootApplication
 @EnableCoApi(
-    apis = [
+    clients = [
         GitHubApiClient::class,
         ServiceApiClient::class,
         ServiceApiClientUseFilterBeanName::class,

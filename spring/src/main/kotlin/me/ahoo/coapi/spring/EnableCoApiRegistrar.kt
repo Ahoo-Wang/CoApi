@@ -22,8 +22,8 @@ class EnableCoApiRegistrar : AbstractCoApiRegistrar() {
     override fun getCoApiDefinitions(importingClassMetadata: AnnotationMetadata): Set<CoApiDefinition> {
         val enableCoApi =
             importingClassMetadata.getAnnotationAttributes(EnableCoApi::class.java.name) ?: return emptySet()
-        val apis = enableCoApi[EnableCoApi::apis.name] as Array<Class<*>>
-        return apis.map { clientType ->
+        val clients = enableCoApi[EnableCoApi::clients.name] as Array<Class<*>>
+        return clients.map { clientType ->
             clientType.toCoApiDefinition(env)
         }.toSet()
     }
