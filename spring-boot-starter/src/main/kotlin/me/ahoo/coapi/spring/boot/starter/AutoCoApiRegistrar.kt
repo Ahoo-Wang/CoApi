@@ -49,7 +49,7 @@ class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
         if (coApiBasePackages.isNotEmpty()) {
             return coApiBasePackages
         }
-        return AutoConfigurationPackages.get(appContext)
+        return AutoConfigurationPackages.get(appContext) + coApiBasePackages
     }
 
     override fun getCoApiDefinitions(importingClassMetadata: AnnotationMetadata): Set<CoApiDefinition> {
