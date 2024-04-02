@@ -20,6 +20,10 @@ java {
         usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
         capability(group.toString(), "lb-support", version.toString())
     }
+    registerFeature("jwtSupport") {
+        usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
+        capability(group.toString(), "jwt-support", version.toString())
+    }
 }
 
 dependencies {
@@ -28,6 +32,9 @@ dependencies {
     api("org.springframework:spring-web")
     "reactiveSupportImplementation"("org.springframework:spring-webflux")
     "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
+    "jwtSupportImplementation"(libs.javaJwt)
+    testImplementation("io.projectreactor:reactor-test")
+    testImplementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     testImplementation(project(":example-provider-api"))
     testImplementation(project(":example-consumer-client"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
