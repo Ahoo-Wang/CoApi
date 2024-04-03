@@ -15,6 +15,14 @@ package me.ahoo.coapi.spring.client.reactive.auth
 
 import reactor.core.publisher.Mono
 
-fun interface BearerTokenProvider {
+interface BearerTokenProvider : HeaderValueProvider {
+    companion object {
+        const val HEADER_VALUE_PREFIX = "Bearer "
+    }
+
     fun getBearerToken(): Mono<String>
+
+    override fun getHeaderValue(): Mono<String> {
+        return getBearerToken().map { "$HEADER_VALUE_PREFIX$it" }
+    }
 }
