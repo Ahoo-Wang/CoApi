@@ -15,5 +15,16 @@ package me.ahoo.coapi.spring.client.reactive.auth
 
 import org.springframework.http.HttpHeaders
 
-class BearerTokenFilter(tokenProvider: BearerTokenProvider) :
-    HeaderSetFilter(headerName = HttpHeaders.AUTHORIZATION, headerValueProvider = tokenProvider)
+class BearerTokenFilter(tokenProvider: ExpirableTokenProvider) :
+    HeaderSetFilter(
+        headerName = HttpHeaders.AUTHORIZATION,
+        headerValueProvider = tokenProvider,
+        headerValueMapper = BearerHeaderValueMapper
+    )
+
+object BearerHeaderValueMapper : HeaderValueMapper {
+    const val BEARER_TOKEN_PREFIX = "Bearer "
+    override fun map(headerValue: String): String {
+        return "$BEARER_TOKEN_PREFIX$headerValue"
+    }
+}
