@@ -25,6 +25,9 @@ open class HeaderSetFilter(
     private val headerValueMapper: HeaderValueMapper = HeaderValueMapper.IDENTITY
 ) : ExchangeFilterFunction {
     override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
+        if (request.headers().containsKey(headerName)) {
+            return next.exchange(request)
+        }
         return headerValueProvider.getHeaderValue()
             .map { headerValue ->
                 ClientRequest.from(request)
