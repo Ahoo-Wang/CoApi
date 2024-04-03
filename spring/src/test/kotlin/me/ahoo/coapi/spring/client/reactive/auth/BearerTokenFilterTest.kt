@@ -24,7 +24,11 @@ class BearerTokenFilterTest {
             assertThat(request.headers().getFirst("Authorization"), equalTo("Bearer $jwtToken"))
             Mono.empty()
         }
-        val tokenProvider = BearerTokenProvider { Mono.just(jwtToken) }
+        val tokenProvider = object : BearerTokenProvider {
+            override fun getBearerToken(): Mono<String> {
+                return Mono.just(jwtToken)
+            }
+        }
         val bearerTokenFilter = BearerTokenFilter(tokenProvider)
         bearerTokenFilter.filter(clientRequest, nextException)
             .test()

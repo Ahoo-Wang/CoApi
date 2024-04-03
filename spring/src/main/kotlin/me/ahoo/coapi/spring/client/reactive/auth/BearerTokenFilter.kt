@@ -13,22 +13,7 @@
 
 package me.ahoo.coapi.spring.client.reactive.auth
 
-import org.springframework.web.reactive.function.client.ClientRequest
-import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
-import org.springframework.web.reactive.function.client.ExchangeFunction
-import reactor.core.publisher.Mono
+import org.springframework.http.HttpHeaders
 
-class BearerTokenFilter(private val tokenProvider: BearerTokenProvider) : ExchangeFilterFunction {
-    override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
-        return tokenProvider.getBearerToken()
-            .map { token ->
-                ClientRequest.from(request)
-                    .headers { headers ->
-                        headers.setBearerAuth(token)
-                    }
-                    .build()
-            }
-            .flatMap { next.exchange(it) }
-    }
-}
+class BearerTokenFilter(tokenProvider: BearerTokenProvider) :
+    HeaderSetFilter(headerName = HttpHeaders.AUTHORIZATION, headerValueProvider = tokenProvider)
