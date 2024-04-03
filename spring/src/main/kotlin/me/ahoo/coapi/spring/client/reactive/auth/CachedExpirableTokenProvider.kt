@@ -13,16 +13,23 @@
 
 package me.ahoo.coapi.spring.client.reactive.auth
 
+import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
 
-interface BearerTokenProvider : HeaderValueProvider {
+class CachedExpirableTokenProvider(tokenProvider: ExpirableTokenProvider) : ExpirableTokenProvider {
     companion object {
-        const val HEADER_VALUE_PREFIX = "Bearer "
+        private val log = LoggerFactory.getLogger(CachedExpirableTokenProvider::class.java)
     }
 
-    fun getBearerToken(): Mono<String>
+    private val tokenCache: Mono<ExpirableToken> = tokenProvider.getToken()
+        .cacheInvalidateIf {
+            if (log.isDebugEnabled) {
+                log.debug("CacheInvalidateIf - isExpired:${it.isExpired}")
+            }
+            it.isExpired
+        }
 
-    override fun getHeaderValue(): Mono<String> {
-        return getBearerToken().map { "$HEADER_VALUE_PREFIX$it" }
+    override fun getToken(): Mono<ExpirableToken> {
+        return tokenCache
     }
 }

@@ -21,14 +21,15 @@ import reactor.core.publisher.Mono
 
 open class HeaderSetFilter(
     private val headerName: String,
-    private val headerValueProvider: HeaderValueProvider
+    private val headerValueProvider: HeaderValueProvider,
+    private val headerValueMapper: HeaderValueMapper = HeaderValueMapper.IDENTITY
 ) : ExchangeFilterFunction {
     override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
         return headerValueProvider.getHeaderValue()
             .map { headerValue ->
                 ClientRequest.from(request)
                     .headers { headers ->
-                        headers[headerName] = headerValue
+                        headers[headerName] = headerValueMapper.map(headerValue)
                     }
                     .build()
             }
@@ -38,4 +39,12 @@ open class HeaderSetFilter(
 
 fun interface HeaderValueProvider {
     fun getHeaderValue(): Mono<String>
+}
+
+fun interface HeaderValueMapper {
+    companion object {
+        val IDENTITY = HeaderValueMapper { it }
+    }
+
+    fun map(headerValue: String): String
 }
