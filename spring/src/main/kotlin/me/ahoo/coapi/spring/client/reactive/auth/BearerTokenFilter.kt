@@ -23,8 +23,12 @@ class BearerTokenFilter(tokenProvider: ExpirableTokenProvider) :
     )
 
 object BearerHeaderValueMapper : HeaderValueMapper {
-    const val BEARER_TOKEN_PREFIX = "Bearer "
+    private const val BEARER_TOKEN_PREFIX = "Bearer "
+    fun String.withBearerPrefix(): String {
+        return "$BEARER_TOKEN_PREFIX$this"
+    }
+
     override fun map(headerValue: String): String {
-        return "$BEARER_TOKEN_PREFIX$headerValue"
+        return headerValue.withBearerPrefix()
     }
 }
