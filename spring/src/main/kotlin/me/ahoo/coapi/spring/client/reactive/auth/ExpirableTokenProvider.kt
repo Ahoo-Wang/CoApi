@@ -16,9 +16,9 @@ package me.ahoo.coapi.spring.client.reactive.auth
 import com.auth0.jwt.JWT
 import reactor.core.publisher.Mono
 
-data class ExpirableToken(val token: String, val expiresAt: Long) {
+data class ExpirableToken(val token: String, val expireAt: Long) {
     val isExpired: Boolean
-        get() = System.currentTimeMillis() > expiresAt
+        get() = System.currentTimeMillis() > expireAt
 
     companion object {
         private val jwtParser = JWT()
