@@ -17,7 +17,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.testretry.TestRetryPlugin
 import org.jetbrains.dokka.gradle.DokkaPlugin
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 
 plugins {
     alias(libs.plugins.testRetry)
@@ -58,7 +57,7 @@ allprojects {
     }
     apply<BasePlugin>()
     base {
-        archivesName.set("${rootProject.name.lowercase()}-${project.name}")
+        archivesName.set(project.getArchivesName())
     }
 }
 
@@ -88,7 +87,7 @@ configure(libraryProjects) {
         jvmToolchain(17)
     }
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions {
+        compilerOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict", "-Xjvm-default=all-compatibility")
         }
     }
@@ -146,12 +145,20 @@ configure(publishProjects) {
                     password = System.getenv("GITHUB_TOKEN")
                 }
             }
+            maven {
+                name = "LinYiPackages"
+                url = uri(project.properties["linyiPackageReleaseUrl"].toString())
+                credentials {
+                    username = project.properties["linyiPackageUsername"]?.toString()
+                    password = project.properties["linyiPackagePwd"]?.toString()
+                }
+            }
         }
         publications {
             val publishName = if (isBom) "mavenBom" else "mavenLibrary"
             val publishComponentName = if (isBom) "javaPlatform" else "java"
             create<MavenPublication>(publishName) {
-                artifactId = project.archivesName.get()
+                artifactId = project.getArchivesName()
                 from(components[publishComponentName])
                 pom {
                     name.set(artifactId)
@@ -211,3 +218,5 @@ nexusPublishing {
 }
 
 fun getPropertyOf(name: String) = project.properties[name]?.toString()
+
+fun Project.getArchivesName() = "${rootProject.name.lowercase()}-${project.name}"
