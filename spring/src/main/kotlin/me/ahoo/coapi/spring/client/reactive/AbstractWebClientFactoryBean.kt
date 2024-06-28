@@ -35,9 +35,12 @@ abstract class AbstractWebClientFactoryBean(private val definition: CoApiDefinit
     override fun getObject(): WebClient {
         val clientBuilder = appContext
             .getBean(WebClient.Builder::class.java)
-
-        clientBuilder.baseUrl(definition.baseUrl)
         val clientProperties = appContext.getBean(ClientProperties::class.java)
+        val baseUrl = clientProperties.getBaseUri(definition.name).ifBlank {
+            definition.baseUrl
+        }
+        clientBuilder.baseUrl(baseUrl)
+
         val filterDefinition = clientProperties.getFilter(definition.name)
         clientBuilder.filters {
             filterDefinition.initFilters(it)

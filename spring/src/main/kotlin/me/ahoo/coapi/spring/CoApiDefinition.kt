@@ -40,10 +40,13 @@ data class CoApiDefinition(
         }
 
         private fun CoApi.resolveBaseUrl(environment: Environment): String {
-            if (serviceId.isNotBlank()) {
-                return LB_SCHEME_PREFIX + serviceId
+            if (baseUrl.isNotBlank()) {
+                return environment.resolvePlaceholders(baseUrl)
             }
-            return environment.resolvePlaceholders(baseUrl)
+            if (serviceId.isNotBlank()) {
+                return LB_SCHEME_PREFIX + environment.resolvePlaceholders(serviceId)
+            }
+            return ""
         }
 
         private fun Class<*>.resolveClientName(coApi: CoApi): String {

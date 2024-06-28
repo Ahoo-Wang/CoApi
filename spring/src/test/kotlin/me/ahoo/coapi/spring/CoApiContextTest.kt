@@ -119,6 +119,10 @@ data class MockClientProperties(
     val filter: Map<String, ClientProperties.FilterDefinition> = emptyMap(),
     val interceptor: Map<String, ClientProperties.InterceptorDefinition> = emptyMap(),
 ) : ClientProperties {
+    override fun getBaseUri(coApiName: String): String {
+        return ""
+    }
+
     override fun getFilter(coApiName: String): ClientProperties.FilterDefinition {
         return filter[coApiName] ?: ClientProperties.FilterDefinition()
     }

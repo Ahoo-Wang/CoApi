@@ -32,6 +32,10 @@ data class CoApiProperties(
         const val COAPI_BASE_PACKAGES = "$COAPI_PREFIX.base-packages"
     }
 
+    override fun getBaseUri(coApiName: String): String {
+        return clients[coApiName]?.baseUrl.orEmpty()
+    }
+
     override fun getFilter(coApiName: String): ClientProperties.FilterDefinition {
         return clients[coApiName]?.reactive?.filter ?: ClientProperties.FilterDefinition()
     }
@@ -42,6 +46,7 @@ data class CoApiProperties(
 }
 
 data class ClientDefinition(
+    var baseUrl: String = "",
     var reactive: ReactiveClientDefinition = ReactiveClientDefinition(),
     var sync: SyncClientDefinition = SyncClientDefinition()
 )

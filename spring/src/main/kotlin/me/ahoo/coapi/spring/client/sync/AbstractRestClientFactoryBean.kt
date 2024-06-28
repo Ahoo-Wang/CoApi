@@ -32,8 +32,12 @@ abstract class AbstractRestClientFactoryBean(private val definition: CoApiDefini
     override fun getObject(): RestClient {
         val clientBuilder = appContext
             .getBean(RestClient.Builder::class.java)
-        clientBuilder.baseUrl(definition.baseUrl)
         val clientProperties = appContext.getBean(ClientProperties::class.java)
+        val baseUrl = clientProperties.getBaseUri(definition.name).ifBlank {
+            definition.baseUrl
+        }
+        clientBuilder.baseUrl(baseUrl)
+
         val interceptorDefinition = clientProperties.getInterceptor(definition.name)
         clientBuilder.requestInterceptors {
             interceptorDefinition.initInterceptors(it)

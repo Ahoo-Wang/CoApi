@@ -18,6 +18,7 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 
 interface ClientProperties {
 
+    fun getBaseUri(coApiName: String): String
     fun getFilter(coApiName: String): FilterDefinition
     fun getInterceptor(coApiName: String): InterceptorDefinition
 
