@@ -36,6 +36,24 @@ class CoApiPropertiesTest {
     }
 
     @Test
+    fun getBaseUrl() {
+        val properties = CoApiProperties()
+        assertThat(properties.getBaseUri(""), equalTo(""))
+    }
+
+    @Test
+    fun setBaseUrl() {
+        val properties = CoApiProperties(
+            clients = mapOf(
+                "test" to ClientDefinition(
+                    baseUrl = "test"
+                )
+            )
+        )
+        assertThat(properties.getBaseUri("test"), equalTo("test"))
+    }
+
+    @Test
     fun getBasePackages() {
         val properties = CoApiProperties()
         assertThat(properties.basePackages, Matchers.empty())
