@@ -23,7 +23,9 @@ class LoadBalancedWebClientFactoryBean(definition: CoApiDefinition) :
         private val loadBalancedFilterClass = LoadBalancedExchangeFilterFunction::class.java
     }
 
-    override val builderCustomizer: WebClientBuilderCustomizer = LoadBalancedWebClientBuilderCustomizer()
+    override val builderCustomizer: WebClientBuilderCustomizer by lazy {
+        if (loadBalanced()) LoadBalancedWebClientBuilderCustomizer() else WebClientBuilderCustomizer.NoOp
+    }
 
     inner class LoadBalancedWebClientBuilderCustomizer : WebClientBuilderCustomizer {
         override fun customize(coApiDefinition: CoApiDefinition, builder: WebClient.Builder) {
