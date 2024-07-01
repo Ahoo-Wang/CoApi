@@ -15,16 +15,18 @@ package me.ahoo.coapi.spring.client.reactive
 
 import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.client.ClientProperties
+import me.ahoo.coapi.spring.client.IHttpClientFactoryBean
 import org.springframework.beans.factory.FactoryBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 
-abstract class AbstractWebClientFactoryBean(private val definition: CoApiDefinition) :
+abstract class AbstractWebClientFactoryBean(override val definition: CoApiDefinition) :
+    IHttpClientFactoryBean,
     FactoryBean<WebClient>,
     ApplicationContextAware {
-    protected lateinit var appContext: ApplicationContext
+    override lateinit var appContext: ApplicationContext
 
     protected open val builderCustomizer: WebClientBuilderCustomizer = WebClientBuilderCustomizer.NoOp
 
@@ -36,9 +38,7 @@ abstract class AbstractWebClientFactoryBean(private val definition: CoApiDefinit
         val clientBuilder = appContext
             .getBean(WebClient.Builder::class.java)
         val clientProperties = appContext.getBean(ClientProperties::class.java)
-        val baseUrl = clientProperties.getBaseUri(definition.name).ifBlank {
-            definition.baseUrl
-        }
+        val baseUrl = getBaseUrl()
         clientBuilder.baseUrl(baseUrl)
 
         val filterDefinition = clientProperties.getFilter(definition.name)

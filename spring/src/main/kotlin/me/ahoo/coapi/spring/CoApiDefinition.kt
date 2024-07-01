@@ -35,10 +35,11 @@ data class CoApiDefinition(
                 name = resolveClientName(coApi),
                 apiType = this,
                 baseUrl = baseUrl,
-                loadBalanced = coApi.serviceId.isNotBlank()
+                loadBalanced = coApi.resolveLoadBalanced()
             )
         }
 
+        @Suppress("ReturnCount")
         private fun CoApi.resolveBaseUrl(environment: Environment): String {
             if (baseUrl.isNotBlank()) {
                 return environment.resolvePlaceholders(baseUrl)
@@ -54,6 +55,13 @@ data class CoApiDefinition(
                 return coApi.name
             }
             return simpleName
+        }
+
+        private fun CoApi.resolveLoadBalanced(): Boolean {
+            if (baseUrl.isNotBlank()) {
+                return false
+            }
+            return serviceId.isNotBlank()
         }
     }
 

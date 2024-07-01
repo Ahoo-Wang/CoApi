@@ -23,7 +23,9 @@ class LoadBalancedRestClientFactoryBean(definition: CoApiDefinition) : AbstractR
         private val loadBalancerInterceptorClass = LoadBalancerInterceptor::class.java
     }
 
-    override val builderCustomizer: RestClientBuilderCustomizer = LoadBalancedRestClientBuilderCustomizer()
+    override val builderCustomizer: RestClientBuilderCustomizer by lazy {
+        if (loadBalanced()) LoadBalancedRestClientBuilderCustomizer() else RestClientBuilderCustomizer.NoOp
+    }
 
     inner class LoadBalancedRestClientBuilderCustomizer : RestClientBuilderCustomizer {
         override fun customize(coApiDefinition: CoApiDefinition, builder: RestClient.Builder) {

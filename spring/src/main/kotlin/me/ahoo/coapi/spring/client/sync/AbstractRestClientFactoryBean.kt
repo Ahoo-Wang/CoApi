@@ -15,17 +15,19 @@ package me.ahoo.coapi.spring.client.sync
 
 import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.client.ClientProperties
+import me.ahoo.coapi.spring.client.IHttpClientFactoryBean
 import org.springframework.beans.factory.FactoryBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 
-abstract class AbstractRestClientFactoryBean(private val definition: CoApiDefinition) :
+abstract class AbstractRestClientFactoryBean(override val definition: CoApiDefinition) :
+    IHttpClientFactoryBean,
     FactoryBean<RestClient>,
     ApplicationContextAware {
 
-    protected lateinit var appContext: ApplicationContext
+    override lateinit var appContext: ApplicationContext
 
     protected open val builderCustomizer: RestClientBuilderCustomizer = RestClientBuilderCustomizer.NoOp
 
@@ -33,9 +35,7 @@ abstract class AbstractRestClientFactoryBean(private val definition: CoApiDefini
         val clientBuilder = appContext
             .getBean(RestClient.Builder::class.java)
         val clientProperties = appContext.getBean(ClientProperties::class.java)
-        val baseUrl = clientProperties.getBaseUri(definition.name).ifBlank {
-            definition.baseUrl
-        }
+        val baseUrl = getBaseUrl()
         clientBuilder.baseUrl(baseUrl)
 
         val interceptorDefinition = clientProperties.getInterceptor(definition.name)
