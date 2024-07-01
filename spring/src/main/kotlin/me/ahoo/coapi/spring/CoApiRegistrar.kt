@@ -13,9 +13,7 @@
 
 package me.ahoo.coapi.spring
 
-import me.ahoo.coapi.spring.client.reactive.LoadBalancedWebClientFactoryBean
 import me.ahoo.coapi.spring.client.reactive.WebClientFactoryBean
-import me.ahoo.coapi.spring.client.sync.LoadBalancedRestClientFactoryBean
 import me.ahoo.coapi.spring.client.sync.RestClientFactoryBean
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
@@ -54,11 +52,7 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val c
             }
             return
         }
-        val clientFactoryBeanClass = if (coApiDefinition.loadBalanced) {
-            LoadBalancedRestClientFactoryBean::class.java
-        } else {
-            RestClientFactoryBean::class.java
-        }
+        val clientFactoryBeanClass = RestClientFactoryBean::class.java
         val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clientFactoryBeanClass)
         beanDefinitionBuilder.addConstructorArgValue(coApiDefinition)
         registry.registerBeanDefinition(coApiDefinition.httpClientBeanName, beanDefinitionBuilder.beanDefinition)
@@ -77,11 +71,7 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val c
             }
             return
         }
-        val clientFactoryBeanClass = if (coApiDefinition.loadBalanced) {
-            LoadBalancedWebClientFactoryBean::class.java
-        } else {
-            WebClientFactoryBean::class.java
-        }
+        val clientFactoryBeanClass = WebClientFactoryBean::class.java
         val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clientFactoryBeanClass)
         beanDefinitionBuilder.addConstructorArgValue(coApiDefinition)
         registry.registerBeanDefinition(coApiDefinition.httpClientBeanName, beanDefinitionBuilder.beanDefinition)
