@@ -19,12 +19,12 @@ import org.springframework.web.reactive.function.client.WebClient
 
 class WebClientFactoryBean(definition: CoApiDefinition) :
     AbstractWebClientFactoryBean(definition) {
-    companion object {
-        private val loadBalancedFilterClass = LoadBalancedExchangeFilterFunction::class.java
-    }
 
     override val builderCustomizer: WebClientBuilderCustomizer by lazy {
-        if (loadBalanced()) LoadBalancedWebClientBuilderCustomizer() else WebClientBuilderCustomizer.NoOp
+        if (!loadBalanced()) {
+            return@lazy WebClientBuilderCustomizer.NoOp
+        }
+        return@lazy LoadBalancedWebClientBuilderCustomizer()
     }
 
     inner class LoadBalancedWebClientBuilderCustomizer : WebClientBuilderCustomizer {
@@ -35,7 +35,7 @@ class WebClientFactoryBean(definition: CoApiDefinition) :
                 }
                 if (!hasLoadBalancedFilter) {
                     val loadBalancedExchangeFilterFunction =
-                        appContext.getBean(loadBalancedFilterClass)
+                        appContext.getBean(LoadBalancedExchangeFilterFunction::class.java)
                     it.add(loadBalancedExchangeFilterFunction)
                 }
             }

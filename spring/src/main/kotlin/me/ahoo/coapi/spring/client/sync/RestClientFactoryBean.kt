@@ -24,7 +24,10 @@ class RestClientFactoryBean(definition: CoApiDefinition) : AbstractRestClientFac
     }
 
     override val builderCustomizer: RestClientBuilderCustomizer by lazy {
-        if (loadBalanced()) LoadBalancedRestClientBuilderCustomizer() else RestClientBuilderCustomizer.NoOp
+        if (!loadBalanced()) {
+            return@lazy RestClientBuilderCustomizer.NoOp
+        }
+        return@lazy LoadBalancedRestClientBuilderCustomizer()
     }
 
     inner class LoadBalancedRestClientBuilderCustomizer : RestClientBuilderCustomizer {
