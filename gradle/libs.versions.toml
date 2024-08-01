@@ -2,7 +2,7 @@
 # libraries
 springBoot = "3.3.2"
 springCloud = "2023.0.3"
-hamcrest = "2.2"
+hamcrest = "3.0"
 mockk = "1.13.12"
 javaJwt = "4.4.0"
 # plugins
