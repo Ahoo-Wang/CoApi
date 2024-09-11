@@ -6,7 +6,7 @@ hamcrest = "3.0"
 mockk = "1.13.12"
 javaJwt = "4.4.0"
 # plugins
-testRetry = "1.5.10"
+testRetry = "1.6.0"
 detekt = "1.23.7"
 dokka = "1.9.20"
 kotlin = "2.0.20"
