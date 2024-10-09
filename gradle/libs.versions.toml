@@ -3,7 +3,7 @@
 springBoot = "3.3.4"
 springCloud = "2023.0.3"
 hamcrest = "3.0"
-mockk = "1.13.12"
+mockk = "1.13.13"
 javaJwt = "4.4.0"
 # plugins
 testRetry = "1.6.0"
