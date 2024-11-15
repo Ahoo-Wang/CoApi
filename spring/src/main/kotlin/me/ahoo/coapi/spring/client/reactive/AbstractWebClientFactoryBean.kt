@@ -22,6 +22,11 @@ import org.springframework.context.ApplicationContextAware
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 
+/**
+ * @see reactor.netty.resources.ConnectionProvider
+ * @see org.springframework.boot.autoconfigure.web.reactive.function.client.ReactorClientHttpConnectorFactory
+ * @see org.springframework.http.client.ReactorResourceFactory
+ */
 abstract class AbstractWebClientFactoryBean(override val definition: CoApiDefinition) :
     IHttpClientFactoryBean,
     FactoryBean<WebClient>,
@@ -40,7 +45,6 @@ abstract class AbstractWebClientFactoryBean(override val definition: CoApiDefini
         val clientProperties = appContext.getBean(ClientProperties::class.java)
         val baseUrl = getBaseUrl()
         clientBuilder.baseUrl(baseUrl)
-
         val filterDefinition = clientProperties.getFilter(definition.name)
         clientBuilder.filters {
             filterDefinition.initFilters(it)
