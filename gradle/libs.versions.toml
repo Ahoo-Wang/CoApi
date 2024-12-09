@@ -1,6 +1,6 @@
 [versions]
 # libraries
-springBoot = "3.3.5"
+springBoot = "3.4.0"
 springCloud = "2023.0.4"
 hamcrest = "3.0"
 mockk = "1.13.13"
