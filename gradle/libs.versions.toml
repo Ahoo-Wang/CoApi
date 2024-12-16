@@ -8,7 +8,7 @@ javaJwt = "4.4.0"
 # plugins
 testRetry = "1.6.0"
 detekt = "1.23.7"
-dokka = "1.9.20"
+dokka = "2.0.0"
 kotlin = "2.0.21"
 publishPlugin = "2.0.0"
 
