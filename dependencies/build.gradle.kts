@@ -12,11 +12,11 @@
  */
 
 dependencies {
-    api(platform(libs.springBootDependencies))
-    api(platform(libs.springCloudDependencies))
+    api(platform(libs.spring.boot.dependencies))
+    api(platform(libs.spring.cloud.dependencies))
     constraints {
         api(libs.hamcrest)
         api(libs.mockk)
-        api(libs.detektFormatting)
+        api(libs.detekt.formatting)
     }
 }
