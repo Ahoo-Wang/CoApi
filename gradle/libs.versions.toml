@@ -1,7 +1,7 @@
 [versions]
 # libraries
 spring-boot = "3.4.3"
-spring-cloud = "2024.0.0"
+spring-cloud = "2024.0.1"
 hamcrest = "3.0"
 mockk = "1.13.17"
 javaJwt = "4.5.0"
