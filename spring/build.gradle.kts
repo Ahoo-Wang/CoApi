@@ -32,7 +32,7 @@ dependencies {
     api("org.springframework:spring-web")
     "reactiveSupportImplementation"("org.springframework:spring-webflux")
     "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
-    "jwtSupportImplementation"(libs.javaJwt)
+    "jwtSupportImplementation"(libs.java.jwt)
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     testImplementation(project(":example-provider-api"))
