@@ -30,6 +30,7 @@ dependencies {
     api(project(":api"))
     api("org.springframework:spring-context")
     api("org.springframework:spring-web")
+    implementation("io.github.oshai:kotlin-logging-jvm")
     "reactiveSupportImplementation"("org.springframework:spring-webflux")
     "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
     "jwtSupportImplementation"(libs.java.jwt)
