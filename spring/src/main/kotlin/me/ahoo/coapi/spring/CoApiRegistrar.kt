@@ -13,15 +13,15 @@
 
 package me.ahoo.coapi.spring
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import me.ahoo.coapi.spring.client.reactive.WebClientFactoryBean
 import me.ahoo.coapi.spring.client.sync.RestClientFactoryBean
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 
 class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val clientMode: ClientMode) {
     companion object {
-        private val log = LoggerFactory.getLogger(CoApiRegistrar::class.java)
+        private val log = KotlinLogging.logger {}
     }
 
     fun register(coApiDefinitions: Set<CoApiDefinition>) {
@@ -40,15 +40,12 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val c
     }
 
     private fun registerRestClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {
-        if (log.isInfoEnabled) {
-            log.info("Register RestClient [{}].", coApiDefinition.httpClientBeanName)
+        log.info {
+            "Register RestClient [${coApiDefinition.httpClientBeanName}]."
         }
         if (registry.containsBeanDefinition(coApiDefinition.httpClientBeanName)) {
-            if (log.isWarnEnabled) {
-                log.warn(
-                    "RestClient [{}] already exists - Ignore.",
-                    coApiDefinition.httpClientBeanName
-                )
+            log.warn {
+                "RestClient [${coApiDefinition.httpClientBeanName}] already exists - Ignore."
             }
             return
         }
@@ -59,15 +56,12 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val c
     }
 
     private fun registerWebClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {
-        if (log.isInfoEnabled) {
-            log.info("Register WebClient [{}].", coApiDefinition.httpClientBeanName)
+        log.info {
+            "Register WebClient [${coApiDefinition.httpClientBeanName}]."
         }
         if (registry.containsBeanDefinition(coApiDefinition.httpClientBeanName)) {
-            if (log.isWarnEnabled) {
-                log.warn(
-                    "WebClient [{}] already exists - Ignore.",
-                    coApiDefinition.httpClientBeanName
-                )
+            log.warn {
+                "WebClient [${coApiDefinition.httpClientBeanName}] already exists - Ignore."
             }
             return
         }
@@ -78,15 +72,12 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val c
     }
 
     private fun registerApiClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {
-        if (log.isInfoEnabled) {
-            log.info("Register CoApi [{}].", coApiDefinition.coApiBeanName)
+        log.info {
+            "Register CoApi [${coApiDefinition.coApiBeanName}]."
         }
         if (registry.containsBeanDefinition(coApiDefinition.coApiBeanName)) {
-            if (log.isWarnEnabled) {
-                log.warn(
-                    "CoApi [{}] already exists - Ignore.",
-                    coApiDefinition.coApiBeanName
-                )
+            log.warn {
+                "CoApi [${coApiDefinition.coApiBeanName}] already exists - Ignore."
             }
             return
         }
