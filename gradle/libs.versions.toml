@@ -2,6 +2,7 @@
 # libraries
 spring-boot = "3.4.3"
 spring-cloud = "2024.0.1"
+kotlin-logging = "7.0.5"
 hamcrest = "3.0"
 mockk = "1.13.17"
 java-jwt = "4.5.0"
@@ -15,6 +16,7 @@ publishPlugin = "2.0.0"
 [libraries]
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
+kotlin-logging = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }
 hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }

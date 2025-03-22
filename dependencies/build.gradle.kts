@@ -15,6 +15,7 @@ dependencies {
     api(platform(libs.spring.boot.dependencies))
     api(platform(libs.spring.cloud.dependencies))
     constraints {
+        api(libs.kotlin.logging)
         api(libs.hamcrest)
         api(libs.mockk)
         api(libs.detekt.formatting)

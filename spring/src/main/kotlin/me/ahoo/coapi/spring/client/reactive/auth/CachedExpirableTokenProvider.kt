@@ -13,18 +13,18 @@
 
 package me.ahoo.coapi.spring.client.reactive.auth
 
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
 import reactor.core.publisher.Mono
 
 class CachedExpirableTokenProvider(tokenProvider: ExpirableTokenProvider) : ExpirableTokenProvider {
     companion object {
-        private val log = LoggerFactory.getLogger(CachedExpirableTokenProvider::class.java)
+        private val log = KotlinLogging.logger {}
     }
 
     private val tokenCache: Mono<ExpirableToken> = tokenProvider.getToken()
         .cacheInvalidateIf {
-            if (log.isDebugEnabled) {
-                log.debug("CacheInvalidateIf - isExpired:${it.isExpired}")
+            log.debug {
+                "CacheInvalidateIf - isExpired:${it.isExpired}"
             }
             it.isExpired
         }
