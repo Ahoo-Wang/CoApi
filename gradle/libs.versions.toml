@@ -11,7 +11,7 @@ test-retry = "1.6.2"
 detekt = "1.23.8"
 dokka = "2.0.0"
 kotlin = "2.1.20"
-publishPlugin = "2.0.0"
+publish-plugin = "2.0.0"
 
 [libraries]
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
@@ -29,4 +29,4 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "publishPlugin" }
+publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "publish-plugin" }
