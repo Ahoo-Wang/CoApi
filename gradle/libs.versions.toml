@@ -4,7 +4,7 @@ spring-boot = "3.4.4"
 spring-cloud = "2024.0.1"
 kotlin-logging = "7.0.6"
 hamcrest = "3.0"
-mockk = "1.13.17"
+mockk = "1.14.0"
 java-jwt = "4.5.0"
 # plugins
 test-retry = "1.6.2"
