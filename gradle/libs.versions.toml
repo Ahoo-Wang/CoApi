@@ -2,7 +2,7 @@
 # libraries
 spring-boot = "3.4.4"
 spring-cloud = "2024.0.1"
-kotlin-logging = "7.0.6"
+kotlin-logging = "7.0.7"
 hamcrest = "3.0"
 mockk = "1.14.0"
 java-jwt = "4.5.0"
