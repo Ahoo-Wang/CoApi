@@ -14,10 +14,7 @@
 package me.ahoo.coapi.spring.boot.starter
 
 import me.ahoo.coapi.spring.client.ClientProperties
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.sameInstance
+import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
 
 class CoApiPropertiesTest {
@@ -25,20 +22,20 @@ class CoApiPropertiesTest {
     @Test
     fun getEnabled() {
         val properties = CoApiProperties()
-        assertThat(properties.enabled, equalTo(true))
+        properties.enabled.assert().isTrue()
     }
 
     @Test
     fun setEnabled() {
         val properties = CoApiProperties(false)
         properties.enabled = true
-        assertThat(properties.enabled, equalTo(true))
+        properties.enabled.assert().isTrue()
     }
 
     @Test
     fun getBaseUrl() {
         val properties = CoApiProperties()
-        assertThat(properties.getBaseUri(""), equalTo(""))
+        properties.getBaseUri("").assert().isBlank()
     }
 
     @Test
@@ -50,20 +47,20 @@ class CoApiPropertiesTest {
                 )
             )
         )
-        assertThat(properties.getBaseUri("test"), equalTo("test"))
+        properties.getBaseUri("test").assert().isEqualTo("test")
     }
 
     @Test
     fun getBasePackages() {
         val properties = CoApiProperties()
-        assertThat(properties.basePackages, Matchers.empty())
+        properties.basePackages.assert().isEmpty()
     }
 
     @Test
     fun getFilterIfDefault() {
         val properties = CoApiProperties()
-        assertThat(properties.getFilter("test").names, Matchers.empty())
-        assertThat(properties.getFilter("test").types, Matchers.empty())
+        properties.getFilter("test").names.assert().isEmpty()
+        properties.getFilter("test").types.assert().isEmpty()
     }
 
     @Test
@@ -79,15 +76,15 @@ class CoApiPropertiesTest {
                 )
             )
         )
-        assertThat(properties.getFilter("test").names, Matchers.hasSize(1))
-        assertThat(properties.getFilter("test").types, Matchers.empty())
+        properties.getFilter("test").names.assert().hasSize(1)
+        properties.getFilter("test").types.assert().isEmpty()
     }
 
     @Test
     fun getInterceptor() {
         val properties = CoApiProperties()
-        assertThat(properties.getInterceptor("test").names, Matchers.empty())
-        assertThat(properties.getInterceptor("test").types, Matchers.empty())
+        properties.getInterceptor("test").names.assert().isEmpty()
+        properties.getInterceptor("test").types.assert().isEmpty()
     }
 
     @Test
@@ -95,10 +92,10 @@ class CoApiPropertiesTest {
         val properties = ClientDefinition()
         val reactive = ReactiveClientDefinition()
         properties.reactive = reactive
-        assertThat(properties.reactive, sameInstance(reactive))
+        properties.reactive.assert().isSameAs(reactive)
         val sync = SyncClientDefinition()
         properties.sync = sync
-        assertThat(properties.sync, sameInstance(sync))
+        properties.sync.assert().isSameAs(sync)
     }
 
     @Test
@@ -106,7 +103,7 @@ class CoApiPropertiesTest {
         val properties = ReactiveClientDefinition()
         val filter = ClientProperties.FilterDefinition()
         properties.filter = filter
-        assertThat(properties.filter, sameInstance(filter))
+        properties.filter.assert().isSameAs(filter)
     }
 
     @Test
@@ -114,6 +111,6 @@ class CoApiPropertiesTest {
         val properties = SyncClientDefinition()
         val interceptor = ClientProperties.InterceptorDefinition()
         properties.interceptor = interceptor
-        assertThat(properties.interceptor, sameInstance(interceptor))
+        properties.interceptor.assert().isSameAs(interceptor)
     }
 }

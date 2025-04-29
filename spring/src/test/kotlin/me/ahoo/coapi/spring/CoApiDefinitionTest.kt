@@ -15,13 +15,14 @@ package me.ahoo.coapi.spring
 
 import io.mockk.mockk
 import me.ahoo.coapi.spring.CoApiDefinition.Companion.toCoApiDefinition
+import me.ahoo.test.asserts.assertThrownBy
 import org.junit.jupiter.api.Test
 
 class CoApiDefinitionTest {
 
     @Test
     fun toCoApiDefinitionIfNoCoApi() {
-        org.junit.jupiter.api.assertThrows<IllegalArgumentException> {
+        assertThrownBy<IllegalArgumentException> {
             CoApiDefinitionTest::class.java.toCoApiDefinition(mockk())
         }
     }
