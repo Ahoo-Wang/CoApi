@@ -1,7 +1,6 @@
 package me.ahoo.coapi.spring
 
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.equalTo
+import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
 
 class ClientModeTest {
@@ -11,8 +10,7 @@ class ClientModeTest {
         val mode = ClientMode.inferClientMode {
             null
         }
-
-        assertThat(mode, equalTo(ClientMode.REACTIVE))
+        mode.assert().isEqualTo(ClientMode.REACTIVE)
     }
 
     @Test
@@ -20,7 +18,6 @@ class ClientModeTest {
         val mode = ClientMode.inferClientMode {
             "SYNC"
         }
-
-        assertThat(mode, equalTo(ClientMode.SYNC))
+        mode.assert().isEqualTo(ClientMode.SYNC)
     }
 }
