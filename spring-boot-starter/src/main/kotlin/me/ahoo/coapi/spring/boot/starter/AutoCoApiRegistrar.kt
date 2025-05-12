@@ -46,7 +46,7 @@ class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
 
     private fun getScanBasePackages(): List<String> {
         val coApiBasePackages = getCoApiBasePackages()
-        if (coApiBasePackages.isNotEmpty() && !AutoConfigurationPackages.has(appContext)) {
+        if (AutoConfigurationPackages.has(appContext).not()) {
             return coApiBasePackages
         }
         return AutoConfigurationPackages.get(appContext) + coApiBasePackages
