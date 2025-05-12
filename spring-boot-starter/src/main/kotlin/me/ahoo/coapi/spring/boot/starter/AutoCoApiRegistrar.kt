@@ -26,13 +26,13 @@ import org.springframework.core.type.filter.AnnotationTypeFilter
 
 class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
 
-    private fun getCoApiBasePackages(): List<String> {
+    private fun getCoApiBasePackages(): Set<String> {
         val basePackages = env.getProperty(CoApiProperties.COAPI_BASE_PACKAGES)
         if (basePackages?.isNotBlank() == true) {
-            return basePackages.split(",").distinct().toList()
+            return basePackages.split(",").toSet()
         }
         var currentIndex = 0
-        buildList {
+        buildSet {
             while (true) {
                 val basePackage = env.getProperty("${CoApiProperties.COAPI_BASE_PACKAGES}[$currentIndex]")
                 if (basePackage.isNullOrBlank()) {
@@ -44,12 +44,12 @@ class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
         }
     }
 
-    private fun getScanBasePackages(): List<String> {
+    private fun getScanBasePackages(): Set<String> {
         val coApiBasePackages = getCoApiBasePackages()
         if (AutoConfigurationPackages.has(appContext).not()) {
             return coApiBasePackages
         }
-        return AutoConfigurationPackages.get(appContext) + coApiBasePackages
+        return AutoConfigurationPackages.get(appContext).toSet() + coApiBasePackages
     }
 
     override fun getCoApiDefinitions(importingClassMetadata: AnnotationMetadata): Set<CoApiDefinition> {
@@ -58,7 +58,7 @@ class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
         return scanBasePackages.toApiClientDefinitions() + beanProvider
     }
 
-    private fun List<String>.toApiClientDefinitions(): Set<CoApiDefinition> {
+    private fun Set<String>.toApiClientDefinitions(): Set<CoApiDefinition> {
         val scanner = ApiClientScanner(false, env)
         return flatMap { basePackage ->
             scanner.findCandidateComponents(basePackage)
