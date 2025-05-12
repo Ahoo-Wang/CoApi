@@ -28,6 +28,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.notNullValue
 import org.junit.jupiter.api.Test
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
@@ -158,6 +159,9 @@ class CoApiAutoConfigurationTest {
     }
 }
 
+@AutoConfigurationPackage(
+    basePackageClasses = [GitHubApiClient::class]
+)
 @SpringBootApplication
 @EnableCoApi(
     clients = [
