@@ -13,17 +13,39 @@
 
 package me.ahoo.coapi.spring
 
-import io.mockk.mockk
+import me.ahoo.coapi.api.CoApi
 import me.ahoo.coapi.spring.CoApiDefinition.Companion.toCoApiDefinition
+import me.ahoo.test.asserts.assert
 import me.ahoo.test.asserts.assertThrownBy
 import org.junit.jupiter.api.Test
+import org.springframework.mock.env.MockEnvironment
 
 class CoApiDefinitionTest {
 
     @Test
     fun toCoApiDefinitionIfNoCoApi() {
         assertThrownBy<IllegalArgumentException> {
-            CoApiDefinitionTest::class.java.toCoApiDefinition(mockk())
+            CoApiDefinitionTest::class.java.toCoApiDefinition(MockEnvironment())
         }
     }
+
+    @Test
+    fun toCoApiDefinitionIfNoLBMockApi() {
+        val coApiDefinition = LBMockApi::class.java.toCoApiDefinition(MockEnvironment())
+        coApiDefinition.loadBalanced.assert().isTrue()
+        coApiDefinition.baseUrl.assert().isEqualTo("http://order-service")
+    }
+
+    @Test
+    fun toCoApiDefinitionIfServiceApi() {
+        val coApiDefinition = MockServiceApi::class.java.toCoApiDefinition(MockEnvironment())
+        coApiDefinition.loadBalanced.assert().isTrue()
+        coApiDefinition.baseUrl.assert().isEqualTo("http://order-service")
+    }
 }
+
+@CoApi(baseUrl = "lb://order-service")
+interface LBMockApi
+
+@CoApi(serviceId = "order-service")
+interface MockServiceApi
