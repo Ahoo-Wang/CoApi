@@ -13,9 +13,6 @@
 
 name: Example Test
 on:
-  push:
-    paths-ignore:
-      - 'documentation/**'
   pull_request:
     paths-ignore:
       - 'documentation/**'
