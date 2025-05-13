@@ -20,34 +20,36 @@ data class CoApiDefinition(
     val name: String,
     val apiType: Class<*>,
     val baseUrl: String,
-    val loadBalanced: Boolean
+    val loadBalanced: Boolean,
 ) {
     companion object {
         private const val CLIENT_BEAN_NAME_SUFFIX = ".HttpClient"
         private const val COAPI_BEAN_NAME_SUFFIX = ".CoApi"
-        private const val LB_SCHEME_PREFIX = "http://"
+        private const val LB_PROTOCOL_PREFIX = "lb://"
+        private const val HTTP_PROTOCOL_PREFIX = "http://"
 
         fun Class<*>.toCoApiDefinition(environment: Environment): CoApiDefinition {
             val coApi = getAnnotation(CoApi::class.java)
                 ?: throw IllegalArgumentException("The class must be annotated by @CoApi.")
-            val baseUrl = coApi.resolveBaseUrl(environment)
+            var loadBalanced = false
+            var baseUrl = ""
+            if (coApi.baseUrl.isNotBlank()) {
+                baseUrl = environment.resolvePlaceholders(coApi.baseUrl)
+                if (baseUrl.startsWith(LB_PROTOCOL_PREFIX)) {
+                    loadBalanced = true
+                    baseUrl = HTTP_PROTOCOL_PREFIX + baseUrl.substring(LB_PROTOCOL_PREFIX.length)
+                }
+            } else if (coApi.serviceId.isNotBlank()) {
+                loadBalanced = true
+                baseUrl = HTTP_PROTOCOL_PREFIX + environment.resolvePlaceholders(coApi.serviceId)
+            }
+
             return CoApiDefinition(
                 name = resolveClientName(coApi),
                 apiType = this,
                 baseUrl = baseUrl,
-                loadBalanced = coApi.resolveLoadBalanced()
+                loadBalanced = loadBalanced
             )
-        }
-
-        @Suppress("ReturnCount")
-        private fun CoApi.resolveBaseUrl(environment: Environment): String {
-            if (baseUrl.isNotBlank()) {
-                return environment.resolvePlaceholders(baseUrl)
-            }
-            if (serviceId.isNotBlank()) {
-                return LB_SCHEME_PREFIX + environment.resolvePlaceholders(serviceId)
-            }
-            return ""
         }
 
         private fun Class<*>.resolveClientName(coApi: CoApi): String {
@@ -55,13 +57,6 @@ data class CoApiDefinition(
                 return coApi.name
             }
             return simpleName
-        }
-
-        private fun CoApi.resolveLoadBalanced(): Boolean {
-            if (baseUrl.isNotBlank()) {
-                return false
-            }
-            return serviceId.isNotBlank()
         }
     }
 
