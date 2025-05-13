@@ -19,9 +19,6 @@ import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchan
 import org.springframework.web.client.RestClient
 
 class RestClientFactoryBean(definition: CoApiDefinition) : AbstractRestClientFactoryBean(definition) {
-    companion object {
-        private val loadBalancerInterceptorClass = LoadBalancerInterceptor::class.java
-    }
 
     override val builderCustomizer: RestClientBuilderCustomizer by lazy {
         if (!loadBalanced()) {
@@ -38,7 +35,7 @@ class RestClientFactoryBean(definition: CoApiDefinition) : AbstractRestClientFac
                 }
                 if (!hasLoadBalancedFilter) {
                     val loadBalancerInterceptor =
-                        appContext.getBean(loadBalancerInterceptorClass)
+                        appContext.getBean(LoadBalancerInterceptor::class.java)
                     it.add(loadBalancerInterceptor)
                 }
             }
