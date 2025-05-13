@@ -66,6 +66,12 @@ github:
 
 ### Define `CoApi` - Client Load Balancing
 
+When using client load balancing, you need to introduce dependencies first:
+
+```kotlin
+implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
+```
+
 ```java
 @CoApi(serviceId = "github-service")
 public interface ServiceApiClient {

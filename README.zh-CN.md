@@ -68,6 +68,12 @@ github:
 
 ### 定义 `CoApi` - 客户端负载均衡
 
+当使用客户端负载均衡时，需要先引入依赖：
+
+```kotlin
+implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
+```
+
 ```java
 @CoApi(serviceId = "github-service")
 public interface ServiceApiClient {
