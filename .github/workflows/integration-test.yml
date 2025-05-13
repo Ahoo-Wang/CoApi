@@ -13,10 +13,6 @@
 
 name: Integration Test
 on:
-  push:
-    paths-ignore:
-      - 'documentation/**'
-      - 'example/**'
   pull_request:
     paths-ignore:
       - 'documentation/**'
