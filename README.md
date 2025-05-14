@@ -10,13 +10,23 @@
 [![Integration Test Status](https://github.com/Ahoo-Wang/CoApi/actions/workflows/integration-test.yml/badge.svg)](https://github.com/Ahoo-Wang/CoApi)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ahoo-Wang/CoApi)
 
-In Spring Framework 6, a new HTTP client, [Spring6 HTTP Interface](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-http-interface), has been introduced. This interface allows developers to define HTTP services as Java interfaces using the `@HttpExchange` annotation.
+In Spring Framework 6, a new HTTP
+client, [Spring6 HTTP Interface](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-http-interface),
+has been introduced. This interface allows developers to define HTTP services as Java interfaces using the
+`@HttpExchange` annotation.
 
-However, the current *Spring* ecosystem does not yet provide support for automatic configuration, and developers need to implement the configuration themselves.
+However, the current *Spring* ecosystem does not yet provide support for automatic configuration, and developers need to
+implement the configuration themselves.
 
-While the *Spring* ecosystem already has [Spring Cloud OpenFeign](https://github.com/spring-cloud/spring-cloud-openfeign), it lacks support for the reactive programming model. To address this, *Spring Cloud OpenFeign* recommends an alternative solution, [feign-reactive](https://github.com/PlaytikaOSS/feign-reactive). However, this alternative is currently not actively maintained and does not support Spring Boot 3.2.x.
+While the *Spring* ecosystem already
+has [Spring Cloud OpenFeign](https://github.com/spring-cloud/spring-cloud-openfeign), it lacks support for the reactive
+programming model. To address this, *Spring Cloud OpenFeign* recommends an alternative
+solution, [feign-reactive](https://github.com/PlaytikaOSS/feign-reactive). However, this alternative is currently not
+actively maintained and does not support Spring Boot 3.2.x.
 
-**CoApi** is here to help with zero-boilerplate code auto-configuration similar to *Spring Cloud OpenFeign*, as well as support for both reactive and synchronous programming models. Developers only need to define the interface, and it is easy to use.
+**CoApi** is here to help with zero-boilerplate code auto-configuration similar to *Spring Cloud OpenFeign*, as well as
+support for both reactive and synchronous programming models. Developers only need to define the interface, and it is
+easy to use.
 
 ## Installation
 
@@ -35,6 +45,7 @@ implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
 > Use *Maven* to install dependencies
 
 ```xml
+
 <dependency>
     <groupId>me.ahoo.coapi</groupId>
     <artifactId>coapi-spring-boot-starter</artifactId>
@@ -46,9 +57,11 @@ implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
 
 ### Define `CoApi` - a third-party interface
 
-> `baseUrl` : Define the base address of the request, which can be obtained from the configuration file, for example: `baseUrl = "${github.url}"`, `github.url` is the configuration item in the configuration file
+> `baseUrl` : Define the base address of the request, which can be obtained from the configuration file, for example:
+`baseUrl = "${github.url}"`, `github.url` is the configuration item in the configuration file
 
 ```java
+
 @CoApi(baseUrl = "${github.url}")
 public interface GitHubApiClient {
 
@@ -72,12 +85,25 @@ When using client load balancing, you need to introduce dependencies first:
 implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 ```
 
+1. Use the `serviceId` parameter definition:
+
 ```java
+
 @CoApi(serviceId = "github-service")
 public interface ServiceApiClient {
 
     @GetExchange("repos/{owner}/{repo}/issues")
     Flux<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
+}
+```
+
+2. Client load balancing protocol (`lb://`) definition via `baseUrl` parameter:
+
+```java
+
+@CoApi(baseUrl = "lb://github-service")
+public interface ServiceApiClient {
+
 }
 ```
 
@@ -127,7 +153,9 @@ TodoClient  -->  TodoApi
 TodoController  ..>  TodoApi
 ```
 
-- `TodoApi` : A common contract between the client consumer and the service provider is defined to prevent the risk of duplicate redundant definitions and to eliminate inconsistencies between the service provider implementation and the client SDK.
+- `TodoApi` : A common contract between the client consumer and the service provider is defined to prevent the risk of
+  duplicate redundant definitions and to eliminate inconsistencies between the service provider implementation and the
+  client SDK.
 - `TodoClient` :The client consumer accesses the service provider's API via `TodoClient`.
 - `TodoController` : The service provider is responsible for implementing the `TodoApi` interface.
 
