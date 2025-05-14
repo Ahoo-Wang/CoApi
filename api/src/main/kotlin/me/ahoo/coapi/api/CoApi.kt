@@ -55,7 +55,7 @@ annotation class CoApi(
      *
      * Example:
      * - `lb://my-service` will be resolved to `http://my-service`
-     * - `http://localhost:8080` will be used as is
+     * - `http://localhost:8080` will be used as the base URL.
      */
     val baseUrl: String = "",
     /**
