@@ -15,10 +15,65 @@ package me.ahoo.coapi.api
 
 import org.springframework.stereotype.Component
 
+/**
+ * CoApi Annotation
+ *
+ * The `@CoApi` annotation is used to mark a class as a CoApi service. It provides
+ * configuration for the service, including its name, base URL, and service ID.
+ * This annotation is essential for integrating CoApi services with the Spring framework.
+ *
+ * When using this annotation, you can specify the following parameters:
+ * - `serviceId`: The unique identifier for the service. Used to resolve the base URL if `baseUrl` is not provided.
+ * - `baseUrl`: The base URL of the service.
+ * Supports `lb://` for load-balanced services and `http://` for direct connections.
+ * - `name`: The name of the CoApi instance. Defaults to the class name if not specified.
+ *
+ * Example usage:
+ * ```kotlin
+ * @CoApi(
+ *     baseUrl = "lb://my-service",
+ *     serviceId = "my-service", // optional
+ *     name = "CustomApiName"  // optional
+ * )
+ * interface MyApi {
+ *     // Service methods here
+ * }
+ * ```
+ *
+ * The `@CoApi` annotation automatically registers the annotated class as a Spring component,
+ * allowing it to be managed and injected by the Spring IoC container.
+ */
 @Target(AnnotationTarget.CLASS)
 @Component
 annotation class CoApi(
-    val serviceId: String = "",
+    /**
+     * The base URL of the CoApi. Supports protocols:
+     * - `lb://` for load-balanced services. The `lb://` protocol will be resolved to `http://` internally.
+     * - `http://` for direct HTTP connections.
+     *
+     * If not specified, the `baseUrl` will be resolved using the `serviceId` with the `lb://` protocol.
+     *
+     * Example:
+     * - `lb://my-service` will be resolved to `http://my-service`
+     * - `http://localhost:8080` will be used as the base URL.
+     */
     val baseUrl: String = "",
-    val name: String = ""
+    /**
+     * The service ID of the CoApi. This ID is used to identify the service when resolving the base URL.
+     * If the `baseUrl` is not specified, the `serviceId` will be used to construct a load balanced URL
+     * with the `lb://` protocol.
+     *
+     * Example:
+     * - If `serviceId` is "my-service" and `baseUrl` is not specified, the resolved URL will be "lb://my-service".
+     */
+    val serviceId: String = "",
+    /**
+     * The name of the CoApi. This name is used to uniquely identify the CoApi instance.
+     * If not specified, the name will default to the simple name of the annotated class.
+     *
+     * Example:
+     * - If the class is named `MyApi`, the default name will be "MyApi".
+     * - If specified as `@CoApi(name = "customName")`, the name will be "customName".
+     */
+    val name: String = "",
 )
