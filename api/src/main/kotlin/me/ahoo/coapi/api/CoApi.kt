@@ -29,14 +29,29 @@ import org.springframework.stereotype.Component
  * - `name`: The name of the CoApi instance. Defaults to the class name if not specified.
  *
  * Example usage:
+ *  ```kotlin
+ *  @CoApi(baseUrl = "https://api.github.com", name = "GitHubApi")
+ *  interface GitHubApiClient {
+ *      @GetExchange("repos/{owner}/{repo}/issues")
+ *     fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+ *  }
+ *  ```
  * ```kotlin
- * @CoApi(
- *     baseUrl = "lb://my-service",
- *     serviceId = "my-service", // optional
- *     name = "CustomApiName"  // optional
- * )
- * interface MyApi {
- *     // Service methods here
+ * @CoApi(baseUrl = "\${github.url}")
+ * interface GitHubApiClient {
+
+ * }
+ * ```
+ * ```kotlin
+ * @CoApi(serviceId = "github-service")
+ * interface GitHubApiClient {
+
+ * }
+ * ```
+ * ```kotlin
+ * @CoApi(baseUrl = "lb://github-service")
+ * interface GitHubApiClient {
+ *
  * }
  * ```
  *
