@@ -42,6 +42,13 @@ class CoApiDefinitionTest {
         coApiDefinition.loadBalanced.assert().isTrue()
         coApiDefinition.baseUrl.assert().isEqualTo("http://order-service")
     }
+
+    @Test
+    fun toCoApiDefinitionIfEmptyApi() {
+        val coApiDefinition = MockEmptyApi::class.java.toCoApiDefinition(MockEnvironment())
+        coApiDefinition.loadBalanced.assert().isFalse()
+        coApiDefinition.baseUrl.assert().isEmpty()
+    }
 }
 
 @CoApi(baseUrl = "lb://order-service")
@@ -49,3 +56,6 @@ interface LBMockApi
 
 @CoApi(serviceId = "order-service")
 interface MockServiceApi
+
+@CoApi
+interface MockEmptyApi
