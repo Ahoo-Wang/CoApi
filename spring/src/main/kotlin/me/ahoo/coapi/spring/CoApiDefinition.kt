@@ -98,13 +98,17 @@ data class CoApiDefinition(
          * @param environment The Spring Environment.
          * @return The resolved base URL.
          */
+        @Suppress("ReturnCount")
         fun CoApi.resolveBaseUrl(environment: Environment): String {
             // If the base URL is not blank, resolve placeholders and return it
             if (baseUrl.isNotBlank()) {
                 return environment.resolvePlaceholders(baseUrl)
             }
-            // Otherwise, construct a load balanced URL using the service ID
-            return LB_PROTOCOL_PREFIX + environment.resolvePlaceholders(serviceId)
+            if (serviceId.isNotBlank()) {
+                // Otherwise, construct a load balanced URL using the service ID
+                return LB_PROTOCOL_PREFIX + environment.resolvePlaceholders(serviceId)
+            }
+            return ""
         }
 
         /**
