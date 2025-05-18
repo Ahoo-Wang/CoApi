@@ -14,6 +14,7 @@
 package me.ahoo.coapi.spring
 
 import me.ahoo.coapi.api.CoApi
+import me.ahoo.coapi.api.LoadBalanced
 import org.springframework.core.env.Environment
 
 /**
@@ -75,10 +76,12 @@ data class CoApiDefinition(
             val resolvedBaseUrl = coApi.resolveBaseUrl(environment)
 
             // Determine if the CoApi is load balanced
-            val loadBalanced = resolvedBaseUrl.startsWith(LB_PROTOCOL_PREFIX)
+            val resolvedLoadBalanced = getAnnotation(LoadBalanced::class.java) != null
+            val baseUrlLoadBalanced = resolvedBaseUrl.startsWith(LB_PROTOCOL_PREFIX)
+            val loadBalanced = resolvedLoadBalanced || baseUrlLoadBalanced
 
             // Adjust the base URL if it's load balanced
-            val baseUrl = if (loadBalanced) {
+            val baseUrl = if (baseUrlLoadBalanced) {
                 HTTP_PROTOCOL_PREFIX + resolvedBaseUrl.substring(LB_PROTOCOL_PREFIX.length)
             } else {
                 resolvedBaseUrl

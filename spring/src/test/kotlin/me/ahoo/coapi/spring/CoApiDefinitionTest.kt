@@ -14,6 +14,7 @@
 package me.ahoo.coapi.spring
 
 import me.ahoo.coapi.api.CoApi
+import me.ahoo.coapi.api.LoadBalanced
 import me.ahoo.coapi.spring.CoApiDefinition.Companion.toCoApiDefinition
 import me.ahoo.test.asserts.assert
 import me.ahoo.test.asserts.assertThrownBy
@@ -46,7 +47,7 @@ class CoApiDefinitionTest {
     @Test
     fun toCoApiDefinitionIfEmptyApi() {
         val coApiDefinition = MockEmptyApi::class.java.toCoApiDefinition(MockEnvironment())
-        coApiDefinition.loadBalanced.assert().isFalse()
+        coApiDefinition.loadBalanced.assert().isTrue()
         coApiDefinition.baseUrl.assert().isEmpty()
     }
 }
@@ -58,4 +59,5 @@ interface LBMockApi
 interface MockServiceApi
 
 @CoApi
+@LoadBalanced
 interface MockEmptyApi
