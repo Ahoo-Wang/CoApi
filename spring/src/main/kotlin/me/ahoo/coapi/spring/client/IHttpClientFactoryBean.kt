@@ -14,6 +14,7 @@
 package me.ahoo.coapi.spring.client
 
 import me.ahoo.coapi.spring.CoApiDefinition
+import me.ahoo.coapi.spring.CoApiDefinition.Companion.LB_PROTOCOL_PREFIX
 import org.springframework.context.ApplicationContext
 
 interface IHttpClientFactoryBean {
@@ -28,10 +29,6 @@ interface IHttpClientFactoryBean {
     }
 
     fun loadBalanced(): Boolean {
-        val clientProperties = appContext.getBean(ClientProperties::class.java)
-        if (clientProperties.getBaseUri(definition.name).isNotBlank()) {
-            return false
-        }
-        return definition.loadBalanced
+        return getBaseUrl().startsWith(LB_PROTOCOL_PREFIX) || definition.loadBalanced
     }
 }
