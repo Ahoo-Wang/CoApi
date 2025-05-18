@@ -55,7 +55,7 @@ data class CoApiDefinition(
         /**
          * Prefix for load balanced protocol.
          */
-        private const val LB_PROTOCOL_PREFIX = "lb://"
+        const val LB_PROTOCOL_PREFIX = "lb://"
 
         /**
          * Prefix for HTTP protocol.
