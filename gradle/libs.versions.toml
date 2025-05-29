@@ -6,6 +6,7 @@ kotlin-logging = "7.0.7"
 fluent-assert = "0.1.2"
 mockk = "1.14.2"
 java-jwt = "4.5.0"
+junit = "5.12.2"
 # plugins
 test-retry = "1.6.2"
 detekt = "1.23.8"
@@ -18,6 +19,7 @@ spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-depe
 spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
 kotlin-logging = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 fluent-assert-bom = { module = "me.ahoo.test:fluent-assert-bom", version.ref = "fluent-assert" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
