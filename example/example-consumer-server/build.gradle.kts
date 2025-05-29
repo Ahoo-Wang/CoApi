@@ -40,6 +40,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
+    testImplementation(platform(rootProject.libs.junit.bom))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
