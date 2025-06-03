@@ -113,6 +113,7 @@ configure(libraryProjects) {
     }
     dependencies {
         api(platform(dependenciesProject))
+        testImplementation(platform(rootProject.libs.junit.bom))
         detektPlugins(platform(dependenciesProject))
         implementation("org.slf4j:slf4j-api")
         testImplementation("ch.qos.logback:logback-classic")
@@ -123,6 +124,7 @@ configure(libraryProjects) {
             exclude(group = "org.slf4j", module = "slf4j-api")
         }
         testImplementation("io.micrometer:micrometer-core")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
         detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting")
     }
