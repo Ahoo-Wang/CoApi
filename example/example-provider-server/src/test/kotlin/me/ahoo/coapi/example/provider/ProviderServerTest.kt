@@ -20,5 +20,4 @@ import org.springframework.boot.test.context.SpringBootTest
 class ProviderServerTest {
     @Test
     fun contextLoads() = Unit
-
 }
