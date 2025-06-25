@@ -16,7 +16,6 @@ package me.ahoo.coapi.example.provider
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-
 @SpringBootApplication
 class ProviderServer
 

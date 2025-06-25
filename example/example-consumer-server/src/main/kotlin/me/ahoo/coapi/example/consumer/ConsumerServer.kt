@@ -13,7 +13,6 @@
 
 package me.ahoo.coapi.example.consumer
 
-
 import me.ahoo.coapi.example.consumer.client.GitHubApiClient
 import me.ahoo.coapi.example.consumer.client.ServiceApiClient
 import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterBeanName
