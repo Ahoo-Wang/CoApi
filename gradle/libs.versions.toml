@@ -5,7 +5,7 @@ spring-cloud = "2025.0.0"
 kotlin-logging = "7.0.7"
 junit = "5.13.3"
 fluent-assert = "0.2.1"
-mockk = "1.14.4"
+mockk = "1.14.5"
 java-jwt = "4.5.0"
 # plugins
 test-retry = "1.6.2"
