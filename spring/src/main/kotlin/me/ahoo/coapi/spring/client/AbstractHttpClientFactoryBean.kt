@@ -15,10 +15,16 @@ package me.ahoo.coapi.spring.client
 
 import me.ahoo.coapi.spring.CoApiDefinition
 import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
 
-interface IHttpClientFactoryBean {
-    val definition: CoApiDefinition
-    val appContext: ApplicationContext
+abstract class AbstractHttpClientFactoryBean : ApplicationContextAware {
+    abstract val definition: CoApiDefinition
+
+    lateinit var appContext: ApplicationContext
+
+    override fun setApplicationContext(applicationContext: ApplicationContext) {
+        this.appContext = applicationContext
+    }
 
     fun getBaseUrlFromProperties(): String {
         val clientProperties = appContext.getBean(ClientProperties::class.java)
