@@ -123,6 +123,10 @@ data class MockClientProperties(
         return ""
     }
 
+    override fun getLoadBalanced(coApiName: String): Boolean? {
+        return null
+    }
+
     override fun getFilter(coApiName: String): ClientProperties.FilterDefinition {
         return filter[coApiName] ?: ClientProperties.FilterDefinition()
     }

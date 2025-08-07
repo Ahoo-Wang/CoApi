@@ -20,15 +20,32 @@ interface IHttpClientFactoryBean {
     val definition: CoApiDefinition
     val appContext: ApplicationContext
 
-    fun getBaseUrl(): String {
+    fun getBaseUrlFromProperties(): String {
         val clientProperties = appContext.getBean(ClientProperties::class.java)
-        return clientProperties.getBaseUri(definition.name).ifBlank {
+        return clientProperties.getBaseUri(definition.name)
+    }
+
+    fun getLoadBalancedFromProperties(): Boolean? {
+        val clientProperties = appContext.getBean(ClientProperties::class.java)
+        return clientProperties.getLoadBalanced(definition.name)
+    }
+
+    fun getBaseUrl(): String {
+        return getBaseUrlFromProperties().ifBlank {
             definition.baseUrl
         }
     }
 
+    @Suppress("ReturnCount")
     fun loadBalanced(): Boolean {
-        val clientProperties = appContext.getBean(ClientProperties::class.java)
-        return clientProperties.getLoadBalanced(definition.name) ?: definition.loadBalanced
+        val loadBalancedFromProperties = getLoadBalancedFromProperties()
+        if (loadBalancedFromProperties != null) {
+            return true
+        }
+        val baseUrlFromProperties = getBaseUrlFromProperties()
+        if (baseUrlFromProperties.isNotBlank()) {
+            return false
+        }
+        return definition.loadBalanced
     }
 }
