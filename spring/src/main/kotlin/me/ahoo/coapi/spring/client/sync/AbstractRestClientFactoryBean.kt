@@ -14,20 +14,15 @@
 package me.ahoo.coapi.spring.client.sync
 
 import me.ahoo.coapi.spring.CoApiDefinition
+import me.ahoo.coapi.spring.client.AbstractHttpClientFactoryBean
 import me.ahoo.coapi.spring.client.ClientProperties
-import me.ahoo.coapi.spring.client.IHttpClientFactoryBean
 import org.springframework.beans.factory.FactoryBean
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 
 abstract class AbstractRestClientFactoryBean(override val definition: CoApiDefinition) :
-    IHttpClientFactoryBean,
-    FactoryBean<RestClient>,
-    ApplicationContextAware {
-
-    override lateinit var appContext: ApplicationContext
+    AbstractHttpClientFactoryBean(),
+    FactoryBean<RestClient> {
 
     protected open val builderCustomizer: RestClientBuilderCustomizer = RestClientBuilderCustomizer.NoOp
 
@@ -52,7 +47,7 @@ abstract class AbstractRestClientFactoryBean(override val definition: CoApiDefin
     }
 
     private fun ClientProperties.InterceptorDefinition.initInterceptors(
-        interceptors: MutableList<ClientHttpRequestInterceptor>
+        interceptors: MutableList<ClientHttpRequestInterceptor>,
     ) {
         names.forEach { filterName ->
             val filter = appContext.getBean(filterName, ClientHttpRequestInterceptor::class.java)
@@ -66,9 +61,5 @@ abstract class AbstractRestClientFactoryBean(override val definition: CoApiDefin
 
     override fun getObjectType(): Class<*> {
         return RestClient::class.java
-    }
-
-    override fun setApplicationContext(applicationContext: ApplicationContext) {
-        this.appContext = applicationContext
     }
 }
