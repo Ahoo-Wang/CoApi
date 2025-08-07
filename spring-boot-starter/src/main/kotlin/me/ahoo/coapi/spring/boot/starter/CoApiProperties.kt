@@ -36,6 +36,10 @@ data class CoApiProperties(
         return clients[coApiName]?.baseUrl.orEmpty()
     }
 
+    override fun getLoadBalanced(coApiName: String): Boolean? {
+        return clients[coApiName]?.loadBalanced
+    }
+
     override fun getFilter(coApiName: String): ClientProperties.FilterDefinition {
         return clients[coApiName]?.reactive?.filter ?: ClientProperties.FilterDefinition()
     }
@@ -47,14 +51,15 @@ data class CoApiProperties(
 
 data class ClientDefinition(
     var baseUrl: String = "",
+    var loadBalanced: Boolean? = null,
     var reactive: ReactiveClientDefinition = ReactiveClientDefinition(),
-    var sync: SyncClientDefinition = SyncClientDefinition()
+    var sync: SyncClientDefinition = SyncClientDefinition(),
 )
 
 data class ReactiveClientDefinition(
-    var filter: ClientProperties.FilterDefinition = ClientProperties.FilterDefinition()
+    var filter: ClientProperties.FilterDefinition = ClientProperties.FilterDefinition(),
 )
 
 data class SyncClientDefinition(
-    var interceptor: ClientProperties.InterceptorDefinition = ClientProperties.InterceptorDefinition()
+    var interceptor: ClientProperties.InterceptorDefinition = ClientProperties.InterceptorDefinition(),
 )
