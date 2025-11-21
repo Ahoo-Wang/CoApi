@@ -24,7 +24,7 @@ plugins {
 dependencies {
     kapt(platform(project(":dependencies")))
     api(project(":spring"))
-    "reactiveSupportImplementation"("org.springframework:spring-webflux")
+    "reactiveSupportImplementation"("org.springframework.boot:spring-boot-webclient")
     api("org.springframework.boot:spring-boot-starter")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
     kapt("org.springframework.boot:spring-boot-autoconfigure-processor")

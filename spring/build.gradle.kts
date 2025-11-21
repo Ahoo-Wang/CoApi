@@ -31,7 +31,7 @@ dependencies {
     api("org.springframework:spring-context")
     api("org.springframework:spring-web")
     implementation("io.github.oshai:kotlin-logging-jvm")
-    "reactiveSupportImplementation"("org.springframework:spring-webflux")
+    "reactiveSupportImplementation"("org.springframework.boot:spring-boot-webclient")
     "lbSupportImplementation"("org.springframework.cloud:spring-cloud-commons")
     "jwtSupportImplementation"(libs.java.jwt)
     testImplementation("io.projectreactor:reactor-test")

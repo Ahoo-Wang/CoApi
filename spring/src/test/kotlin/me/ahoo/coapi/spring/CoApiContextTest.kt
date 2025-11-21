@@ -26,8 +26,8 @@ import me.ahoo.coapi.spring.client.sync.RestClientBuilderCustomizer
 import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
 import org.assertj.core.api.AssertionsForInterfaceTypes
 import org.junit.jupiter.api.Test
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
+import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration
 import org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
 import org.springframework.web.client.RestClient
