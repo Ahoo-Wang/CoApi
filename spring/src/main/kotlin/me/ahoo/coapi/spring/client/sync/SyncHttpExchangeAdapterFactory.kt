@@ -15,13 +15,14 @@ package me.ahoo.coapi.spring.client.sync
 
 import me.ahoo.coapi.spring.HttpExchangeAdapterFactory
 import org.springframework.beans.factory.BeanFactory
+import org.springframework.beans.factory.getBean
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.support.RestClientAdapter
 import org.springframework.web.service.invoker.HttpExchangeAdapter
 
 class SyncHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
     override fun create(beanFactory: BeanFactory, httpClientName: String): HttpExchangeAdapter {
-        val httpClient = beanFactory.getBean(httpClientName, RestClient::class.java)
+        val httpClient = beanFactory.getBean<RestClient>(httpClientName)
         return RestClientAdapter.create(httpClient)
     }
 }

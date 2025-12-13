@@ -17,6 +17,7 @@ import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.client.AbstractHttpClientFactoryBean
 import me.ahoo.coapi.spring.client.ClientProperties
 import org.springframework.beans.factory.FactoryBean
+import org.springframework.beans.factory.getBean
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 
@@ -28,8 +29,8 @@ abstract class AbstractRestClientFactoryBean(override val definition: CoApiDefin
 
     override fun getObject(): RestClient {
         val clientBuilder = appContext
-            .getBean(RestClient.Builder::class.java)
-        val clientProperties = appContext.getBean(ClientProperties::class.java)
+            .getBean<RestClient.Builder>()
+        val clientProperties = appContext.getBean<ClientProperties>()
         val baseUrl = getBaseUrl()
         clientBuilder.baseUrl(baseUrl)
 
