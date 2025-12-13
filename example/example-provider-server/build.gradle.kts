@@ -32,7 +32,7 @@ dependencies {
     implementation("io.netty:netty-all")
     implementation(project(":example-provider-api"))
     implementation(project(":spring-boot-starter"))
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")

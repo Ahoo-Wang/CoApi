@@ -28,8 +28,10 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.notNullValue
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.getBean
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration
 import org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor
@@ -66,10 +68,10 @@ class CoApiAutoConfigurationTest {
                 val coApiProperties = context.getBean(CoApiProperties::class.java)
                 assertThat(coApiProperties.mode, equalTo(ClientMode.AUTO))
                 assertThat(coApiProperties.clients["ServiceApiClientUseFilterBeanName"], notNullValue())
-                context.getBean(GitHubApiClient::class.java)
-                context.getBean(ServiceApiClient::class.java)
-                context.getBean(ServiceApiClientUseFilterBeanName::class.java)
-                context.getBean(ServiceApiClientUseFilterType::class.java)
+                context.getBean<GitHubApiClient>()
+                context.getBean<ServiceApiClient>()
+                context.getBean<ServiceApiClientUseFilterBeanName>()
+                context.getBean<ServiceApiClientUseFilterType>()
             }
     }
 
@@ -81,6 +83,7 @@ class CoApiAutoConfigurationTest {
             .withPropertyValues(interceptorNameProperty)
             .withPropertyValues(interceptorTypeProperty)
             .withBean("loadBalancerInterceptor", LoadBalancerInterceptor::class.java, { mockk() })
+            .withUserConfiguration(RestClientAutoConfiguration::class.java)
             .withUserConfiguration(EnableCoApiConfiguration::class.java)
             .withUserConfiguration(CoApiAutoConfiguration::class.java)
             .run { context ->
@@ -88,12 +91,12 @@ class CoApiAutoConfigurationTest {
                     .hasSingleBean(SyncHttpExchangeAdapterFactory::class.java)
                     .hasSingleBean(GitHubApiClient::class.java)
                     .hasSingleBean(ServiceApiClient::class.java)
-                val coApiProperties = context.getBean(CoApiProperties::class.java)
+                val coApiProperties = context.getBean<CoApiProperties>()
                 assertThat(coApiProperties.mode, equalTo(ClientMode.SYNC))
-                context.getBean(GitHubApiClient::class.java)
-                context.getBean(ServiceApiClient::class.java)
-                context.getBean(ServiceApiClientUseFilterBeanName::class.java)
-                context.getBean(ServiceApiClientUseFilterType::class.java)
+                context.getBean<GitHubApiClient>()
+                context.getBean<ServiceApiClient>()
+                context.getBean<ServiceApiClientUseFilterBeanName>()
+                context.getBean<ServiceApiClientUseFilterType>()
             }
     }
 

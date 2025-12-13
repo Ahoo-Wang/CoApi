@@ -18,6 +18,7 @@ import me.ahoo.coapi.spring.AbstractCoApiRegistrar
 import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.CoApiDefinition.Companion.toCoApiDefinition
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition
+import org.springframework.beans.factory.getBeanProvider
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
 import org.springframework.core.env.Environment
@@ -53,7 +54,7 @@ class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
     }
 
     override fun getCoApiDefinitions(importingClassMetadata: AnnotationMetadata): Set<CoApiDefinition> {
-        val beanProvider = appContext.getBeanProvider(CoApiDefinition::class.java).toList()
+        val beanProvider = appContext.getBeanProvider<CoApiDefinition>().toList()
         val scanBasePackages = getScanBasePackages()
         return scanBasePackages.toApiClientDefinitions() + beanProvider
     }

@@ -15,6 +15,10 @@ java {
         usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
         capability(group.toString(), "reactive-support", version.toString())
     }
+    registerFeature("syncSupport") {
+        usingSourceSet(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME])
+        capability(group.toString(), "sync-support", version.toString())
+    }
 }
 
 plugins {
@@ -25,6 +29,7 @@ dependencies {
     kapt(platform(project(":dependencies")))
     api(project(":spring"))
     "reactiveSupportImplementation"("org.springframework.boot:spring-boot-webclient")
+    "syncSupportImplementation"("org.springframework.boot:spring-boot-restclient")
     api("org.springframework.boot:spring-boot-starter")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
     kapt("org.springframework.boot:spring-boot-autoconfigure-processor")

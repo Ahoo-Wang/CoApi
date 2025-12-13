@@ -15,13 +15,14 @@ package me.ahoo.coapi.spring.client.reactive
 
 import me.ahoo.coapi.spring.HttpExchangeAdapterFactory
 import org.springframework.beans.factory.BeanFactory
+import org.springframework.beans.factory.getBean
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.support.WebClientAdapter
 import org.springframework.web.service.invoker.HttpExchangeAdapter
 
 class ReactiveHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
     override fun create(beanFactory: BeanFactory, httpClientName: String): HttpExchangeAdapter {
-        val httpClient = beanFactory.getBean(httpClientName, WebClient::class.java)
+        val httpClient = beanFactory.getBean<WebClient>(httpClientName)
         return WebClientAdapter.create(httpClient)
     }
 }
