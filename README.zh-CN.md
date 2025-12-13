@@ -23,6 +23,12 @@
 
 **CoApi** 应运而生，它提供了类似于 *Spring Cloud OpenFeign* 的零样板代码自动配置的支持，同时支持响应式编程模型和同步编程模型。开发者只需定义接口，即可轻松使用。
 
+## Spring Boot 版本兼容性
+
+> **CoApi 1.x** 支持 Spring Boot 3.2.x
+>
+> **CoApi 2.x** 支持 Spring Boot 4.x
+
 ## 安装
 
 > 使用 *Gradle(Kotlin)* 安装依赖

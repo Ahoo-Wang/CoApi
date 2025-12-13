@@ -28,6 +28,12 @@ actively maintained and does not support Spring Boot 3.2.x.
 support for both reactive and synchronous programming models. Developers only need to define the interface, and it is
 easy to use.
 
+## Spring Boot Version Compatibility
+
+> **CoApi 1.x** supports Spring Boot 3.2.x
+> 
+> **CoApi 2.x** supports Spring Boot 4.x
+
 ## Installation
 
 > Use *Gradle(Kotlin)* to install dependencies
