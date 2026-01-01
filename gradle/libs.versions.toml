@@ -2,7 +2,7 @@
 # libraries
 spring-boot = "4.0.1"
 spring-cloud = "2025.1.0"
-kotlin-logging = "7.0.13"
+kotlin-logging = "7.0.14"
 junit = "6.0.1"
 fluent-assert = "0.2.6"
 mockk = "1.14.7"
