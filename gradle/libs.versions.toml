@@ -3,7 +3,7 @@
 spring-boot = "4.0.1"
 spring-cloud = "2025.1.0"
 kotlin-logging = "7.0.14"
-junit = "6.0.1"
+junit = "6.0.2"
 fluent-assert = "0.2.6"
 mockk = "1.14.7"
 java-jwt = "4.5.0"
