@@ -1,7 +1,7 @@
 [versions]
 # libraries
 spring-boot = "4.0.2"
-spring-cloud = "2025.1.0"
+spring-cloud = "2025.1.1"
 kotlin-logging = "7.0.14"
 junit = "6.0.2"
 fluent-assert = "0.2.6"
