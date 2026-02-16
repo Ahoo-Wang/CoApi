@@ -6,7 +6,7 @@ kotlin-logging = "7.0.14"
 junit = "6.0.3"
 fluent-assert = "0.2.6"
 mockk = "1.14.9"
-java-jwt = "4.5.0"
+java-jwt = "4.5.1"
 # plugins
 test-retry = "1.6.4"
 detekt = "1.23.8"
