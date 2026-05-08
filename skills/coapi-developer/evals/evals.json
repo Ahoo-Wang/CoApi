@@ -1,0 +1,23 @@
+{
+  "skill_name": "coapi-developer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to create a CoApi client for the JSONPlaceholder API (https://jsonplaceholder.typicode.com). It should have endpoints to get all posts, get a post by ID, and create a new post. I want to use the reactive programming model with Flux/Mono. Generate the interface and data classes, plus the application.yml config.",
+      "expected_output": "A Kotlin interface with @CoApi annotation, @HttpExchange methods for GET /posts, GET /posts/{id}, POST /posts, data classes for Post, and application.yml with the base URL config.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I have a microservice architecture with a user-service registered in Consul. I want to create a CoApi client that uses Spring Cloud LoadBalancer to call user-service. The client should have endpoints for getUser(id) and listUsers(). Show me the full setup including dependencies, the client interface, and the application.yml configuration for both reactive and sync modes.",
+      "expected_output": "Gradle dependencies (coapi-spring-boot-starter, spring-cloud-starter-loadbalancer), @CoApi interface with serviceId, application.yml with coapi.mode and per-client filter/interceptor config.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I'm writing tests for my CoApi client that calls an external weather API. I want to use ApplicationContextRunner to verify the client bean is registered correctly, and also write a Spring Boot integration test that actually calls the API. Show me both test patterns using the project's testing conventions (fluent-assert, JUnit 5).",
+      "expected_output": "Two test classes: one using ApplicationContextRunner for unit-level bean verification, one using @SpringBootTest for integration testing. Both should follow the project's conventions with fluent-assert (.assert()) and proper test structure.",
+      "files": []
+    }
+  ]
+}
