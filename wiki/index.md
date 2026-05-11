@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: "CoApi"
-  text: "Zero-boilerplate HTTP Client for Spring 6"
-  tagline: Define an interface, add annotations, done. Supports reactive and sync modes with built-in client-side load balancing.
+  text: "Zero-boilerplate HTTP Clients for Spring 6"
+  tagline: Define an interface, annotate it, done. Reactive & synchronous, with client-side load balancing.
   actions:
     - theme: brand
       text: Quick Start
@@ -18,22 +18,22 @@ hero:
 
 features:
   - title: "@CoApi Annotation"
-    details: Mark any interface with @CoApi — CoApi auto-configures HTTP client, proxy bean, and all supporting infrastructure. Zero boilerplate.
+    details: Mark any interface with @CoApi — CoApi auto-configures the HTTP client, proxy bean, and all supporting infrastructure. Zero boilerplate.
     link: /deep-dive/annotations
-  - title: "Reactive & Sync"
-    details: Switch between WebClient (reactive) and RestClient (sync) with a single property. Or let CoApi auto-infer from classpath.
+  - title: "Reactive & Synchronous"
+    details: Switch between WebClient (reactive) and RestClient (synchronous) with a single property. Or let CoApi infer from your classpath.
     link: /deep-dive/client-modes
-  - title: "Client-side Load Balancing"
-    details: Integrated with Spring Cloud LoadBalancer. Use serviceId or lb:// protocol for automatic instance selection between microservices.
+  - title: "Client-Side Load Balancing"
+    details: Integrated with Spring Cloud LoadBalancer. Use serviceId or lb:// protocol for automatic instance selection across microservices.
     link: /deep-dive/load-balancing
-  - title: "Spring Boot Auto-configuration"
-    details: Add starter dependency, @CoApi interfaces are auto-discovered via classpath scanning. No manual configuration needed.
+  - title: "Spring Boot Auto-Configuration"
+    details: Add the starter dependency and @CoApi interfaces are auto-discovered via classpath scanning. No manual setup required.
     link: /deep-dive/auto-configuration
   - title: "Customizable SPI"
-    details: Hook into client creation via WebClientBuilderCustomizer or RestClientBuilderCustomizer. Configure filters, interceptors, and connection pools per client.
+    details: Hook into client creation with WebClientBuilderCustomizer or RestClientBuilderCustomizer. Configure filters, interceptors, and connection pools per client.
     link: /deep-dive/customization
-  - title: "Built-in Authentication"
-    details: BearerTokenFilter with JWT-aware reactive token caching. Tokens fetched once, cached, and auto-refreshed on expiration.
+  - title: "Built-in Auth"
+    details: BearerTokenFilter with JWT-aware reactive token caching. Token is fetched once, cached, and automatically refreshed on expiry.
     link: /deep-dive/authentication
 ---
 

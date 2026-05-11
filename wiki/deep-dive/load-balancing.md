@@ -3,27 +3,27 @@ title: Client-Side Load Balancing
 description: Deep dive into CoApi's client-side load balancing — annotation-driven configuration, lb:// protocol, Spring Cloud LoadBalancer integration, and filter/interceptor chains.
 ---
 
-# 客户端负载均衡
+# Client-Side Load Balancing
 
-## 概述
+## Overview
 
-在微服务架构中，服务需要调用其他服务而无需硬编码主机名。CoApi 与 Spring Cloud LoadBalancer 集成，提供客户端负载均衡：HTTP 客户端本身选择调用哪个服务实例。这消除了对外部负载均衡器的需求，并让应用程序直接控制实例选择、重试和断路。
+In microservice architectures, services need to call other services without hardcoding hostnames. CoApi integrates with Spring Cloud LoadBalancer to provide client-side load balancing: the HTTP client itself selects which service instance to call. This eliminates the need for an external load balancer and gives the application direct control over instance selection, retries, and circuit breaking.
 
-CoApi 提供了三种选择负载均衡的方式，都解析为相同的机制：`LoadBalancedExchangeFilterFunction`（响应式）或 `LoadBalancerInterceptor`（同步）被添加到 HTTP 客户端的过滤器/拦截器链中。
+CoApi provides three ways to opt into load balancing, all resolving to the same mechanism: a `LoadBalancedExchangeFilterFunction` (reactive) or `LoadBalancerInterceptor` (sync) is added to the HTTP client's filter/interceptor chain.
 
-## 一览
+## At a Glance
 
-| 机制 | 注解 | 解析后的 URL | 负载均衡 | 来源 |
+| Mechanism | Annotation | Resolved URL | Load Balanced | Source |
 |-----------|-----------|--------------|---------------|--------|
-| 服务 ID | `@CoApi(serviceId = "svc")` | `http://svc` | 是 | [CoApi.kt:46](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L46) |
-| LB 协议 | `@CoApi(baseUrl = "lb://svc")` | `http://svc` | 是 | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
-| 注解 | `@CoApi @LoadBalanced` | 空 | 是 | [LoadBalanced.kt:17](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
-| 属性 | `coapi.clients.<name>.load-balanced=true` | 按属性 | 是 | [CoApiProperties.kt:54](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
-| 直接 URL | `@CoApi(baseUrl = "http://...")` | 按指定 | 否 | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| Service ID | `@CoApi(serviceId = "svc")` | `http://svc` | Yes | [CoApi.kt:46](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L46) |
+| LB Protocol | `@CoApi(baseUrl = "lb://svc")` | `http://svc` | Yes | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| Annotation | `@CoApi @LoadBalanced` | Empty | Yes | [LoadBalanced.kt:17](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
+| Properties | `coapi.clients.<name>.load-balanced=true` | Per properties | Yes | [CoApiProperties.kt:54](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
+| Direct URL | `@CoApi(baseUrl = "http://...")` | As specified | No | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
 
-## URL 解析流程
+## URL Resolution Flow
 
-当 `toCoApiDefinition()` 解析注解时，它会解析基础 URL 并确定负载均衡：
+When `toCoApiDefinition()` parses the annotation, it resolves the base URL and determines load balancing:
 
 ```mermaid
 flowchart TD
@@ -48,18 +48,18 @@ flowchart TD
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt:70-97, api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt:17 -->
 
-[CoApiDefinition.kt:70-97](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L70-L97) 中的解析逻辑：
+The resolution logic in [CoApiDefinition.kt:70-97](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L70-L97):
 
-| 输入 | 解析后的 URL | loadBalanced |
+| Input | Resolved URL | loadBalanced |
 |-------|-------------|--------------|
 | `@CoApi(baseUrl = "lb://order-service")` | `http://order-service` | `true` |
 | `@CoApi(serviceId = "order-service")` | `http://order-service` | `true` |
-| `@CoApi @LoadBalanced` | `""` (空) | `true` |
-| `@CoApi(baseUrl = "\${github.url}")` | 解析后的值 | `false` |
+| `@CoApi @LoadBalanced` | `""` (empty) | `true` |
+| `@CoApi(baseUrl = "\${github.url}")` | resolved value | `false` |
 
-## 运行时负载均衡决策
+## Runtime Load Balancing Decision
 
-在 bean 创建时，`AbstractHttpClientFactoryBean.loadBalanced()` 应用优先级顺序：
+At bean creation time, `AbstractHttpClientFactoryBean.loadBalanced()` applies a precedence order:
 
 ```mermaid
 sequenceDiagram
@@ -83,17 +83,17 @@ sequenceDiagram
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt:42-56 -->
 
-**优先级**（[AbstractHttpClientFactoryBean.kt:42-56](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt#L42-L56)）：
+**Precedence** ([AbstractHttpClientFactoryBean.kt:42-56](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt#L42-L56)):
 
-| 优先级 | 来源 | 效果 |
+| Priority | Source | Effect |
 |----------|--------|--------|
-| 1（最高） | `coapi.clients.<name>.load-balanced` | 覆盖为 `true` |
-| 2 | `coapi.clients.<name>.base-url`（非空） | 强制非负载均衡 |
-| 3（最低） | `@CoApi` / `@LoadBalanced` 注解 | 注解的默认值 |
+| 1 (highest) | `coapi.clients.<name>.load-balanced` | Override to `true` |
+| 2 | `coapi.clients.<name>.base-url` (non-blank) | Forces non-load-balanced |
+| 3 (lowest) | `@CoApi` / `@LoadBalanced` annotation | Default from annotation |
 
-## WebClient 负载均衡
+## WebClient Load Balancing
 
-对于响应式堆栈，[WebClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) 添加 `LoadBalancedExchangeFilterFunction`：
+For the reactive stack, [WebClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) adds `LoadBalancedExchangeFilterFunction`:
 
 ```mermaid
 sequenceDiagram
@@ -117,11 +117,11 @@ sequenceDiagram
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:30-43 -->
 
-`LoadBalancedWebClientBuilderCustomizer` 内部类（[WebClientFactoryBean.kt:34-43](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L34-L43)）在添加前检查重复项，确保幂等性。
+The `LoadBalancedWebClientBuilderCustomizer` inner class ([WebClientFactoryBean.kt:34-43](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L34-L43)) checks for duplicates before adding, ensuring idempotency.
 
-## RestClient 负载均衡
+## RestClient Load Balancing
 
-对于同步堆栈，[RestClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) 添加 `LoadBalancerInterceptor`：
+For the synchronous stack, [RestClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) adds `LoadBalancerInterceptor`:
 
 ```mermaid
 sequenceDiagram
@@ -145,9 +145,9 @@ sequenceDiagram
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:30-43 -->
 
-## 每个客户端的过滤器和拦截器配置
+## Per-Client Filter & Interceptor Configuration
 
-除了负载均衡外，CoApi 还支持通过 YAML 属性配置每个客户端的过滤器/拦截器链：
+Beyond load balancing, CoApi supports per-client filter/interceptor chains via YAML properties:
 
 ```yaml
 coapi:
@@ -164,18 +164,18 @@ coapi:
             - org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
 ```
 
-| 属性 | 类型 | 适用于 | 来源 |
+| Property | Type | Applies To | Source |
 |----------|------|-----------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | Bean 名称 | WebClient（响应式） | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.reactive.filter.types` | 类类型 | WebClient（响应式） | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.sync.interceptor.names` | Bean 名称 | RestClient（同步） | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
-| `coapi.clients.<name>.sync.interceptor.types` | 类类型 | RestClient（同步） | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
+| `coapi.clients.<name>.reactive.filter.names` | Bean names | WebClient (reactive) | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
+| `coapi.clients.<name>.reactive.filter.types` | Class types | WebClient (reactive) | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
+| `coapi.clients.<name>.sync.interceptor.names` | Bean names | RestClient (sync) | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
+| `coapi.clients.<name>.sync.interceptor.types` | Class types | RestClient (sync) | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
 
-[AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) 中的过滤器解析从 `ApplicationContext` 解析 bean 名称和类型。
+Filter resolution in [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) resolves bean names and types from `ApplicationContext`.
 
-## 服务发现配置
+## Service Discovery Configuration
 
-CoApi 与任何 Spring Cloud `DiscoveryClient` 配合工作。开发环境的简单内存配置：
+CoApi works with any Spring Cloud `DiscoveryClient`. A simple in-memory configuration for development:
 
 ```yaml
 spring:
@@ -193,22 +193,22 @@ spring:
                 port: 8010
 ```
 
-## 需求
+## Requirements
 
-| 需求 | 如何实现 |
+| Requirement | How |
 |-------------|-----|
-| 类路径上有 `spring-cloud-starter-loadbalancer` | Gradle/Maven 依赖 |
-| 服务实例已注册 | Spring Cloud DiscoveryClient 或 SimpleDiscoveryClient |
-| CoApi 中启用了负载均衡 | `serviceId`、`lb://`、`@LoadBalanced` 或属性 |
+| `spring-cloud-starter-loadbalancer` on classpath | Gradle/Maven dependency |
+| Service instances registered | Spring Cloud DiscoveryClient or SimpleDiscoveryClient |
+| Load balancing enabled in CoApi | `serviceId`, `lb://`, `@LoadBalanced`, or property |
 
-## 相关页面
+## Related Pages
 
-- [注解（@CoApi, @LoadBalanced）](./annotations.md) — 注解参数和 URL 解析
-- [客户端模式（响应式和同步）](./client-modes.md) — WebClient 与 RestClient 内部原理
-- [自定义和扩展](./customization.md) — 自定义 SPI 和过滤器链
-- [配置参考](../getting-started/configuration.md) — 所有 YAML 属性
+- [Annotations (@CoApi, @LoadBalanced)](./annotations.md) — annotation parameters and URL resolution
+- [Client Modes (Reactive & Sync)](./client-modes.md) — WebClient vs RestClient internals
+- [Customization & Extensibility](./customization.md) — customizer SPI and filter chains
+- [Configuration Reference](../getting-started/configuration.md) — all YAML properties
 
-## 参考资料
+## References
 
 1. [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt`
 2. [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt`

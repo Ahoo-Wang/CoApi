@@ -1,42 +1,42 @@
 ---
-title: 安装与设置
-description: 在 Spring Boot 项目中安装和配置 CoApi 的完整指南，包括依赖管理和模块设置
+title: Installation & Setup
+description: Comprehensive guide for installing and configuring CoApi in your Spring Boot projects with dependency management and module setup
 ---
 
-# 安装与设置
+# Installation & Setup
 
-## 概述
+## Overview
 
-正确安装和配置 CoApi 对于在 Spring Boot 应用程序中发挥其零样板自动配置能力至关重要。本指南提供在响应式和同步编程模型中设置 CoApi 的完整流程，确保与现代 Spring 生态系统的无缝集成，并通过自动化 HTTP 客户端管理最大化开发者生产力。
+Proper installation and configuration of CoApi is essential for leveraging its zero-boilerplate auto-configuration capabilities in Spring Boot applications. This guide provides a comprehensive walkthrough for setting up CoApi with both reactive and synchronous programming models, ensuring seamless integration with modern Spring ecosystems and maximizing developer productivity through automated HTTP client management.
 
-## 一览
+## At-a-Glance
 
-| 组件 | 版本 | 状态 | 描述 |
+| Component | Version | Status | Description |
 |-----------|---------|--------|-------------|
-| **CoApi Core** | 2.0.1 | ✅ 活跃 | 基础 HTTP 接口定义和注解 |
-| **Spring Integration** | 2.0.1 | ✅ 活跃 | Spring 特定自动配置和工具 |
-| **Spring Boot Starter** | 2.0.1 | ✅ 活跃 | 自动配置的 Spring Boot 集成 |
-| **BOM（材料清单）** | 2.0.1 | ✅ 活跃 | 集中式版本管理 |
-| **JDK 要求** | 17+ | ✅ 必需 | 需要 Java 17 或更高版本 |
-| **Spring Boot** | 4.x | ✅ 兼容 | CoApi 2.x 支持 Spring Boot 4.x |
+| **CoApi Core** | 2.0.1 | ✅ Active | Base HTTP interface definitions and annotations |
+| **Spring Integration** | 2.0.1 | ✅ Active | Spring-specific auto-configuration and utilities |
+| **Spring Boot Starter** | 2.0.1 | ✅ Active | Auto-configured Spring Boot integration |
+| **BOM (Bill of Materials)** | 2.0.1 | ✅ Active | Centralized version management |
+| **JDK Requirement** | 17+ | ✅ Required | Java 17 or higher required |
+| **Spring Boot** | 4.x | ✅ Compatible | CoApi 2.x supports Spring Boot 4.x |
 
-## 前置条件
+## Prerequisites
 
-### 系统要求
+### System Requirements
 
-- **Java 开发工具包**：JDK 17 或更高版本
-- **构建工具**：Gradle 8.x 或 Maven 3.8+
-- **Spring Boot**：CoApi 2.x 兼容的 4.x
-- **IDE**：IntelliJ IDEA、Eclipse 或支持 Java 的 VSCode
+- **Java Development Kit**: JDK 17 or higher
+- **Build Tool**: Gradle 8.x or Maven 3.8+
+- **Spring Boot**: 4.x for CoApi 2.x compatibility
+- **IDE**: IntelliJ IDEA, Eclipse, or VSCode with Java support
 
-### Spring Boot 版本兼容性
+### Spring Boot Version Compatibility
 
 > **CoApi 1.x** → Spring Boot 3.2.x  
 > **CoApi 2.x** → Spring Boot 4.x
 
-## 模块架构
+## Module Architecture
 
-CoApi 由几个关键模块组成，共同提供全面的 HTTP 客户端功能：
+CoApi is organized into several key modules that work together to provide comprehensive HTTP client functionality:
 
 ```mermaid
 graph TD
@@ -45,27 +45,27 @@ graph TD
         B --> C[coapi-spring-boot-starter]
         C --> D[coapi-bom]
     end
-
+    
     subgraph "Core Capabilities"
         E[HTTP Interface Annotations] --> A
         F[Auto-Configuration] --> C
         G[Load Balancing] --> B
         H[Authentication] --> B
     end
-
+    
     subgraph "Integration Layer"
         I[Spring Boot Auto-Config] --> C
         J[Spring Cloud LoadBalancer] --> G
         K[JWT Security] --> H
     end
-
+    
 ```
 
-## 依赖管理
+## Dependency Management
 
-### BOM 使用
+### BOM Usage
 
-CoApi BOM（材料清单）提供集中式版本管理：
+The CoApi BOM (Bill of Materials) provides centralized version management:
 
 ```xml
 <!-- pom.xml -->
@@ -84,7 +84,7 @@ CoApi BOM（材料清单）提供集中式版本管理：
 
 ### Gradle Kotlin DSL
 
-使用 CoApi BOM 与 Gradle Kotlin DSL：
+Using the CoApi BOM with Gradle Kotlin DSL:
 
 ```kotlin
 // build.gradle.kts
@@ -94,7 +94,7 @@ dependencies {
 }
 ```
 
-## 模块依赖
+## Module Dependencies
 
 ```mermaid
 graph LR
@@ -103,27 +103,27 @@ graph LR
         B --> C[coapi-spring]
         C --> D[coapi-spring-boot-starter]
     end
-
+    
     subgraph "External Dependencies"
         E[Spring Framework 6] --> B
         F[Spring Boot 4] --> D
         G[Spring Cloud LoadBalancer] --> C
         H[Kotlin Logging] --> C
     end
-
+    
 ```
 
-## 安装说明
+## Installation Instructions
 
 ### Gradle Kotlin DSL
 
-将 CoApi starter 添加到您的依赖中：
+Add the CoApi starter to your dependencies:
 
 ```kotlin
 // build.gradle.kts
 dependencies {
     implementation("me.ahoo.coapi:coapi-spring-boot-starter")
-
+    
     // Optional: Load balancing support
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 }
@@ -135,7 +135,7 @@ dependencies {
 // build.gradle
 dependencies {
     implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
-
+    
     // Optional: Load balancing support
     implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
 }
@@ -151,7 +151,7 @@ dependencies {
         <artifactId>coapi-spring-boot-starter</artifactId>
         <version>2.0.1</version>
     </dependency>
-
+    
     <!-- Optional: Load balancing support -->
     <dependency>
         <groupId>org.springframework.cloud</groupId>
@@ -160,9 +160,9 @@ dependencies {
 </dependencies>
 ```
 
-### BOM 配置
+### BOM Configuration
 
-将 BOM 添加到您的依赖管理中：
+Add the BOM to your dependency management:
 
 ```xml
 <!-- pom.xml -->
@@ -179,9 +179,9 @@ dependencies {
 </dependencyManagement>
 ```
 
-## Gradle Toolchain 配置
+## Gradle Toolchain Configuration
 
-为获得最佳兼容性，在 Gradle 构建中配置 Java 17：
+For optimal compatibility, configure Java 17 in your Gradle build:
 
 ```kotlin
 // build.gradle.kts
@@ -197,7 +197,7 @@ kotlin {
 }
 ```
 
-## 设置流程
+## Setup Process
 
 ```mermaid
 graph TD
@@ -206,36 +206,36 @@ graph TD
     C --> D[Define API Interfaces]
     D --> E[Enable CoApi Configuration]
     E --> F[Test Integration]
-
+    
     subgraph "Prerequisites"
         A1[JDK 17+]
         A2[Gradle/Maven]
         A3[Spring Boot 4.x]
     end
-
+    
     subgraph "Configuration"
         B1[BOM Integration]
         B2[Starter Dependency]
         B3[Optional Dependencies]
     end
-
+    
     subgraph "Integration"
         C1["@EnableCoApi Annotation"]
         C2[Property Configuration]
         C3[Interface Definition]
     end
-
+    
     subgraph "Testing"
         D1[Unit Tests]
         D2[Integration Tests]
         D3[Load Testing]
     end
-
+    
 ```
 
-## 配置示例
+## Configuration Examples
 
-### 基本设置
+### Basic Setup
 
 ```kotlin
 @SpringBootApplication
@@ -251,7 +251,7 @@ public interface GitHubApiClient {
 }
 ```
 
-### 负载均衡设置
+### Load Balancing Setup
 
 ```kotlin
 // Add load balancer dependency
@@ -264,7 +264,7 @@ public interface GitHubApiClient {
 }
 ```
 
-### 配置属性
+### Configuration Properties
 
 ```yaml
 # application.yml
@@ -278,44 +278,44 @@ spring:
         enabled: false
 ```
 
-## 可选依赖
+## Optional Dependencies
 
-### 负载均衡支持
+### Load Balancing Support
 
-为提高分布式系统弹性，包含 Spring Cloud LoadBalancer：
+For distributed system resilience, include the Spring Cloud LoadBalancer:
 
 ```kotlin
 implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 ```
 
-### 响应式 Web 支持
+### Reactive Web Support
 
-如果使用响应式编程模型，包含 Spring WebFlux：
+If using reactive programming models, include Spring WebFlux:
 
 ```kotlin
 implementation("org.springframework.boot:spring-boot-starter-webflux")
 ```
 
-### JWT 认证
+### JWT Authentication
 
-对于基于 JWT 的认证，包含可选的 JWT 支持：
+For JWT-based authentication, include the optional JWT support:
 
 ```kotlin
 implementation("org.springframework.boot:spring-boot-starter-security")
 ```
 
-## 故障排除
+## Troubleshooting
 
-### 常见问题
+### Common Issues
 
-1. **版本兼容性**：确保 CoApi 2.x 与 Spring Boot 4.x 一起使用
-2. **缺少依赖**：验证所有必需依赖都在构建配置中
-3. **自动配置**：确认 `@EnableCoApi` 已正确配置
-4. **Java 版本**：使用 JDK 17+ 以获得最佳兼容性
+1. **Version Compatibility**: Ensure CoApi 2.x is used with Spring Boot 4.x
+2. **Missing Dependencies**: Verify all required dependencies are in the build configuration
+3. **Auto-Configuration**: Confirm `@EnableCoApi` is properly configured
+4. **Java Version**: Use JDK 17+ for optimal compatibility
 
-### 调试模式
+### Debug Mode
 
-启用调试日志以进行故障排除：
+Enable debug logging for troubleshooting:
 
 ```yaml
 # application.yml
@@ -324,30 +324,30 @@ logging:
     me.ahoo.coapi: DEBUG
 ```
 
-## 下一步
+## Next Steps
 
-完成安装后，继续学习：
+After completing the installation, proceed with:
 
-1. [基础使用指南](../usage/basic-usage.md) - 学习如何定义和使用 CoApi 接口
-2. [高级配置](../advanced/configuration.md) - 探索高级配置选项
-3. [示例](../examples/) - 查看实际实现示例
-4. [迁移指南](../migration/) - 从其他 HTTP 客户端框架迁移
+1. [Basic Usage Guide](../usage/basic-usage.md) - Learn how to define and use CoApi interfaces
+2. [Advanced Configuration](../advanced/configuration.md) - Explore advanced configuration options
+3. [Examples](../examples/) - View practical implementation examples
+4. [Migration Guide](../migration/) - Migrate from other HTTP client frameworks
 
-## 参考资料
+## References
 
-| 源文件 | 描述 |
+| Source File | Description |
 |------------|-------------|
-| [gradle.properties:20-21](https://github.com/Ahoo-Wang/CoApi/blob/main/gradle.properties#L20) | Group 和版本配置 |
-| [bom/build.gradle.kts:14-23](https://github.com/Ahoo-Wang/CoApi/blob/main/bom/build.gradle.kts#L14) | BOM 依赖约束 |
-| [dependencies/build.gradle.kts:14-23](https://github.com/Ahoo-Wang/CoApi/blob/main/dependencies/build.gradle.kts#L14) | 依赖管理设置 |
-| [api/build.gradle.kts:14-16](https://github.com/Ahoo-Wang/CoApi/blob/main/api/build.gradle.kts#L14) | 核心 API 模块依赖 |
-| [spring/build.gradle.kts:29-41](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/build.gradle.kts#L29) | Spring 集成依赖 |
-| [spring-boot-starter/build.gradle.kts:28-41](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts#L28) | Spring Boot starter 配置 |
+| [gradle.properties:20-21](https://github.com/Ahoo-Wang/CoApi/blob/main/gradle.properties#L20) | Group and version configuration |
+| [bom/build.gradle.kts:14-23](https://github.com/Ahoo-Wang/CoApi/blob/main/bom/build.gradle.kts#L14) | BOM dependency constraints |
+| [dependencies/build.gradle.kts:14-23](https://github.com/Ahoo-Wang/CoApi/blob/main/dependencies/build.gradle.kts#L14) | Dependency management setup |
+| [api/build.gradle.kts:14-16](https://github.com/Ahoo-Wang/CoApi/blob/main/api/build.gradle.kts#L14) | Core API module dependencies |
+| [spring/build.gradle.kts:29-41](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/build.gradle.kts#L29) | Spring integration dependencies |
+| [spring-boot-starter/build.gradle.kts:28-41](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts#L28) | Spring Boot starter configuration |
 
-## 相关页面
+## Related Pages
 
-- [入门指南](../) - 主要入门指南
-- [快速开始](../quick-start.md) - 5 分钟设置教程
-- [配置](../configuration/) - 详细配置选项
-- [示例](../examples/) - 工作代码示例
-- [常见问题](../faq/) - 常见问题
+- [Getting Started](../) - Main getting started guide
+- [Quick Start](../quick-start.md) - 5-minute setup tutorial
+- [Configuration](../configuration/) - Detailed configuration options
+- [Examples](../examples/) - Working code examples
+- [FAQ](../faq/) - Frequently asked questions

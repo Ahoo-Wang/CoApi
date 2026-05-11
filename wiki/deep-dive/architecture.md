@@ -3,27 +3,27 @@ title: Architecture Overview
 description: Deep dive into CoApi's modular architecture, registration flow, and design patterns
 ---
 
-# 架构概览
+# Architecture Overview
 
-CoApi 的架构旨在提供一个无缝的、类型安全的 HTTP 客户端框架，该框架与 Spring 生态系统深度集成，同时保持对各种部署场景的灵活性。该架构通过提供自动发现、配置管理以及对响应式和同步编程模型的支持，解决了 REST API 客户端开发中的常见挑战。
+CoApi's architecture is designed to provide a seamless, type-safe HTTP client framework that integrates deeply with Spring ecosystem while maintaining flexibility for various deployment scenarios. The architecture addresses the common challenges of REST API client development by providing automatic discovery, configuration management, and support for both reactive and synchronous programming models.
 
-## 概述
+## Overview
 
-CoApi 的存在是为了解决一个根本问题：在 Spring 应用程序中创建类型安全的 HTTP 客户端，而无需通常与手动 HTTP 客户端配置相关的样板代码。通过利用 Spring 的自动配置能力和注解驱动的编程模型，CoApi 降低了与外部服务集成的复杂性，同时提供了企业级特性，如负载均衡、熔断和配置管理。
+CoApi exists to solve the fundamental problem of creating type-safe HTTP clients in Spring applications without the boilerplate code typically associated with manual HTTP client configuration. By leveraging Spring's auto-configuration capabilities and annotation-driven programming model, CoApi reduces the complexity of integrating with external services while providing enterprise-grade features like load balancing, circuit breaking, and configuration management.
 
-该架构遵循模块化设计，将关注点分离到三个主要层：API 层（用于接口定义）、Spring 集成层（用于依赖注入和生命周期管理）以及 Spring Boot 集成层（用于自动配置和合理默认值）。
+The architecture follows a modular design that separates concerns across three main layers: the API layer (for interface definitions), the Spring integration layer (for dependency injection and lifecycle management), and the Spring Boot integration layer (for auto-configuration and sensible defaults).
 
-## 概览一览
+## At-a-Glance
 
-| 组件 | 职责 | 关键特性 | 来源 |
+| Component | Responsibility | Key Features | Source |
 |----------|---------------|---------------|--------|
-| `@CoApi` | 接口定义与配置 | 类型安全的 HTTP 客户端、服务发现、负载均衡 | [CoApi.kt:61](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L61) |
-| `AbstractCoApiRegistrar` | 基础注册逻辑 | 客户端模式推断、工厂注册 | [AbstractCoApiRegistrar.kt:28](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28) |
-| `CoApiRegistrar` | 单个客户端注册 | Bean 定义创建、工厂 Bean 注册 | [CoApiRegistrar.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22) |
-| `CoApiFactoryBean` | 代理创建 | JDK 代理生成、服务代理工厂 | [CoApiFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21) |
-| `HttpClientFactoryBean` | HTTP 客户端配置 | WebClient/RestClient 创建、过滤器应用 | [WebClientFactoryBean.kt:20](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L20) |
+| `@CoApi` | Interface definition and configuration | Type-safe HTTP clients, service discovery, load balancing | [CoApi.kt:61](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L61) |
+| `AbstractCoApiRegistrar` | Base registration logic | Client mode inference, factory registration | [AbstractCoApiRegistrar.kt:28](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28) |
+| `CoApiRegistrar` | Individual client registration | Bean definition creation, factory bean registration | [CoApiRegistrar.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22) |
+| `CoApiFactoryBean` | Proxy creation | JDK proxy generation, service proxy factory | [CoApiFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21) |
+| `HttpClientFactoryBean` | HTTP client configuration | WebClient/RestClient creation, filter application | [WebClientFactoryBean.kt:20](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L20) |
 
-## 模块架构
+## Module Architecture
 
 ```mermaid
 graph TB
@@ -82,9 +82,9 @@ graph TB
     
 ```
 
-## 注册流程
+## Registration Flow
 
-注册过程是 CoApi 架构的核心，它根据注解和配置自动发现和配置 HTTP 客户端。以下序列图展示了完整的注册流程：
+The registration process is the heart of CoApi's architecture, automatically discovering and configuring HTTP clients based on annotations and configuration. This sequence diagram illustrates the complete registration flow:
 
 ```mermaid
 sequenceDiagram
@@ -119,9 +119,9 @@ sequenceDiagram
 
 <!-- Sources: [AutoCoApiRegistrar.kt:28](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt#L28), [AbstractCoApiRegistrar.kt:42](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L42), [CoApiRegistrar.kt:27](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L27), [CoApiFactoryBean.kt:26](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L26), [WebClientFactoryBean.kt:23](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L23) -->
 
-## Bean 生命周期
+## Bean Lifecycle
 
-Spring Bean 的生命周期经过精心管理，以确保正确的初始化和依赖注入：
+The Spring bean lifecycle is carefully managed to ensure proper initialization and dependency injection:
 
 ```mermaid
 sequenceDiagram
@@ -157,9 +157,9 @@ sequenceDiagram
 
 <!-- Sources: [CoApiFactoryBean.kt:40](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L40), [AbstractCoApiRegistrar.kt:52](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L52), [CoApiFactoryBean.kt:26](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L26) -->
 
-## 类图
+## Class Diagram
 
-类层次结构展示了关键组件之间的关系：
+The class hierarchy shows the relationships between key components:
 
 ```mermaid
 classDiagram
@@ -235,9 +235,9 @@ classDiagram
 
 <!-- Sources: [CoApi.kt:63](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L63), [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt), [AbstractCoApiRegistrar.kt:28](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28), [CoApiRegistrar.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22), [CoApiFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21), [WebClientFactoryBean.kt:20](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L20), [RestClientFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt#L21) -->
 
-## 分层架构
+## Layered Architecture
 
-该架构遵循清晰的分层方法，各层职责分明：
+The architecture follows a clean layered approach with clear separation of concerns:
 
 ```mermaid
 graph TD
@@ -283,50 +283,50 @@ graph TD
 
 <!-- Sources: [CoApi.kt:14](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L14), [AbstractCoApiRegistrar.kt:14](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L14), [CoApiRegistrar.kt:14](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L14) -->
 
-## 关键设计模式
+## Key Design Patterns
 
-CoApi 的架构实现了多种设计模式，以确保可维护性和可扩展性：
+CoApi's architecture implements several design patterns to ensure maintainability and extensibility:
 
-### 1. 工厂模式
-工厂 Bean 用于创建复杂的对象，如 HTTP 客户端和代理，并进行正确的配置。
+### 1. Factory Pattern
+Factory beans are used to create complex objects like HTTP clients and proxies with proper configuration.
 
-### 2. 策略模式
-不同的客户端模式（响应式与同步）使用策略模式，配合不同的工厂实现进行处理。
+### 2. Strategy Pattern
+Different client modes (reactive vs sync) are handled using the Strategy pattern with different factory implementations.
 
-### 3. 模板方法模式
-抽象工厂类提供通用功能，同时允许特定的实现。
+### 3. Template Method Pattern
+Abstract factory classes provide common functionality while allowing specific implementations.
 
-### 4. 代理模式
-JDK 代理用于创建委托给 HTTP 客户端的类型安全接口。
+### 4. Proxy Pattern
+JDK proxies are used to create type-safe interfaces that delegate to HTTP clients.
 
-### 5. 建造者模式
-HttpServiceProxyFactory 和客户端构建器使用建造者模式进行流式配置。
+### 5. Builder Pattern
+HttpServiceProxyFactory and client builders use the Builder pattern for fluent configuration.
 
-## 交叉引用
+## Cross-References
 
-- [快速入门](../getting-started/index.md) - CoApi 基础介绍
-- [配置参考](../getting-started/configuration.md) - 完整配置指南
-- [客户端模式](
-- [Spring Boot 集成](.md) - Spring Boot 特定模式
-- [注解](./annotations/annotations.md) - 基于注解的配置
+- [Getting Started](../getting-started/index.md) - Introduction to CoApi basics
+- [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
+- [Client Modes](
+- [Spring Boot Integration](.md) - Spring Boot specific patterns
+- [Annotations](./annotations/annotations.md) - Annotation-based configuration
 
-## 参考文献
+## References
 
-### 源代码文件
+### Source Files
 
-- [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) - 主注解接口
-- [AutoCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt) - 自动配置注册
-- [EnableCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApiRegistrar.kt) - 手动注册
-- [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt) - 基础注册逻辑
-- [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) - 单个客户端注册
-- [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) - 代理创建工厂
-- [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) - 响应式 HTTP 客户端工厂
-- [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) - 同步 HTTP 客户端工厂
+- [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) - Main annotation interface
+- [AutoCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt) - Auto-configuration registration
+- [EnableCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApiRegistrar.kt) - Manual registration
+- [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt) - Base registration logic
+- [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) - Individual client registration
+- [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) - Proxy creation factory
+- [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) - Reactive HTTP client factory
+- [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) - Synchronous HTTP client factory
 
-### 相关页面
+### Related Pages
 
-- [模块架构](
-- [注册流程](
-- [Bean 生命周期](
-- [设计模式](
-- [性能考量](.md) - 性能优化指南
+- [Module Architecture](
+- [Registration Process](
+- [Bean Lifecycle](
+- [Design Patterns](
+- [Performance Considerations](.md) - Performance optimization guidelines

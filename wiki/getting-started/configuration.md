@@ -3,47 +3,47 @@ title: Configuration Reference
 description: Complete reference for CoApi configuration properties, resolution order, and advanced patterns
 ---
 
-# 配置参考
+# Configuration Reference
 
-CoApi 的配置系统旨在提供最大的灵活性，同时保持合理的默认值和清晰的优先级规则。配置采用分层方法，允许全局设置和特定于客户端的覆盖，使开发人员能够跨整个 API 客户端生态系统或针对各个服务自定义行为。
+CoApi's configuration system is designed to provide maximum flexibility while maintaining sensible defaults and clear precedence rules. The configuration follows a hierarchical approach that allows both global settings and client-specific overrides, enabling developers to customize behavior across their entire API client ecosystem or for individual services.
 
-## 概述
+## Overview
 
-CoApi 的配置架构在声明式便利性和程序化控制之间取得平衡。通过支持注解驱动和基于属性的配置，它适应不同的开发风格和部署场景。系统优先考虑显式属性声明，同时为向后兼容性和快速原型设计提供注解回退。
+CoApi's configuration architecture balances declarative convenience with programmatic control. By supporting both annotation-driven and property-based configuration, it accommodates different development styles and deployment scenarios. The system prioritizes explicit property declarations while providing annotation fallbacks for backward compatibility and rapid prototyping.
 
-## 配置属性
+## Configuration Properties
 
-### 全局属性
+### Global Properties
 
-| 属性 | 类型 | 默认 | 描述 | 来源 |
+| Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.enabled` | `Boolean` | `true` | 启用/禁用 CoApi 功能 | [CoApiProperties.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L1) |
-| `coapi.mode` | `ClientMode` | `AUTO` | 全局客户端模式（AUTO、REACTIVE、SYNC） | [CoApiProperties.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L2) |
-| `coapi.base-packages` | `List<String>` | `[]` | 客户端发现的基础包 | [CoApiProperties.kt:3](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L3) |
+| `coapi.enabled` | `Boolean` | `true` | Enable/disable CoApi functionality | [CoApiProperties.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L1) |
+| `coapi.mode` | `ClientMode` | `AUTO` | Global client mode (AUTO, REACTIVE, SYNC) | [CoApiProperties.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L2) |
+| `coapi.base-packages` | `List<String>` | `[]` | Base packages for client discovery | [CoApiProperties.kt:3](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L3) |
 
-### 客户端属性
+### Client Properties
 
-| 属性 | 类型 | 默认 | 描述 | 来源 |
+| Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.base-url` | `String` | `""` | 客户端的基础 URL | [ClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
-| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | 为客户端启用负载均衡 | [ClientDefinition.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.base-url` | `String` | `""` | Base URL for the client | [ClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
+| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | Enable load balancing for the client | [ClientDefinition.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
 
-### 响应式客户端属性
+### Reactive Client Properties
 
-| 属性 | 类型 | 默认 | 描述 | 来源 |
+| Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | `List<String>` | `[]` | 响应式过滤器函数名称 | [ReactiveClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
-| `coapi.clients.<name>.reactive.filter.types` | `List<String>` | `[]` | 响应式过滤器函数类型 | [ReactiveClientDefinition.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.reactive.filter.names` | `List<String>` | `[]` | Reactive filter function names | [ReactiveClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
+| `coapi.clients.<name>.reactive.filter.types` | `List<String>` | `[]` | Reactive filter function types | [ReactiveClientDefinition.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
 
-### 同步客户端属性
+### Sync Client Properties
 
-| 属性 | 类型 | 默认 | 描述 | 来源 |
+| Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.sync.interceptor.names` | `List<String>` | `[]` | 同步拦截器名称 | [SyncClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.sync.interceptor.names` | `List<String>` | `[]` | Sync interceptor names | [SyncClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
 
-## 配置解析流程
+## Configuration Resolution Flow
 
-配置系统遵循严格的优先级顺序以确保可预测的行为：
+The configuration system follows a strict precedence order to ensure predictable behavior:
 
 ```mermaid
 flowchart TD
@@ -52,24 +52,24 @@ flowchart TD
     B -->|No properties baseUrl| D{Check @CoApi Annotation}
     D -->|Has baseUrl| E[Use Annotation baseUrl]
     D -->|No annotation baseUrl| F[Throw Configuration Exception]
-
+    
     A --> G{Check coapi.clients.<name>.load-balanced}
     G -->|Has property| H[Use Properties loadBalanced]
     G -->|No property| I{Check @LoadBalanced Annotation}
     I -->|Has annotation| J[Use Annotation loadBalanced]
     I -->|No annotation| K[Use Default Behavior]
-
+    
     C --> L[Resolve Complete Configuration]
     E --> L
     H --> L
     J --> L
     K --> L
-
+    
 ```
 
-## 属性层次结构
+## Property Hierarchy
 
-配置层次结构决定了不同配置源的合并和优先级：
+The configuration hierarchy determines how different configuration sources are merged and prioritized:
 
 ```mermaid
 graph TD
@@ -78,22 +78,22 @@ graph TD
         B[coapi.mode]
         C[coapi.base-packages]
     end
-
+    
     subgraph "Client Level"
         D[coapi.clients.<name>.base-url]
         E[coapi.clients.<name>.load-balanced]
     end
-
+    
     subgraph "Client Sub-Level"
         F[coapi.clients.<name>.reactive.filter.*]
         G[coapi.clients.<name>.sync.interceptor.*]
     end
-
+    
     subgraph "Annotation Level"
         H["@CoApi(baseUrl)"]
         I["@LoadBalanced"]
     end
-
+    
     A --> D
     B --> D
     C --> D
@@ -103,26 +103,26 @@ graph TD
     E --> G
     H --> D
     I --> E
-
+    
 ```
 
-## 客户端配置示例
+## Client Configuration Example
 
-一个完整的客户端配置示例，显示所有可用选项：
+A complete client configuration example showing all available options:
 
 ```mermaid
 graph TB
     subgraph "Application.yml"
         A["coapi:"]
     end
-
+    
     subgraph "Global Settings"
         B["enabled: true"]
         C["mode: AUTO"]
         D["base-packages:"]
         E[ - com.example.clients]
     end
-
+    
     subgraph "Client Definitions"
         F["clients:"]
         G["GitHubApiClient:"]
@@ -140,7 +140,7 @@ graph TB
         S["names:"]
         T[ - loadBalancerInterceptor]
     end
-
+    
     A --> B
     A --> C
     A --> D
@@ -160,12 +160,12 @@ graph TB
     Q --> R
     R --> S
     S --> T
-
+    
 ```
 
-## 配置解析序列
+## Configuration Resolution Sequence
 
-解析过程遵循明确定义的序列以确保可预测的行为：
+The resolution process follows a well-defined sequence to ensure predictable behavior:
 
 ```mermaid
 sequenceDiagram
@@ -173,9 +173,9 @@ sequenceDiagram
     participant A as Annotations
     participant F as FactoryBean
     participant C as Client Instance
-
+    
     autonumber
-
+    
     F->>P: Check coapi.clients.<name>.base-url
     alt Has property
         P-->>F: Return baseUrl from properties
@@ -187,7 +187,7 @@ sequenceDiagram
             F-->>F: Throw ConfigurationException
         end
     end
-
+    
     F->>P: Check coapi.clients.<name>.load-balanced
     alt Has property
         P-->>F: Return loadBalanced from properties
@@ -199,12 +199,12 @@ sequenceDiagram
             F-->>F: Use default behavior
         end
     end
-
+    
     F->>F: Build ClientDefinition
     F-->>C: Return configured client
 ```
 
-## YAML 配置示例
+## YAML Configuration Example
 
 ```yaml
 coapi:
@@ -229,26 +229,26 @@ coapi:
             - loadBalancerInterceptor
 ```
 
-## 交叉引用
+## Cross-References
 
-- [客户端模式](../concepts/client-modes.md) - 不同客户端操作模式的详细信息
-- [注解配置](../annotations/annotations.md) - 使用注解进行配置
-- [Spring Boot 集成](../integrations/spring-boot.md) - Spring Boot 特定的配置模式
-- [负载均衡](../features/load-balancing.md) - 负载均衡配置和行为
+- [Client Mode](../concepts/client-modes.md) - Details about different client operation modes
+- [Annotation Configuration](../annotations/annotations.md) - Using annotations for configuration
+- [Spring Boot Integration](../integrations/spring-boot.md) - Spring Boot specific configuration patterns
+- [Load Balancing](../features/load-balancing.md) - Load balancing configuration and behavior
 
-## 参考资料
+## References
 
-### 源文件
+### Source Files
 
-- [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt) - 主配置属性类
-- [AbstractHttpClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) - 配置解析逻辑
-- [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) - 客户端配置类
-- [ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) - 客户端模式枚举
-- [ConditionalOnCoApiEnabled.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/ConditionalOnCoApiEnabled.kt) - 条件配置
+- [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt) - Main configuration properties class
+- [AbstractHttpClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) - Configuration resolution logic
+- [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) - Client configuration classes
+- [ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) - Client mode enumeration
+- [ConditionalOnCoApiEnabled.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/ConditionalOnCoApiEnabled.kt) - Conditional configuration
 
-### 相关页面
+### Related Pages
 
-- [入门指南](../getting-started/index.md) - CoApi 基础介绍
-- [配置参考](../getting-started/configuration.md) - 完整配置指南
-- [客户端模式](../concepts/client-modes.md) - 理解客户端操作模式
-- [Spring Boot 集成](../integrations/spring-boot.md) - Spring Boot 特定模式
+- [Getting Started](../getting-started/index.md) - Introduction to CoApi basics
+- [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
+- [Client Mode](../concepts/client-modes.md) - Understanding client operation modes
+- [Spring Boot Integration](../integrations/spring-boot.md) - Spring Boot specific patterns

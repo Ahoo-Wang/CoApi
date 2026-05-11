@@ -3,29 +3,29 @@ title: Authentication
 description: Deep dive into CoApi's authentication mechanisms, token management, and security filters
 ---
 
-# 认证
+# Authentication
 
-CoApi 提供了一个健壮的认证系统，与 Spring WebFlux 响应式编程模型无缝集成。该认证框架支持基于令牌的认证，具有自动缓存和过期管理功能，确保与外部 API 的安全高效通信，同时保持类型安全和响应式原则。
+CoApi provides a robust authentication system that integrates seamlessly with Spring WebFlux reactive programming model. The authentication framework supports token-based authentication with automatic caching and expiry management, ensuring secure and efficient communication with external APIs while maintaining type safety and reactive principles.
 
-## 概述
+## Overview
 
-CoApi 中的认证系统旨在处理现代 API 认证的常见需求，特别是基于 JWT（JSON Web Token）的 Bearer 令牌认证。该框架提供了可复用的组件，可以轻松配置和组合以满足各种认证场景，从简单的静态令牌到具有自动刷新能力的复杂动态令牌提供者。
+The authentication system in CoApi is designed to handle the common requirements of modern API authentication, particularly JWT (JSON Web Token) based authentication with Bearer tokens. The framework provides reusable components that can be easily configured and composed to meet various authentication scenarios, from simple static tokens to complex dynamic token providers with automatic refresh capabilities.
 
-认证层全程利用 Spring WebFlux 的响应式编程模型，确保非阻塞操作和高效的资源利用。该架构遵循模块化设计，令牌提供者、头部映射器和请求过滤器之间职责分明。
+The authentication layer leverages Spring WebFlux's reactive programming model throughout, ensuring non-blocking operation and efficient resource utilization. The architecture follows a modular design with clear separation of concerns between token providers, header mappers, and request filters.
 
-## 概览一览
+## At-a-Glance
 
-| 组件 | 职责 | 关键特性 | 来源 |
+| Component | Responsibility | Key Features | Source |
 |----------|---------------|---------------|--------|
-| `HeaderSetFilter` | 在请求上注入通用头部 | 可配置的头部名称、值提供者、映射器 | [HeaderSetFilter.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt#L22) |
-| `BearerTokenFilter` | Authorization 头部注入 | Bearer 令牌前缀、令牌提供者集成 | [BearerTokenFilter.kt:18](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt#L18) |
-| `ExpirableToken` | 带过期信息的令牌 | JWT 过期检测、基于时间的验证 | [ExpirableToken.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L19) |
-| `ExpirableTokenProvider` | 令牌提供者接口 | 响应式令牌获取、头部值映射 | [ExpirableTokenProvider.kt:33](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L33) |
-| `CachedExpirableTokenProvider` | 缓存令牌提供者 | 响应式缓存、自动过期失效 | [CachedExpirableTokenProvider.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt#L19) |
+| `HeaderSetFilter` | Generic header injection on requests | Configurable header names, value providers, mappers | [HeaderSetFilter.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt#L22) |
+| `BearerTokenFilter` | Authorization header injection | Bearer token prefix, token provider integration | [BearerTokenFilter.kt:18](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt#L18) |
+| `ExpirableToken` | Token with expiration information | JWT expiry detection, time-based validation | [ExpirableToken.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L19) |
+| `ExpirableTokenProvider` | Token provider interface | Reactive token fetching, header value mapping | [ExpirableTokenProvider.kt:33](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L33) |
+| `CachedExpirableTokenProvider` | Cached token provider | Reactive caching, automatic expiry invalidation | [CachedExpirableTokenProvider.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt#L19) |
 
-## 类层次结构
+## Class Hierarchy
 
-认证框架遵循清晰的继承层次结构，各组件职责分明：
+The authentication framework follows a clean inheritance hierarchy with clear responsibilities:
 
 ```mermaid
 classDiagram
@@ -82,9 +82,9 @@ classDiagram
     CachedExpirableTokenProvider --> ExpirableTokenProvider : implements
 ```
 
-## 令牌缓存流程
+## Token Caching Flow
 
-响应式缓存机制在保持线程安全和自动失效的同时，确保高效的令牌管理：
+The reactive caching mechanism ensures efficient token management while maintaining thread safety and automatic invalidation:
 
 ```mermaid
 sequenceDiagram
@@ -119,9 +119,9 @@ sequenceDiagram
     note over C,C: Reactive caching
 ```
 
-## 请求认证流程
+## Request Authentication Flow
 
-完整的认证流程演示了 Bearer 令牌如何自动添加到 HTTP 请求中：
+The complete authentication flow demonstrates how Bearer tokens are automatically added to HTTP requests:
 
 ```mermaid
 sequenceDiagram
@@ -163,9 +163,9 @@ sequenceDiagram
     end
 ```
 
-## JWT 过期检查状态图
+## JWT Expiry Check State Diagram
 
-令牌管理系统通过状态机方式处理 JWT 过期检查：
+The token management system handles JWT expiry checks through a state machine approach:
 
 ```mermaid
 stateDiagram-v2
@@ -185,11 +185,11 @@ stateDiagram-v2
     ValidToken --> [*] : Application shutdown
 ```
 
-## 核心组件
+## Core Components
 
 ### HeaderSetFilter
 
-`HeaderSetFilter` 是一个通用的响应式过滤器，可以在 HTTP 请求上设置任意头部。它遵循 Spring WebFlux 的 `ExchangeFilterFunction` 接口，提供了将头部注入请求的灵活方式。
+The `HeaderSetFilter` is a generic reactive filter that can set any header on HTTP requests. It follows the Spring WebFlux `ExchangeFilterFunction` interface and provides a flexible way to inject headers into requests.
 
 ```kotlin
 open class HeaderSetFilter(
@@ -214,11 +214,11 @@ open class HeaderSetFilter(
 }
 ```
 
-该过滤器首先检查请求中是否已存在该头部，以避免覆盖现有值。如果头部不存在，它从提供者获取头部值，使用配置的映射器进行映射，然后在继续下一个交换函数之前将其设置在请求上。
+The filter first checks if the header already exists in the request to avoid overwriting existing values. If the header is not present, it retrieves the header value from the provider, maps it using the configured mapper, and sets it on the request before proceeding to the next exchange function.
 
 ### BearerTokenFilter
 
-`BearerTokenFilter` 是 `HeaderSetFilter` 的专门版本，专门处理 Bearer 令牌认证。它使用为 `Authorization` 头部和 Bearer 令牌前缀预配置的值扩展了基础过滤器。
+The `BearerTokenFilter` is a specialized version of `HeaderSetFilter` that specifically handles Bearer token authentication. It extends the base filter with pre-configured values for the `Authorization` header and the Bearer token prefix.
 
 ```kotlin
 class BearerTokenFilter(tokenProvider: ExpirableTokenProvider) :
@@ -229,11 +229,11 @@ class BearerTokenFilter(tokenProvider: ExpirableTokenProvider) :
     )
 ```
 
-`BearerHeaderValueMapper` 确保所有令牌值都根据 OAuth 2.0 Bearer 令牌规范添加 "Bearer " 前缀。
+The `BearerHeaderValueMapper` ensures that all token values are prefixed with "Bearer " according to the OAuth 2.0 Bearer Token specification.
 
 ### ExpirableToken
 
-`ExpirableToken` 数据类将令牌字符串与其过期时间戳包装在一起，提供了检查令牌是否过期的便捷方法。
+The `ExpirableToken` data class wraps a token string with its expiration timestamp, providing convenient methods for checking if the token has expired.
 
 ```kotlin
 data class ExpirableToken(val token: String, val expireAt: Long) {
@@ -251,11 +251,11 @@ data class ExpirableToken(val token: String, val expireAt: Long) {
 }
 ```
 
-伴生对象提供了一个便捷的扩展函数，通过解码 JWT 并提取过期时间戳，将 JWT 字符串转换为 `ExpirableToken` 实例。
+The companion object provides a convenient extension function to convert JWT strings to `ExpirableToken` instances by decoding the JWT and extracting the expiration timestamp.
 
 ### CachedExpirableTokenProvider
 
-`CachedExpirableTokenProvider` 使用 Project Reactor 的 `Mono.cacheInvalidateIf` 操作符实现响应式缓存。这提供了线程安全的缓存，当令牌过期时自动失效。
+The `CachedExpirableTokenProvider` implements reactive caching using Project Reactor's `Mono.cacheInvalidateIf` operator. This provides thread-safe caching with automatic invalidation when tokens expire.
 
 ```kotlin
 class CachedExpirableTokenProvider(tokenProvider: ExpirableTokenProvider) : ExpirableTokenProvider {
@@ -271,11 +271,11 @@ class CachedExpirableTokenProvider(tokenProvider: ExpirableTokenProvider) : Expi
 }
 ```
 
-缓存在令牌过期时自动失效并刷新令牌，确保始终使用有效令牌，无需手动干预。
+The cache automatically invalidates and refreshes tokens when they expire, ensuring that always-valid tokens are used without manual intervention.
 
-## 配置示例
+## Configuration Examples
 
-### 基本 Bearer 令牌认证
+### Basic Bearer Token Authentication
 
 ```kotlin
 @Configuration
@@ -302,7 +302,7 @@ class AuthenticationConfig {
 }
 ```
 
-### 带 JWT 解码的动态令牌提供者
+### Dynamic Token Provider with JWT Decoding
 
 ```kotlin
 @Configuration
@@ -333,7 +333,7 @@ class DynamicAuthenticationConfig {
 }
 ```
 
-### WebClient 集成
+### WebClient Integration
 
 ```kotlin
 @Configuration
@@ -353,28 +353,28 @@ class WebClientConfig {
 }
 ```
 
-## 交叉引用
+## Cross-References
 
-- [快速入门](../getting-started/index.md) - CoApi 基础介绍
-- [客户端模式](./client-modes.md) - 了解响应式与同步操作
-- [Spring Boot 集成](.md) - Spring Boot 特定模式
-- [配置参考](../getting-started/configuration.md) - 完整配置指南
-- [注解](./annotations.md) - 基于注解的配置
+- [Getting Started](../getting-started/index.md) - Introduction to CoApi basics
+- [Client Modes](./client-modes.md) - Understanding reactive vs sync operation
+- [Spring Boot Integration](.md) - Spring Boot specific patterns
+- [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
+- [Annotations](./annotations.md) - Annotation-based configuration
 
-## 参考文献
+## References
 
-### 源代码文件
+### Source Files
 
-- [HeaderSetFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt) - 通用头部注入过滤器
-- [BearerTokenFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt) - Bearer 令牌认证过滤器
-- [ExpirableToken.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt) - 支持过期的令牌
-- [CachedExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt) - 响应式缓存实现
-- [BearerHeaderValueMapper.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt) - Bearer 令牌前缀映射
+- [HeaderSetFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt) - Generic header injection filter
+- [BearerTokenFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt) - Bearer token authentication filter
+- [ExpirableToken.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt) - Token with expiration support
+- [CachedExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt) - Reactive caching implementation
+- [BearerHeaderValueMapper.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt) - Bearer token prefix mapping
 
-### 相关页面
+### Related Pages
 
-- [客户端模式](./client-modes.md) - 了解响应式与同步操作
-- [配置参考](../getting-started/configuration.md) - 完整配置指南
-- [Spring Boot 集成](.md) - Spring Boot 特定模式
-- [负载均衡](./load-balancing.md) - 负载均衡集成
-- [架构概览](./architecture.md) - 系统架构与设计
+- [Client Modes](./client-modes.md) - Understanding reactive vs sync operation
+- [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
+- [Spring Boot Integration](.md) - Spring Boot specific patterns
+- [Load Balancing](./load-balancing.md) - Load balancing integration
+- [Architecture Overview](./architecture.md) - System architecture and design

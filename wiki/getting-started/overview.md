@@ -1,58 +1,58 @@
 ---
-title: CoApi 是什么？
-description: CoApi 是一个 Spring 库，为 Spring 6 HTTP Interface 客户端提供零样板自动配置，同时支持响应式和同步编程模型。
+title: What is CoApi?
+description: CoApi is a Spring library providing zero-boilerplate auto-configuration for Spring 6 HTTP Interface clients, supporting both reactive and synchronous programming models.
 ---
 
-# CoApi 是什么？
+# What is CoApi?
 
-## 概述
+## Overview
 
-CoApi 诞生的原因是 Spring 6 引入了 HTTP Interface（`@HttpExchange`），但留下了一个关键缺口：没有自动配置。开发者必须手动连接 `HttpServiceProxyFactory`，在 `WebClient` 和 `RestClient` 之间做出选择，处理 URL 解析，并管理 bean 生命周期。与此同时，Spring Cloud 中事实上的声明式 HTTP 客户端标准 OpenFeign 缺乏响应式编程支持。其推荐的替代品 `feign-reactive` 已停止维护，且与 Spring Boot 3.2+ 不兼容。
+CoApi exists because Spring 6 introduced the HTTP Interface (`@HttpExchange`) but left a critical gap: there is no auto-configuration. Developers must manually wire `HttpServiceProxyFactory`, choose between `WebClient` and `RestClient`, handle URL resolution, and manage bean lifecycles. Meanwhile, OpenFeign — the de facto standard for declarative HTTP clients in Spring Cloud — lacks reactive programming support. Its recommended alternative, `feign-reactive`, is unmaintained and incompatible with Spring Boot 3.2+.
 
-CoApi 通过注解驱动、零样板自动配置填补了这个空白。定义一个接口，用 `@CoApi` 注解标记，CoApi 自动注册 HTTP 客户端 bean、JDK 代理及所有支持基础设施。它通过单一注解同时支持响应式（`WebClient`）和同步（`RestClient`）模型，并通过 Spring Cloud LoadBalancer 集成客户端负载均衡。
+CoApi fills this gap with annotation-driven, zero-boilerplate auto-configuration. Define an interface, annotate it with `@CoApi`, and CoApi automatically registers the HTTP client bean, the JDK proxy, and all supporting infrastructure. It supports both reactive (`WebClient`) and synchronous (`RestClient`) models with a single annotation, and integrates client-side load balancing via Spring Cloud LoadBalancer.
 
-## 一览
+## At a Glance
 
-| 组件 | 职责 | 关键文件 | 源码 |
+| Component | Responsibility | Key File | Source |
 |-----------|----------------|----------|--------|
-| `@CoApi` | 将接口标记为 HTTP 客户端，提供 `baseUrl`/`serviceId`/`name` | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) | [api/src/main/kotlin/.../CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
-| `@LoadBalanced` | 标记接口启用客户端负载均衡 | [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) | [api/src/main/kotlin/.../LoadBalanced.kt:17](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
-| `CoApiDefinition` | 解析后的元数据：name、apiType、baseUrl、loadBalanced | [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) | [spring/src/main/kotlin/.../CoApiDefinition.kt:24](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L24) |
-| `CoApiRegistrar` | 为每个接口注册 WebClient/RestClient + 代理 bean | [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) | [spring/src/main/kotlin/.../CoApiRegistrar.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22) |
-| `CoApiFactoryBean` | 通过 `HttpServiceProxyFactory` 创建 JDK 代理 | [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) | [spring/src/main/kotlin/.../CoApiFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21) |
-| `CoApiAutoConfiguration` | Boot 自动配置入口点 | [CoApiAutoConfiguration.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt) | [spring-boot-starter/.../CoApiAutoConfiguration.kt:24](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt#L24) |
+| `@CoApi` | Marks interfaces as HTTP clients, provides `baseUrl`/`serviceId`/`name` | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) | [api/src/main/kotlin/.../CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| `@LoadBalanced` | Marks interface for client-side load balancing | [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) | [api/src/main/kotlin/.../LoadBalanced.kt:17](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
+| `CoApiDefinition` | Parsed metadata: name, apiType, baseUrl, loadBalanced | [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) | [spring/src/main/kotlin/.../CoApiDefinition.kt:24](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L24) |
+| `CoApiRegistrar` | Registers WebClient/RestClient + proxy beans per interface | [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) | [spring/src/main/kotlin/.../CoApiRegistrar.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22) |
+| `CoApiFactoryBean` | Creates JDK proxy via `HttpServiceProxyFactory` | [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) | [spring/src/main/kotlin/.../CoApiFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21) |
+| `CoApiAutoConfiguration` | Boot auto-configuration entry point | [CoApiAutoConfiguration.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt) | [spring-boot-starter/.../CoApiAutoConfiguration.kt:24](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt#L24) |
 
-## 为什么选择 CoApi？
+## Why CoApi?
 
-Spring 生态系统中声明式 HTTP 客户端有三种方法。以下是它们的对比：
+The Spring ecosystem has three approaches to declarative HTTP clients. Here is how they compare:
 
-| 特性 | CoApi | Spring Cloud OpenFeign | 手动 HTTP Interface |
+| Feature | CoApi | Spring Cloud OpenFeign | Manual HTTP Interface |
 |---------|-------|----------------------|----------------------|
-| 自动配置 | 零配置 | 零配置 | 每个客户端需手动设置 |
-| 响应式支持（WebClient） | 内置 | 无 | 手动 |
-| 同步支持（RestClient） | 内置 | 内置 | 手动 |
-| 负载均衡 | 内置 | 内置 | 手动 |
-| Spring Boot 4.x / Spring 7.x | 支持 | 支持 | 支持 |
-| 注解驱动 | `@CoApi` | `@FeignClient` | 仅 `@HttpExchange` |
-| 双模式切换 | `coapi.mode` 属性 | 不适用 | 需要修改代码 |
+| Auto-configuration | Zero config | Zero config | Manual setup per client |
+| Reactive support (WebClient) | Built-in | None | Manual |
+| Synchronous support (RestClient) | Built-in | Built-in | Manual |
+| Load balancing | Built-in | Built-in | Manual |
+| Spring Boot 4.x / Spring 7.x | Supported | Supported | Supported |
+| Annotation-driven | `@CoApi` | `@FeignClient` | `@HttpExchange` only |
+| Dual-mode switching | `coapi.mode` property | N/A | Code change required |
 
-## 工作原理
+## How It Works
 
 ```mermaid
 graph LR
-    subgraph "1. 定义"
+    subgraph "1. Define"
         A["@CoApi Interface"]
     end
-    subgraph "2. 发现"
+    subgraph "2. Discover"
         B[AutoCoApiRegistrar]
         C[EnableCoApiRegistrar]
     end
-    subgraph "3. 注册"
+    subgraph "3. Register"
         D["WebClient / RestClient Bean"]
         E[Proxy Bean]
     end
-    subgraph "4. 使用"
-        F["注入并调用"]
+    subgraph "4. Use"
+        F["Inject & Call"]
     end
 
     A --> B
@@ -67,9 +67,9 @@ graph LR
 ```
 <!-- Sources: api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt:38, spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt:22, spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt:30 -->
 
-## 每个接口两个 Bean 的模式
+## The Two-Bean-Per-Interface Pattern
 
-CoApi 为每个 `@CoApi` 注解的接口注册 **两个 bean**：
+CoApi registers **two beans** for every `@CoApi`-annotated interface:
 
 ```mermaid
 sequenceDiagram
@@ -90,24 +90,24 @@ sequenceDiagram
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt:33-87, spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt:26-34 -->
 
-1. **HTTP 客户端 Bean**（`name.HttpClient`）— 一个配置了基础 URL、过滤器/拦截器以及可选负载均衡的 `WebClient` 或 `RestClient`。
-2. **代理 Bean**（`name.CoApi`）— 由 Spring 的 `HttpServiceProxyFactory` 生成的实现注解接口的 JDK 动态代理。
+1. **HTTP Client Bean** (`name.HttpClient`) — a `WebClient` or `RestClient` configured with base URL, filters/interceptors, and optional load balancing.
+2. **Proxy Bean** (`name.CoApi`) — a JDK dynamic proxy implementing the annotated interface, generated by Spring's `HttpServiceProxyFactory`.
 
-## 客户端模式推断
+## Client Mode Inference
 
 ```mermaid
 flowchart TD
-    A[Application Starts] --> B{"coapi.mode 属性?"}
+    A[Application Starts] --> B{"coapi.mode property?"}
     B -->|REACTIVE| C["WebClient + WebClientAdapter"]
     B -->|SYNC| D["RestClient + RestClientAdapter"]
-    B -->|AUTO or unset| E{classpath 上是否存在 org.springframework.web.reactive.HandlerResult?}
-    E -->|是| C
-    E -->|否| D
+    B -->|AUTO or unset| E{org.springframework.web.reactive.HandlerResult on classpath?}
+    E -->|Yes| C
+    E -->|No| D
 
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt:16-39, spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt:42-50 -->
 
-## 模块架构
+## Module Architecture
 
 ```mermaid
 graph BT
@@ -140,36 +140,36 @@ graph BT
 ```
 <!-- Sources: settings.gradle.kts:26-45, bom/build.gradle.kts:14-23, dependencies/build.gradle.kts:14-23 -->
 
-## 版本兼容性
+## Version Compatibility
 
-| CoApi 版本 | Spring Boot | Spring Framework | JDK |
+| CoApi Version | Spring Boot | Spring Framework | JDK |
 |---------------|-------------|------------------|-----|
 | 1.x | 3.2.x | 6.x | 17+ |
 | 2.x | 4.x | 7.x | 17+ |
 
-当前版本：**2.0.1**（[gradle.properties:21](https://github.com/Ahoo-Wang/CoApi/blob/main/gradle.properties#L21)）
+Current version: **2.0.1** ([gradle.properties:21](https://github.com/Ahoo-Wang/CoApi/blob/main/gradle.properties#L21))
 
-## 关键特性
+## Key Features
 
-- **零样板** — 一个注解，完全自动配置
-- **双模式** — 通过属性或类路径推断在响应式（`WebClient`）和同步（`RestClient`）之间切换
-- **负载均衡** — 与 Spring Cloud LoadBalancer 集成
-- **可定制** — `WebClientBuilderCustomizer` / `RestClientBuilderCustomizer` SPI 支持全局和每个客户端的自定义
-- **认证** — 内置带 JWT 感知的 `CachedExpirableTokenProvider` 的 `BearerTokenFilter`
-- **过滤器/拦截器** — 可通过 YAML 属性配置每个客户端的过滤器链
+- **Zero-boilerplate** — one annotation, full auto-configuration
+- **Dual-mode** — reactive (`WebClient`) or synchronous (`RestClient`) via property or classpath inference
+- **Load balancing** — integrated with Spring Cloud LoadBalancer
+- **Customizable** — `WebClientBuilderCustomizer` / `RestClientBuilderCustomizer` SPI for global and per-client customization
+- **Authentication** — built-in `BearerTokenFilter` with JWT-aware `CachedExpirableTokenProvider`
+- **Filter/interceptor** — per-client filter chains configurable via YAML properties
 
-## 相关页面
+## Related Pages
 
-- [安装与设置](./installation.md) — 将 CoApi 添加到您的项目
-- [快速开始](./quick-start.md) — 定义您的第一个 HTTP 客户端
-- [配置参考](./configuration.md) — 所有属性详解
-- [架构概述](../deep-dive/architecture.md) — 深入了解注册流程
+- [Installation & Setup](./installation.md) — add CoApi to your project
+- [Quick Start](./quick-start.md) — define your first HTTP client
+- [Configuration Reference](./configuration.md) — all properties explained
+- [Architecture Overview](../deep-dive/architecture.md) — deep dive into registration flow
 
-## 参考资料
+## References
 
-1. [CoApi 注解](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt`
+1. [CoApi Annotation](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt`
 2. [CoApiDefinition](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt`
 3. [CoApiRegistrar](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt`
 4. [CoApiFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt`
 5. [ClientMode](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt`
-6. [README.md](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md) — 项目概览和使用示例
+6. [README.md](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md) — Project overview and usage examples

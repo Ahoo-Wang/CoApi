@@ -3,25 +3,25 @@ title: Examples & Patterns
 description: CoApi usage examples and implementation patterns
 ---
 
-# 示例与模式
+# Examples & Patterns
 
-## 概述
+## Overview
 
-CoApi 提供了构建类型安全 HTTP 客户端和服务器的灵活模式。本页面探讨了涵盖提供者-消费者架构、第三方 API 集成、过滤器配置、同步客户端和连接池自定义的实用示例。这些模式展示了 CoApi 如何在支持各种部署场景的同时保持契约和实现之间的一致性。
+CoApi provides flexible patterns for building type-safe HTTP clients and servers. This page explores practical examples covering provider-consumer architectures, third-party API integration, filter configuration, sync clients, and connection pool customization. These patterns demonstrate how CoApi maintains consistency between contracts and implementations while supporting various deployment scenarios.
 
-## 一览
+## At a Glance
 
-| 模式 | 关键组件 | 用例 | 关键优势 |
+| Pattern | Key Components | Use Case | Key Benefits |
 |---------|---------------|----------|-------------|
-| 提供者-消费者 | 共享 API、提供者服务器、消费者服务器 | 内部微服务 | 单一契约防止不一致 |
-| 第三方 API | 使用不同配置的 @CoApi | 外部服务集成 | 灵活的 URL 和负载均衡选项 |
-| 过滤器配置 | 基于 YAML 的过滤 | 服务选择 | 细粒度客户端路由控制 |
-| 同步 Java | @EnableCoApi 与 Java 客户端 | 同步操作 | 传统 Java 集成 |
-| 连接池 | WebClientBuilderCustomizer | 性能调优 | 每客户端资源优化 |
+| Provider-Consumer | Shared API, Provider Server, Consumer Server | Internal microservices | Single contract prevents inconsistency |
+| Third-Party API | @CoApi with different configurations | External service integration | Flexible URL and load-balancing options |
+| Filter Configuration | YAML-based filtering | Service selection | Fine-grained client routing control |
+| Sync Java | @EnableCoApi with Java clients | Synchronous operations | Traditional Java integration |
+| Connection Pool | WebClientBuilderCustomizer | Performance tuning | Per-client resource optimization |
 
-## 提供者-消费者模式
+## Provider-Consumer Pattern
 
-主要模式涉及共享 API 契约，防止提供者服务和消费者服务之间出现不一致。
+The primary pattern involves a shared API contract that prevents inconsistency between provider and consumer services.
 
 ```mermaid
 classDiagram
@@ -50,28 +50,28 @@ classDiagram
         +todoClient: TodoClient
         +useTodoClient(): void
     }
-
+    
     TodoApi <|-- TodoController : implements
     TodoApi <|.. TodoClient : @CoApi
     TodoClient --> ConsumerServer : inject
 ```
 
-**组件：**
+**Components:**
 
-1. **共享 API 模块**（`example-provider-api`）- 定义契约
-   - 使用 `@HttpExchange` 注解的 [`TodoApi.kt`](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-api/src/main/kotlin/me/ahoo/coapi/example/provider/api/TodoApi.kt)
+1. **Shared API Module** (`example-provider-api`) - Defines the contract
+   - [`TodoApi.kt`](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-api/src/main/kotlin/me/ahoo/coapi/example/provider/api/TodoApi.kt) with `@HttpExchange` annotations
 
-2. **提供者服务器**（`example-provider-server`）- 实现契约
-   - [`TodoController.kt`](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-server/src/main/kotlin/me/ahoo/coapi/example/provider/TodoController.kt) 实现 `TodoApi`
+2. **Provider Server** (`example-provider-server`) - Implements the contract
+   - [`TodoController.kt`](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-server/src/main/kotlin/me/ahoo/coapi/example/provider/TodoController.kt) implements `TodoApi`
 
-3. **消费者服务器**（`example-consumer-server`）- 使用客户端
-   - 注入 `TodoClient` 并调用 `TodoApi` 中定义的方法
+3. **Consumer Server** (`example-consumer-server`) - Uses the client
+   - Injects `TodoClient` and calls methods defined in `TodoApi`
 
-**优势：** 单一契约防止提供者实现和消费者实现之间出现不一致。
+**Benefit:** Single contract prevents inconsistency between provider and consumer implementations.
 
-## 第三方 API 客户端
+## Third-Party API Client
 
-CoApi 支持多种集成第三方 API 的方法：
+CoApi supports multiple approaches for integrating third-party APIs:
 
 ```mermaid
 sequenceDiagram
@@ -80,41 +80,41 @@ sequenceDiagram
     participant GitHubApi
     participant LoadBalancer
     participant ServiceRegistry
-
+    
     Consumer->>CoApi: @CoApi(baseUrl="${github.url}")
     CoApi->>GitHubApi: @GetExchange /repos/{owner}/{repo}
     GitHubApi-->>Consumer: List<Issue>
-
+    
     Consumer->>CoApi: @CoApi(serviceId="github-service")
     CoApi->>LoadBalancer: request routing
     LoadBalancer->>ServiceRegistry: lookup service
     ServiceRegistry-->>LoadBalancer: service instances
     LoadBalancer->>GitHubApi: load-balanced request
     GitHubApi-->>Consumer: List<Issue>
-
+    
     Consumer->>CoApi: @CoApi (no URL)
     CoApi->>Consumer: URI or UriBuilderFactory
     Consumer->>GitHubApi: direct URI usage
     GitHubApi-->>Consumer: List<Issue>
 ```
 
-**客户端类型：**
+**Client Types:**
 
-1. **GitHubApiClient** - 直接基础 URL 配置
+1. **GitHubApiClient** - Direct base URL configuration
    - [`GitHubApiClient.kt`](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
-   - 带 `@GetExchange` 的 `@CoApi(baseUrl = "${github.url}")`
+   - `@CoApi(baseUrl = "${github.url}")` with `@GetExchange`
 
-2. **ServiceApiClient** - 负载均衡服务发现
+2. **ServiceApiClient** - Load-balanced service discovery
    - [`ServiceApiClient.kt`](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt)
    - `@CoApi(serviceId = "github-service", name = "GitHubApi")`
 
-3. **UriApiClient** - 直接 URI 使用
+3. **UriApiClient** - Direct URI usage
    - [`UriApiClient.kt`](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/UriApiClient.kt)
-   - `@CoApi`（无 URL）- 直接使用 `URI` 或 `UriBuilderFactory`
+   - `@CoApi` (no URL) - uses `URI` or `UriBuilderFactory` directly
 
-## 过滤器配置模式
+## Filter Configuration Patterns
 
-CoApi 提供了灵活的服务选择过滤机制：
+CoApi provides flexible filtering mechanisms for service selection:
 
 ```mermaid
 graph TD
@@ -122,25 +122,25 @@ graph TD
         A[YAML Configuration] --> B[Filter by Bean Name]
         A --> C[Filter by Class Type]
     end
-
+    
     B --> D[ServiceApiClientUseFilterBeanName]
     C --> E[ServiceApiClientUseFilterType]
-
+    
     D --> F[Filter via bean name in YAML]
     E --> G[Filter via class type in YAML]
-
+    
 ```
 
-**过滤器类型：**
+**Filter Types:**
 
-1. **ServiceApiClientUseFilterBeanName** - 通过 YAML 按 bean 名称过滤
-2. **ServiceApiClientUseFilterType** - 通过 YAML 按类类型过滤
+1. **ServiceApiClientUseFilterBeanName** - Filter by bean name via YAML
+2. **ServiceApiClientUseFilterType** - Filter by class type via YAML
 
-两种模式都允许在复杂部署中对服务选择进行细粒度控制。
+Both patterns allow fine-grained control over service selection in complex deployments.
 
-## 同步 Java 示例
+## Sync Java Example
 
-CoApi 支持响应式和同步 Java 客户端：
+CoApi supports both reactive and synchronous Java clients:
 
 ```mermaid
 classDiagram
@@ -157,28 +157,28 @@ classDiagram
         +githubSyncLbClient: GitHubSyncLbClient
         +startup(): void
     }
-
+    
     GitHubSyncClient --> ExampleSyncServer : inject
     GitHubSyncLbClient --> ExampleSyncServer : inject
     ExampleSyncServer ..> GitHubSyncClient : @EnableCoApi
     ExampleSyncServer ..> GitHubSyncLbClient : @EnableCoApi
 ```
 
-**组件：**
+**Components:**
 
-1. **GitHubSyncClient**（Java）- 直接 URL 配置
-   - 返回 `List<Issue>`
+1. **GitHubSyncClient** (Java) - Direct URL configuration
+   - Returns `List<Issue>`
 
-2. **GitHubSyncLbClient**（Java）- 负载均衡配置
-   - 返回 `List<Issue>`
+2. **GitHubSyncLbClient** (Java) - Load-balanced configuration  
+   - Returns `List<Issue>`
 
-3. **ExampleSyncServer** - 配置
+3. **ExampleSyncServer** - Configuration
    - [`GitHubSyncClient.java`](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-sync/src/main/java/me/ahoo/coapi/example/sync/GitHubSyncClient.java)
    - `@EnableCoApi(clients = [GitHubSyncClient::class])`
 
-## 连接池自定义
+## Connection Pool Customization
 
-为了性能优化，CoApi 允许每客户端连接池配置：
+For performance optimization, CoApi allows per-client connection pool configuration:
 
 ```mermaid
 graph TD
@@ -187,33 +187,33 @@ graph TD
         B --> C[coApiDefinition.name]
         C --> D[Per-client pool settings]
     end
-
+    
     D --> E[Max connections]
     D --> F[Acquire timeout]
     D --> G[Idle timeout]
-
+    
 ```
 
-**实现：**
+**Implementation:**
 - [`ConsumerWebClientBuilderCustomizer.kt`](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerWebClientBuilderCustomizer.kt)
-- 使用 `ConnectionProvider.builder(coApiDefinition.name)` 进行每客户端配置
+- Uses `ConnectionProvider.builder(coApiDefinition.name)` for per-client configuration
 
-## 参考资料
+## References
 
-1. [TodoApi 接口](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-api/src/main/kotlin/me/ahoo/coapi/example/provider/api/TodoApi.kt) - 共享 API 契约定义
-2. [TodoClient 接口](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-api/src/main/kotlin/me/ahoo/coapi/example/provider/client/TodoClient.kt) - 消费者端客户端实现
-3. [TodoController](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-server/src/main/kotlin/me/ahoo/coapi/example/provider/TodoController.kt) - 提供者端控制器实现
-4. [GitHubApiClient](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) - 带基础 URL 的第三方 API 客户端
-5. [ServiceApiClient](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt) - 负载均衡服务客户端
-6. [UriApiClient](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/UriApiClient.kt) - 基于 URI 的客户端
-7. [ConsumerServer](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerServer.kt) - 消费者应用程序配置
-8. [ConsumerWebClientBuilderCustomizer](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerWebClientBuilderCustomizer.kt) - 连接池自定义
-9. [GitHubSyncClient](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-sync/src/main/java/me/ahoo/coapi/example/sync/GitHubSyncClient.java) - 同步 Java 客户端
+1. [TodoApi Interface](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-api/src/main/kotlin/me/ahoo/coapi/example/provider/api/TodoApi.kt) - Shared API contract definition
+2. [TodoClient Interface](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-api/src/main/kotlin/me/ahoo/coapi/example/provider/client/TodoClient.kt) - Consumer-side client implementation
+3. [TodoController](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-provider-server/src/main/kotlin/me/ahoo/coapi/example/provider/TodoController.kt) - Provider-side controller implementation
+4. [GitHubApiClient](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) - Third-party API client with base URL
+5. [ServiceApiClient](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt) - Load-balanced service client
+6. [UriApiClient](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/UriApiClient.kt) - URI-based client
+7. [ConsumerServer](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerServer.kt) - Consumer application configuration
+8. [ConsumerWebClientBuilderCustomizer](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerWebClientBuilderCustomizer.kt) - Connection pool customization
+9. [GitHubSyncClient](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-sync/src/main/java/me/ahoo/coapi/example/sync/GitHubSyncClient.java) - Synchronous Java client
 
-## 相关页面
+## Related Pages
 
-- [入门指南](../getting-started.md) - 基础设置和配置
-- [配置](../getting-started/configuration.md) - 详细配置选项
-- [高级主题](.md) - 高级模式和自定义
-- [最佳实践](.md) - 推荐的方法和模式
-- [故障排除](.md) - 常见问题和解决方案
+- [Getting Started](../getting-started.md) - Basic setup and configuration
+- [Configuration](../getting-started/configuration.md) - Detailed configuration options
+- [Advanced Topics](.md) - Advanced patterns and customizations
+- [Best Practices](.md) - Recommended approaches and patterns
+- [Troubleshooting](.md) - Common issues and solutions

@@ -3,24 +3,24 @@ title: Annotations
 description: Deep dive into CoApi annotations including @CoApi, @LoadBalanced, and configuration parsing
 ---
 
-# 注解
+# Annotations
 
-## 概述
+## Overview
 
-CoApi 提供了一套完善的基于注解的配置系统，简化了分布式服务客户端的集成。这些注解使开发者能够以最少的样板代码定义服务端点、配置负载均衡和管理服务发现。注解系统设计直观，同时为各种部署场景提供了强大的配置选项。
+CoApi provides a sophisticated annotation-based configuration system that simplifies the integration of distributed service clients. These annotations enable developers to define service endpoints, configure load balancing, and manage service discovery with minimal boilerplate code. The annotation system is designed to be intuitive while providing powerful configuration options for various deployment scenarios.
 
-## 概览一览
+## At-a-Glance
 
-| 注解 | 目标 | 用途 | 关键参数 | 默认行为 |
+| Annotation | Target | Purpose | Key Parameters | Default Behavior |
 |------------|--------|---------|---------------|-----------------|
-| `@CoApi` | 类 | 定义服务客户端 | `baseUrl`、`serviceId`、`name` | 自动注册为 @Component |
-| `@LoadBalanced` | 类 | 标记接口为负载均衡 | （无） | 需要显式注解或 `lb://` 前缀 |
+| `@CoApi` | Class | Define a service client | `baseUrl`, `serviceId`, `name` | Auto-registers as @Component |
+| `@LoadBalanced` | Class | Mark interface as load-balanced | (none) | Requires explicit annotation or `lb://` prefix |
 
-## 核心注解
+## Core Annotations
 
-### @CoApi 注解
+### @CoApi Annotation
 
-`@CoApi` 注解是 CoApi 配置系统的基石。它将类标记为服务客户端，并提供必要的配置参数。
+The `@CoApi` annotation is the cornerstone of the CoApi configuration system. It marks a class as a service client and provides essential configuration parameters.
 
 ```kotlin
 @Target(AnnotationTarget.CLASS)
@@ -32,13 +32,13 @@ annotation class CoApi(
 )
 ```
 
-**关键特性：**
-- **自动组件注册**：`@Component` 元注解确保 Spring 在组件扫描时能够识别被注解的类
-- **灵活的 URL 配置**：支持多种 URL 解析策略
-- **占位符支持**：使用 `${...}` 语法实现环境变量替换
-- **协议支持**：同时处理 `lb://`（负载均衡）和 `http://`（直连）协议
+**Key Features:**
+- **Automatic Component Registration**: The `@Component` meta-annotation ensures Spring picks up annotated classes during component scanning
+- **Flexible URL Configuration**: Supports multiple URL resolution strategies
+- **Placeholder Support**: Enables environment variable substitution using `${...}` syntax
+- **Protocol Support**: Handles both `lb://` (load-balanced) and `http://` (direct) protocols
 
-**使用示例：**
+**Usage Examples:**
 
 ```kotlin
 // Direct HTTP connection
@@ -67,23 +67,23 @@ interface CustomApiClient {
 }
 ```
 
-### @LoadBalanced 注解
+### @LoadBalanced Annotation
 
-`@LoadBalanced` 注解提供显式的负载均衡配置：
+The `@LoadBalanced` annotation provides explicit load balancing configuration:
 
 ```kotlin
 @Target(AnnotationTarget.CLASS)
 annotation class LoadBalanced
 ```
 
-**用途：**
-- 即使未使用 `lb://` 协议，也能将接口标记为负载均衡
-- 优先于基于 URL 的负载均衡判断
-- 适用于需要负载均衡但使用直连 HTTP 连接的服务
+**Purpose:**
+- Marks an interface as load-balanced even when not using `lb://` protocol
+- Takes precedence over URL-based load balancing determination
+- Useful for services that require load balancing but use direct HTTP connections
 
-## URL 解析流程
+## URL Resolution Flow
 
-CoApi 系统采用一套精密的 URL 解析算法，根据注解配置确定最终的服务端点：
+The CoApi system employs a sophisticated URL resolution algorithm that determines the final service endpoint based on annotation configuration:
 
 ```mermaid
 graph TD
@@ -120,9 +120,9 @@ graph TD
     S --> T[End]
 ```
 
-## 类层次结构与关系
+## Class Hierarchy and Relationships
 
-注解系统创建了一个清晰的组件层次结构，各组件协同工作以提供服务客户端功能：
+The annotation system creates a clear hierarchy of components that work together to provide service client functionality:
 
 ```mermaid
 classDiagram
@@ -162,9 +162,9 @@ classDiagram
     CoApiDefinition --> Environment : uses
 ```
 
-## 参数流转与处理
+## Parameter Flow and Processing
 
-注解处理遵循系统化的流程，将声明式配置转换为运行时就绪的服务定义：
+The annotation processing follows a systematic flow to transform declarative configuration into runtime-ready service definitions:
 
 ```mermaid
 sequenceDiagram
@@ -202,11 +202,11 @@ sequenceDiagram
     end
 ```
 
-## 配置示例
+## Configuration Examples
 
-### 测试用例分析
+### Test Case Analysis
 
-CoApi 系统包含全面的测试用例，演示了各种配置场景：
+The CoApi system includes comprehensive test cases that demonstrate various configuration scenarios:
 
 ```kotlin
 // Test Case 1: lb:// protocol
@@ -229,9 +229,9 @@ interface MockEmptyApi
 // Result: loadBalanced=true, baseUrl=""
 ```
 
-### 实际使用示例
+### Real-world Usage Examples
 
-**带环境配置的 GitHub API 客户端：**
+**GitHub API Client with Environment Configuration:**
 ```kotlin
 @CoApi(baseUrl = "${github.url}", name = "GitHubApi")
 interface GitHubApiClient {
@@ -240,7 +240,7 @@ interface GitHubApiClient {
 }
 ```
 
-**带服务发现的服务 API 客户端：**
+**Service API Client with Service Discovery:**
 ```kotlin
 @CoApi(serviceId = "github-service")
 interface ServiceApiClient {
@@ -249,9 +249,9 @@ interface ServiceApiClient {
 }
 ```
 
-## Bean 生成
+## Bean Generation
 
-注解系统根据配置自动生成 Spring Bean 名称：
+The annotation system automatically generates Spring bean names based on the configuration:
 
 ```mermaid
 graph LR
@@ -269,26 +269,26 @@ graph LR
     H --> J[CoApi Bean]
 ```
 
-## 最佳实践
+## Best Practices
 
-1. **使用描述性名称**：在处理多个服务时，始终提供有意义的 `name` 参数
-2. **利用环境变量**：对在不同环境间变化的配置使用 `${...}` 占位符
-3. **显式负载均衡**：对需要负载均衡的服务使用 `@LoadBalanced`，无论协议如何
-4. **协议选择**：使用 `lb://` 进行基于服务发现的负载均衡，使用 `http://` 进行直连
-5. **错误处理**：始终确保服务客户端接口上存在 `@CoApi` 注解
+1. **Use Descriptive Names**: Always provide meaningful `name` parameters when working with multiple services
+2. **Leverage Environment Variables**: Use `${...}` placeholders for configuration that varies between environments
+3. **Explicit Load Balancing**: Use `@LoadBalanced` for services that need load balancing regardless of protocol
+4. **Protocol Selection**: Use `lb://` for service-discovery-based load balancing and `http://` for direct connections
+5. **Error Handling**: Always ensure `@CoApi` annotation is present on service client interfaces
 
-## 参考文献
+## References
 
-### 源代码文件
-- [api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) - 主 CoApi 注解定义
-- [api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) - 负载均衡注解
-- [spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) - 配置解析逻辑
-- [spring/src/test/kotlin/me/ahoo/coapi/spring/CoApiDefinitionTest.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/test/kotlin/me/ahoo/coapi/spring/CoApiDefinitionTest.kt) - 测试用例
-- [example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) - 示例实现
-- [example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt) - 服务发现示例
+### Source Files
+- [api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) - Main CoApi annotation definition
+- [api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) - Load balancing annotation
+- [spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) - Configuration parsing logic
+- [spring/src/test/kotlin/me/ahoo/coapi/spring/CoApiDefinitionTest.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/test/kotlin/me/ahoo/coapi/spring/CoApiDefinitionTest.kt) - Test cases
+- [example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) - Example implementation
+- [example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt) - Service discovery example
 
-### 相关页面
-- [配置](../getting-started/configuration.md) - 详细配置指南
-- [服务发现](./load-balancing.md) - 负载均衡与服务发现
-- [测试](.md) - CoApi 客户端测试策略
-- [示例](./examples.md) - 完整使用示例
+### Related Pages
+- [Configuration](../getting-started/configuration.md) - Detailed configuration guide
+- [Service Discovery](./load-balancing.md) - Load balancing and service discovery
+- [Testing](.md) - Testing strategies for CoApi clients
+- [Examples](./examples.md) - Complete usage examples
