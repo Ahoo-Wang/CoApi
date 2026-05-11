@@ -1,0 +1,31 @@
+{
+  "eval_id": 2,
+  "eval_name": "load-balancing",
+  "prompt": "I have a microservice architecture with a user-service registered in Consul. I want to create a CoApi client that uses Spring Cloud LoadBalancer to call user-service. The client should have endpoints for getUser(id) and listUsers(). Show me the full setup including dependencies, the client interface, and the application.yml configuration for both reactive and sync modes.",
+  "assertions": [
+    {
+      "text": "Includes spring-cloud-starter-loadbalancer dependency",
+      "type": "dependency_present"
+    },
+    {
+      "text": "Uses serviceId in @CoApi annotation",
+      "type": "contains_annotation"
+    },
+    {
+      "text": "Has coapi.mode configuration",
+      "type": "config_present"
+    },
+    {
+      "text": "Shows reactive filter configuration",
+      "type": "config_present"
+    },
+    {
+      "text": "Shows sync interceptor configuration",
+      "type": "config_present"
+    },
+    {
+      "text": "Interface has getUser and listUsers methods",
+      "type": "code_pattern"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+# ===================================================================
+# Reactive Mode Configuration
+# ===================================================================
+# This profile configures the application for REACTIVE mode using
+# WebClient + Spring Cloud LoadBalancer + Consul service discovery.
+#
+# Start with: --spring.profiles.active=reactive
+# Or set:     coapi.mode=REACTIVE
+# ===================================================================
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: user-service-consumer
+
+  # Consul service discovery configuration
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        # Register this consumer in Consul (optional -- only needed if you
+        # want other services to discover this consumer as well)
+        register: false
+        # The service name lookup uses the serviceId from @CoApi.
+        # Consul will resolve "user-service" to one or more healthy instances.
+
+    # Spring Cloud LoadBalancer configuration
+    loadbalancer:
+      # Use round-robin by default; Consul-backed discovery supplies the instances
+      cache:
+        enabled: true
+        ttl: 30s
+
+# CoApi configuration
+coapi:
+  # Force reactive mode (WebClient-based). AUTO would also select reactive
+  # when spring-boot-starter-webflux is on the classpath.
+  mode: REACTIVE
+  clients:
+    UserApiClient:
+      # No explicit baseUrl needed -- @CoApi(serviceId="user-service")
+      # already resolves to lb://user-service -> http://user-service.
+      # loadBalanced is automatically true when serviceId is used.
+      # You can optionally override:
+      #   loadBalanced: true
+      reactive:
+        filter:
+          # The LoadBalancedExchangeFilterFunction is added automatically
+          # by CoApi when loadBalanced=true. You can add extra filters here:
+          names: []
+          types: []

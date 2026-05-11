@@ -1,0 +1,103 @@
+{
+  "skill_name": "coapi-developer",
+  "iteration": 1,
+  "timestamp": "2026-05-08T00:00:00Z",
+  "configurations": [
+    {
+      "name": "with_skill",
+      "label": "With Skill",
+      "total_assertions": 23,
+      "passed": 22,
+      "failed": 1,
+      "pass_rate": 0.957,
+      "total_duration_seconds": 503.5,
+      "evals": [
+        {
+          "eval_name": "create-interface",
+          "passed": 8,
+          "failed": 0,
+          "total": 8,
+          "pass_rate": 1.0,
+          "duration_seconds": 105.2,
+          "failed_assertions": [],
+          "note": "Separated API interface (PostApi) from client (PostClient) following project pattern"
+        },
+        {
+          "eval_name": "load-balancing",
+          "passed": 6,
+          "failed": 1,
+          "total": 7,
+          "pass_rate": 0.857,
+          "duration_seconds": 212.0,
+          "failed_assertions": ["Uses correct Maven artifact for CoApi starter - used spring-boot-starter instead of coapi-spring-boot-starter"],
+          "note": "Used wrong Maven artifact name: me.ahoo.coapi:spring-boot-starter instead of me.ahoo.coapi:coapi-spring-boot-starter"
+        },
+        {
+          "eval_name": "testing",
+          "passed": 8,
+          "failed": 0,
+          "total": 8,
+          "pass_rate": 1.0,
+          "duration_seconds": 186.3,
+          "failed_assertions": [],
+          "note": "Excellent test coverage including MockClientProperties, both reactive/sync modes, bean naming"
+        }
+      ]
+    },
+    {
+      "name": "without_skill",
+      "label": "Without Skill (Baseline)",
+      "total_assertions": 23,
+      "passed": 21,
+      "failed": 2,
+      "pass_rate": 0.913,
+      "total_duration_seconds": 530.0,
+      "evals": [
+        {
+          "eval_name": "create-interface",
+          "passed": 7,
+          "failed": 1,
+          "total": 8,
+          "pass_rate": 0.875,
+          "duration_seconds": 91.3,
+          "failed_assertions": ["No class-level @HttpExchange annotation"],
+          "note": "Solid output but no separation between API interface and client, methods use full paths"
+        },
+        {
+          "eval_name": "load-balancing",
+          "passed": 7,
+          "failed": 1,
+          "total": 8,
+          "pass_rate": 0.875,
+          "duration_seconds": 221.9,
+          "failed_assertions": ["Uses Spring Cloud 2023.0.2 BOM which is incompatible with Spring Boot 4.x"],
+          "note": "Correct Maven artifact but outdated Spring Cloud BOM version"
+        },
+        {
+          "eval_name": "testing",
+          "passed": 7,
+          "failed": 1,
+          "total": 8,
+          "pass_rate": 0.875,
+          "duration_seconds": 216.8,
+          "failed_assertions": ["Missing ClientProperties mock in ApplicationContextRunner tests"],
+          "note": "Tests would likely fail without ClientProperties bean registered"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "with_skill_pass_rate": 0.957,
+    "without_skill_pass_rate": 0.913,
+    "delta_pass_rate": 0.044,
+    "with_skill_avg_duration": 167.8,
+    "without_skill_avg_duration": 176.7,
+    "key_findings": [
+      "With-skill version correctly separates API interface from client following the project's pattern (TodoApi/TodoClient)",
+      "With-skill testing output includes MockClientProperties and tests both modes more thoroughly",
+      "With-skill version used wrong Maven artifact name (spring-boot-starter vs coapi-spring-boot-starter)",
+      "Without-skill version had outdated Spring Cloud BOM and missing ClientProperties mock in tests",
+      "Both versions produced high-quality output; the skill mainly adds value in testing patterns and project conventions"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+/*
+ * Copyright [2022-present] [ahoo wang <ahoowang@qq.com> (https://github.com/Ahoo-Wang)].
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package me.ahoo.coapi.example.weather
+
+import me.ahoo.coapi.example.weather.client.WeatherApiClient
+import me.ahoo.coapi.example.weather.client.WeatherResponse
+import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
+import me.ahoo.test.asserts.assert
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.ComponentScan
+
+@SpringBootTest
+class WeatherApiClientIntegrationTest {
+
+    @Autowired
+    private lateinit var reactiveHttpExchangeAdapterFactory: ReactiveHttpExchangeAdapterFactory
+
+    @Autowired
+    private lateinit var weatherApiClient: WeatherApiClient
+
+    @Test
+    fun `should autowire ReactiveHttpExchangeAdapterFactory`() {
+        reactiveHttpExchangeAdapterFactory.assert().isNotNull()
+    }
+
+    @Test
+    fun `should autowire WeatherApiClient`() {
+        weatherApiClient.assert().isNotNull()
+    }
+
+    @Test
+    fun `should call weather API and get response`() {
+        val response: WeatherResponse? = weatherApiClient.getCurrentWeather("Shanghai")
+            .doOnNext { weather ->
+                weather.assert().isNotNull()
+                weather.city.assert().isNotBlank()
+                weather.condition.assert().isNotBlank()
+            }
+            .block()
+        response.assert().isNotNull()
+    }
+}
+
+@SpringBootApplication
+@ComponentScan(basePackages = ["me.ahoo.coapi.example.weather"])
+class WeatherTestApplication

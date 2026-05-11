@@ -1,0 +1,47 @@
+{
+  "eval_id": 2,
+  "eval_name": "load-balancing",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "Includes spring-cloud-starter-loadbalancer dependency",
+      "passed": true,
+      "evidence": "build.gradle.kts has implementation(\"org.springframework.cloud:spring-cloud-starter-loadbalancer\")"
+    },
+    {
+      "text": "Uses serviceId in @CoApi annotation",
+      "passed": true,
+      "evidence": "UserApiClient and UserSyncApiClient both use @CoApi(serviceId = \"user-service\")"
+    },
+    {
+      "text": "Has coapi.mode configuration",
+      "passed": true,
+      "evidence": "application-reactive.yml has coapi.mode=REACTIVE, application-sync.yml has coapi.mode=SYNC"
+    },
+    {
+      "text": "Shows reactive filter configuration",
+      "passed": true,
+      "evidence": "application-reactive.yml configures coapi.clients.ReactiveUserClient.reactive.filter with loadBalancerExchangeFilterFunction"
+    },
+    {
+      "text": "Shows sync interceptor configuration",
+      "passed": true,
+      "evidence": "application-sync.yml configures coapi.clients.SyncUserClient.sync.interceptor with loadBalancerInterceptor"
+    },
+    {
+      "text": "Interface has getUser and listUsers methods",
+      "passed": true,
+      "evidence": "UserApiClient defines getUser() and listUsers()"
+    },
+    {
+      "text": "Uses correct Maven artifact for CoApi starter",
+      "passed": true,
+      "evidence": "Uses me.ahoo.coapi:coapi-spring-boot-starter (correct artifact name)"
+    },
+    {
+      "text": "Uses compatible Spring Cloud BOM version",
+      "passed": false,
+      "evidence": "Uses spring-cloud-dependencies:2023.0.2 which is incompatible with Spring Boot 4.x"
+    }
+  ]
+}
