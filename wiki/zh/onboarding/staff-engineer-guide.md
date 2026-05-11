@@ -47,7 +47,7 @@ graph TD
 
 ## 核心组件职责
 
-### CoApiDefinition ([source](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L24))
+### [CoApiDefinition](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L24)
 
 将 @CoApi 注解解析为元数据：
 
@@ -56,7 +56,7 @@ graph TD
 - **baseUrl**：支持 `lb://` 和 `http://` 协议，带占位符解析
 - **loadBalanced**：确定是否使用服务发现
 
-### CoApiRegistrar ([source](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22))
+### [CoApiRegistrar](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22)
 
 向 BeanDefinitionRegistry 注册 bean：
 
@@ -64,7 +64,7 @@ graph TD
 - 创建用于代理生成的 CoApiFactoryBean
 - 处理 bean 名称解析和冲突检测
 
-### AbstractCoApiRegistrar ([source](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28))
+### [AbstractCoApiRegistrar](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28)
 
 模板方法模式实现：
 
@@ -72,7 +72,7 @@ graph TD
 - 注册 HttpExchangeAdapterFactory
 - 委托给子类进行定义发现
 
-### CoApiFactoryBean ([source](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21))
+### [CoApiFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21)
 
 通过 HttpServiceProxyFactory 创建 JDK 代理：
 
@@ -80,7 +80,7 @@ graph TD
 - 使用适配器构建 HttpServiceProxyFactory
 - 创建委托给 HTTP 客户端的代理实例
 
-### HttpExchangeAdapterFactory ([source](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/HttpExchangeAdapterFactory.kt#L19))
+### [HttpExchangeAdapterFactory](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/HttpExchangeAdapterFactory.kt#L19)
 
 用于可插拔适配器的 SPI 接口：
 
