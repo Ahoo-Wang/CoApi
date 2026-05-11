@@ -1,0 +1,5 @@
+/* Zoomable Mermaid */
+.vp-doc .mermaid svg {
+  cursor: zoom-in;
+}
+
