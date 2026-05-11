@@ -1,7 +1,6 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  lang: 'en-US',
   title: 'CoApi Wiki',
   description: 'Zero-boilerplate HTTP client auto-configuration for Spring 6',
   ignoreDeadLinks: true,
@@ -11,14 +10,23 @@ export default defineConfig({
     ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
     ['link', { href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap', rel: 'stylesheet' }]
   ],
+  themeConfig: {
+    logo: '/logo.svg',
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/Ahoo-Wang/CoApi' }
+    ],
+    editLink: {
+      pattern: 'https://github.com/Ahoo-Wang/CoApi/edit/main/wiki/:path'
+    },
+    search: {
+      provider: 'local'
+    }
+  },
   locales: {
     en: {
       label: 'English',
       lang: 'en-US',
-      title: 'CoApi Wiki',
-      description: 'Zero-boilerplate HTTP client auto-configuration for Spring 6',
       themeConfig: {
-        logo: '/logo.svg',
         nav: [
           { text: 'Getting Started', link: '/getting-started/overview' },
           { text: 'Deep Dive', link: '/deep-dive/architecture' },
@@ -100,11 +108,10 @@ export default defineConfig({
             }
           ]
         },
-        socialLinks: [
-          { icon: 'github', link: 'https://github.com/Ahoo-Wang/CoApi' }
-        ],
+        editLink: {
+          text: 'Edit this page on GitHub'
+        },
         search: {
-          provider: 'local',
           options: {
             translations: {
               button: {
@@ -122,20 +129,13 @@ export default defineConfig({
               }
             }
           }
-        },
-        editLink: {
-          pattern: 'https://github.com/Ahoo-Wang/CoApi/edit/main/wiki/:path',
-          text: 'Edit this page on GitHub'
         }
       }
     },
     zh: {
       label: '简体中文',
       lang: 'zh-CN',
-      title: 'CoApi Wiki',
-      description: '零样板 HTTP 客户端自动配置',
       themeConfig: {
-        logo: '/logo.svg',
         nav: [
           { text: '快速开始', link: '/zh/getting-started/overview' },
           { text: '深入了解', link: '/zh/deep-dive/architecture' },
@@ -217,11 +217,10 @@ export default defineConfig({
             }
           ]
         },
-        socialLinks: [
-          { icon: 'github', link: 'https://github.com/Ahoo-Wang/CoApi' }
-        ],
+        editLink: {
+          text: '在 GitHub 上编辑此页'
+        },
         search: {
-          provider: 'local',
           options: {
             translations: {
               button: {
@@ -239,10 +238,6 @@ export default defineConfig({
               }
             }
           }
-        },
-        editLink: {
-          pattern: 'https://github.com/Ahoo-Wang/CoApi/edit/main/wiki/:path',
-          text: '在 GitHub 上编辑此页'
         }
       }
     }
