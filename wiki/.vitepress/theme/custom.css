@@ -1,5 +1,30 @@
-/* Zoomable Mermaid */
-.vp-doc .mermaid svg {
-  cursor: zoom-in;
+/* Font Configuration */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --vp-font-family-base: 'Inter', 'Inter Neue', system-ui, -apple-system, sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
+/* Code Block Borders */
+.vp-doc div[class*='language-'] {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+}
+
+/* Table Styles */
+.vp-doc table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.vp-doc th,
+.vp-doc td {
+  border: 1px solid var(--vp-c-divider);
+  padding: 0.6em 1em;
+}
+
+.vp-doc th {
+  background: var(--vp-c-brand-soft);
+  font-weight: 600;
+}
