@@ -21,7 +21,7 @@ This separation allows the library to:
 
 ```mermaid
 graph TD
-    A["@CoApi Interface] --> B[CoApiRegistrar"]
+    A["@CoApi Interface"] --> B[CoApiRegistrar]
     B --> C{ClientMode}
     C -->|Reactive| D[WebClientFactoryBean]
     C -->|Sync| E[RestClientFactoryBean]
@@ -36,7 +36,6 @@ graph TD
     J --> G
     I --> L[HttpExchangeAdapterFactory]
     L --> M[Spring Context]
-    
 ```
 
 ## Core Component Responsibilities
