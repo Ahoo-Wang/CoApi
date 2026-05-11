@@ -153,7 +153,7 @@ export default defineConfig({
     }
   },
   locales: {
-    en: {
+    root: {
       label: 'English',
       lang: 'en-US',
       link: '/',
