@@ -17,29 +17,29 @@ CoApi's configuration architecture balances declarative convenience with program
 
 | Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.enabled` | `Boolean` | `true` | Enable/disable CoApi functionality | [CoApiProperties.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L1) |
-| `coapi.mode` | `ClientMode` | `AUTO` | Global client mode (AUTO, REACTIVE, SYNC) | [CoApiProperties.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L2) |
-| `coapi.base-packages` | `List<String>` | `[]` | Base packages for client discovery | [CoApiProperties.kt:3](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L3) |
+| `coapi.enabled` | `Boolean` | `true` | Enable/disable CoApi functionality | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L1) |
+| `coapi.mode` | `ClientMode` | `AUTO` | Global client mode (AUTO, REACTIVE, SYNC) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L2) |
+| `coapi.base-packages` | `List<String>` | `[]` | Base packages for client discovery | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L3) |
 
 ### Client Properties
 
 | Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.base-url` | `String` | `""` | Base URL for the client | [ClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
-| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | Enable load balancing for the client | [ClientDefinition.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.base-url` | `String` | `""` | Base URL for the client | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
+| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | Enable load balancing for the client | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
 
 ### Reactive Client Properties
 
 | Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | `List<String>` | `[]` | Reactive filter function names | [ReactiveClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
-| `coapi.clients.<name>.reactive.filter.types` | `List<String>` | `[]` | Reactive filter function types | [ReactiveClientDefinition.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.reactive.filter.names` | `List<String>` | `[]` | Reactive filter function names | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
+| `coapi.clients.<name>.reactive.filter.types` | `List<String>` | `[]` | Reactive filter function types | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
 
 ### Sync Client Properties
 
 | Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.sync.interceptor.names` | `List<String>` | `[]` | Sync interceptor names | [SyncClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.sync.interceptor.names` | `List<String>` | `[]` | Sync interceptor names | [SyncClientDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
 
 ## Configuration Resolution Flow
 

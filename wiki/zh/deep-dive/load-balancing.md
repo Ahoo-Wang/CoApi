@@ -15,11 +15,11 @@ CoApi 提供了三种选择负载均衡的方式，都解析为相同的机制�
 
 | 机制 | 注解 | 解析后的 URL | 负载均衡 | 来源 |
 |-----------|-----------|--------------|---------------|--------|
-| 服务 ID | `@CoApi(serviceId = "svc")` | `http://svc` | 是 | [CoApi.kt:46](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L46) |
-| LB 协议 | `@CoApi(baseUrl = "lb://svc")` | `http://svc` | 是 | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
-| 注解 | `@CoApi @LoadBalanced` | 空 | 是 | [LoadBalanced.kt:17](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
-| 属性 | `coapi.clients.<name>.load-balanced=true` | 按属性 | 是 | [CoApiProperties.kt:54](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
-| 直接 URL | `@CoApi(baseUrl = "http://...")` | 按指定 | 否 | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| 服务 ID | `@CoApi(serviceId = "svc")` | `http://svc` | 是 | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L46) |
+| LB 协议 | `@CoApi(baseUrl = "lb://svc")` | `http://svc` | 是 | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| 注解 | `@CoApi @LoadBalanced` | 空 | 是 | [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
+| 属性 | `coapi.clients.<name>.load-balanced=true` | 按属性 | 是 | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
+| 直接 URL | `@CoApi(baseUrl = "http://...")` | 按指定 | 否 | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
 
 ## URL 解析流程
 
@@ -166,10 +166,10 @@ coapi:
 
 | 属性 | 类型 | 适用于 | 来源 |
 |----------|------|-----------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | Bean 名称 | WebClient（响应式） | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.reactive.filter.types` | 类类型 | WebClient（响应式） | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.sync.interceptor.names` | Bean 名称 | RestClient（同步） | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
-| `coapi.clients.<name>.sync.interceptor.types` | 类类型 | RestClient（同步） | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
+| `coapi.clients.<name>.reactive.filter.names` | Bean 名称 | WebClient（响应式） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
+| `coapi.clients.<name>.reactive.filter.types` | 类类型 | WebClient（响应式） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
+| `coapi.clients.<name>.sync.interceptor.names` | Bean 名称 | RestClient（同步） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
+| `coapi.clients.<name>.sync.interceptor.types` | 类类型 | RestClient（同步） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
 
 [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) 中的过滤器解析从 `ApplicationContext` 解析 bean 名称和类型。
 

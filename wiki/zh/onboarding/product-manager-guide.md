@@ -175,14 +175,14 @@ graph LR
 - **内容**：异步处理数据流
 - **优势**：高容量操作性能更好
 - **用法**：从方法返回 `Flux<T>` 或 `Mono<T>`
-- **源码**：[GitHubApiClient.kt:25](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
+- **源码**：[GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt#L25)
 
 **同步编程**
 
 - **内容**：传统的请求-响应模型
 - **优势**：简单操作的代码更简单
 - **用法**：返回标准 Java/Kotlin 集合
-- **源码**：[GitHubSyncClient.java:26](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-sync/src/main/java/me/ahoo/coapi/example/sync/GitHubSyncClient.java)
+- **源码**：[GitHubSyncClient.java](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-sync/src/main/java/me/ahoo/coapi/example/sync/GitHubSyncClient.java#L26)
 
 #### 配置选项
 
@@ -191,14 +191,14 @@ graph LR
 - **内容**：定义服务调用的基础 URL
 - **优势**：集中配置管理
 - **用法**：在注解中使用 `baseUrl = "${config.property}"`
-- **源码**：[GitHubApiClient.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
+- **源码**：[GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt#L21)
 
 **服务 ID 配置**
 
 - **内容**：使用服务发现获取服务位置
 - **优势**：动态服务位置管理
 - **用法**：在注解中使用 `serviceId = "service-name"`
-- **源码**：[ServiceApiClient.java:98](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L98)
+- **源码**：[ServiceApiClient.java](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L98)
 
 **自定义过滤**
 

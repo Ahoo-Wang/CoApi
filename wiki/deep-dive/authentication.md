@@ -17,11 +17,11 @@ The authentication layer leverages Spring WebFlux's reactive programming model t
 
 | Component | Responsibility | Key Features | Source |
 |----------|---------------|---------------|--------|
-| `HeaderSetFilter` | Generic header injection on requests | Configurable header names, value providers, mappers | [HeaderSetFilter.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt#L22) |
-| `BearerTokenFilter` | Authorization header injection | Bearer token prefix, token provider integration | [BearerTokenFilter.kt:18](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt#L18) |
-| `ExpirableToken` | Token with expiration information | JWT expiry detection, time-based validation | [ExpirableToken.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L19) |
-| `ExpirableTokenProvider` | Token provider interface | Reactive token fetching, header value mapping | [ExpirableTokenProvider.kt:33](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L33) |
-| `CachedExpirableTokenProvider` | Cached token provider | Reactive caching, automatic expiry invalidation | [CachedExpirableTokenProvider.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt#L19) |
+| `HeaderSetFilter` | Generic header injection on requests | Configurable header names, value providers, mappers | [HeaderSetFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt#L22) |
+| `BearerTokenFilter` | Authorization header injection | Bearer token prefix, token provider integration | [BearerTokenFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt#L18) |
+| `ExpirableToken` | Token with expiration information | JWT expiry detection, time-based validation | [ExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L19) |
+| `ExpirableTokenProvider` | Token provider interface | Reactive token fetching, header value mapping | [ExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L33) |
+| `CachedExpirableTokenProvider` | Cached token provider | Reactive caching, automatic expiry invalidation | [CachedExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt#L19) |
 
 ## Class Hierarchy
 

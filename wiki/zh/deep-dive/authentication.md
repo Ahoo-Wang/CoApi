@@ -17,11 +17,11 @@ CoApi 中的认证系统旨在处理现代 API 认证的常见需求，特别是
 
 | 组件 | 职责 | 关键特性 | 来源 |
 |----------|---------------|---------------|--------|
-| `HeaderSetFilter` | 在请求上注入通用头部 | 可配置的头部名称、值提供者、映射器 | [HeaderSetFilter.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt#L22) |
-| `BearerTokenFilter` | Authorization 头部注入 | Bearer 令牌前缀、令牌提供者集成 | [BearerTokenFilter.kt:18](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt#L18) |
-| `ExpirableToken` | 带过期信息的令牌 | JWT 过期检测、基于时间的验证 | [ExpirableToken.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L19) |
-| `ExpirableTokenProvider` | 令牌提供者接口 | 响应式令牌获取、头部值映射 | [ExpirableTokenProvider.kt:33](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L33) |
-| `CachedExpirableTokenProvider` | 缓存令牌提供者 | 响应式缓存、自动过期失效 | [CachedExpirableTokenProvider.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt#L19) |
+| `HeaderSetFilter` | 在请求上注入通用头部 | 可配置的头部名称、值提供者、映射器 | [HeaderSetFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt#L22) |
+| `BearerTokenFilter` | Authorization 头部注入 | Bearer 令牌前缀、令牌提供者集成 | [BearerTokenFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt#L18) |
+| `ExpirableToken` | 带过期信息的令牌 | JWT 过期检测、基于时间的验证 | [ExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L19) |
+| `ExpirableTokenProvider` | 令牌提供者接口 | 响应式令牌获取、头部值映射 | [ExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L33) |
+| `CachedExpirableTokenProvider` | 缓存令牌提供者 | 响应式缓存、自动过期失效 | [CachedExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt#L19) |
 
 ## 类层次结构
 

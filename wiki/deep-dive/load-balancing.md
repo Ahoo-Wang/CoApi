@@ -15,11 +15,11 @@ CoApi provides three ways to opt into load balancing, all resolving to the same 
 
 | Mechanism | Annotation | Resolved URL | Load Balanced | Source |
 |-----------|-----------|--------------|---------------|--------|
-| Service ID | `@CoApi(serviceId = "svc")` | `http://svc` | Yes | [CoApi.kt:46](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L46) |
-| LB Protocol | `@CoApi(baseUrl = "lb://svc")` | `http://svc` | Yes | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
-| Annotation | `@CoApi @LoadBalanced` | Empty | Yes | [LoadBalanced.kt:17](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
-| Properties | `coapi.clients.<name>.load-balanced=true` | Per properties | Yes | [CoApiProperties.kt:54](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
-| Direct URL | `@CoApi(baseUrl = "http://...")` | As specified | No | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| Service ID | `@CoApi(serviceId = "svc")` | `http://svc` | Yes | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L46) |
+| LB Protocol | `@CoApi(baseUrl = "lb://svc")` | `http://svc` | Yes | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| Annotation | `@CoApi @LoadBalanced` | Empty | Yes | [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
+| Properties | `coapi.clients.<name>.load-balanced=true` | Per properties | Yes | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
+| Direct URL | `@CoApi(baseUrl = "http://...")` | As specified | No | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
 
 ## URL Resolution Flow
 
@@ -166,10 +166,10 @@ coapi:
 
 | Property | Type | Applies To | Source |
 |----------|------|-----------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | Bean names | WebClient (reactive) | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.reactive.filter.types` | Class types | WebClient (reactive) | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.sync.interceptor.names` | Bean names | RestClient (sync) | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
-| `coapi.clients.<name>.sync.interceptor.types` | Class types | RestClient (sync) | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
+| `coapi.clients.<name>.reactive.filter.names` | Bean names | WebClient (reactive) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
+| `coapi.clients.<name>.reactive.filter.types` | Class types | WebClient (reactive) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
+| `coapi.clients.<name>.sync.interceptor.names` | Bean names | RestClient (sync) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
+| `coapi.clients.<name>.sync.interceptor.types` | Class types | RestClient (sync) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
 
 Filter resolution in [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) resolves bean names and types from `ApplicationContext`.
 

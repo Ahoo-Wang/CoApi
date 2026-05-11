@@ -13,10 +13,10 @@ CoApi 将 HTTP 客户端设置精简到极致：用 `@HttpExchange` 方法定义
 
 | 步骤 | 操作 | 关键文件 | 源码 |
 |------|------|----------|--------|
-| 1. 添加依赖 | `coapi-spring-boot-starter` | [spring-boot-starter/build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts) | [spring-boot-starter/build.gradle.kts:29](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts#L29) |
-| 2. 定义接口 | `@CoApi` + `@GetExchange` | [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) | [example/.../GitHubApiClient.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt#L21) |
-| 3. 配置 URL | `application.yaml` | [application.yaml](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml) | [example/.../application.yaml:3](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml#L3) |
-| 4. 注入并使用 | 构造函数注入 | [GithubController.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt) | [example/.../GithubController.kt:32](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt#L32) |
+| 1. 添加依赖 | `coapi-spring-boot-starter` | [spring-boot-starter/build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts) | [build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts#L29) |
+| 2. 定义接口 | `@CoApi` + `@GetExchange` | [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) | [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt#L21) |
+| 3. 配置 URL | `application.yaml` | [application.yaml](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml) | [application.yaml](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml#L3) |
+| 4. 注入并使用 | 构造函数注入 | [GithubController.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt) | [GithubController.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt#L32) |
 
 ## 步骤 1：添加依赖
 

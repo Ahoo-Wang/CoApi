@@ -157,13 +157,13 @@ graph LR
 - **What**: Handle data streams asynchronously
 - **Benefit**: Better performance for high-volume operations
 - **Usage**: Return `Flux<T>` or `Mono<T>` from methods
-- **Source**: [GitHubApiClient.kt:25](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
+- **Source**: [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt#L25)
 
 **Synchronous Programming**
 - **What**: Traditional request-response model
 - **Benefit**: Simpler code for straightforward operations
 - **Usage**: Return standard Java/Kotlin collections
-- **Source**: [GitHubSyncClient.java:26](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-sync/src/main/java/me/ahoo/coapi/example/sync/GitHubSyncClient.java)
+- **Source**: [GitHubSyncClient.java](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-sync/src/main/java/me/ahoo/coapi/example/sync/GitHubSyncClient.java#L26)
 
 #### Configuration Options
 
@@ -171,13 +171,13 @@ graph LR
 - **What**: Define the base URL for service calls
 - **Benefit**: Centralized configuration management
 - **Usage**: Use `baseUrl = "${config.property}"` in annotations
-- **Source**: [GitHubApiClient.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
+- **Source**: [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt#L21)
 
 **Service ID Configuration**
 - **What**: Use service discovery for service locations
 - **Benefit**: Dynamic service location management
 - **Usage**: Use `serviceId = "service-name"` in annotations
-- **Source**: [ServiceApiClient.java:98](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L98)
+- **Source**: [ServiceApiClient.java](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L98)
 
 **Custom Filtering**
 - **What**: Add custom filters for request/response processing
