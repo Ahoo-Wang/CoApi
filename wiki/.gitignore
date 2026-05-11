@@ -1,7 +1,6 @@
 node_modules
 .vitepress/dist
 .vitepress/cache
-pnpm-lock.yaml
 package-lock.json
 *.local
 .DS_Store
