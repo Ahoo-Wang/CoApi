@@ -40,32 +40,32 @@ graph TD
 
 ## Core Component Responsibilities
 
-### CoApiDefinition ([spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt:24])
+### CoApiDefinition (https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L24)
 Parses @CoApi annotation into metadata:
 - **name**: Resolved client name (defaults to class name)
 - **apiType**: The interface class
 - **baseUrl**: Supports `lb://` and `http://` protocols with placeholder resolution
 - **loadBalanced**: Determines if service discovery should be used
 
-### CoApiRegistrar ([spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt:22])
+### CoApiRegistrar (https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22)
 Registers beans into BeanDefinitionRegistry:
 - Creates HTTP client FactoryBean based on ClientMode
 - Creates CoApiFactoryBean for proxy generation
 - Handles bean name resolution and collision detection
 
-### AbstractCoApiRegistrar ([spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt:28])
+### AbstractCoApiRegistrar (https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28)
 Template method pattern implementation:
 - Infers ClientMode from Spring environment
 - Registers HttpExchangeAdapterFactory
 - Delegates to subclass for definition discovery
 
-### CoApiFactoryBean ([spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt:21])
+### CoApiFactoryBean (https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21)
 Creates the JDK proxy via HttpServiceProxyFactory:
 - Resolves HttpExchangeAdapter from SPI
 - Builds HttpServiceProxyFactory with the adapter
 - Creates proxy instance that delegates to HTTP client
 
-### HttpExchangeAdapterFactory ([spring/src/main/kotlin/me/ahoo/coapi/spring/HttpExchangeAdapterFactory.kt:19])
+### HttpExchangeAdapterFactory (https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/HttpExchangeAdapterFactory.kt#L19)
 SPI interface for pluggable adapters:
 - **SyncHttpExchangeAdapterFactory**: RestClient-based adapter
 - **ReactiveHttpExchangeAdapterFactory**: WebClient-based adapter
