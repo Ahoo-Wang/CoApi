@@ -1,0 +1,28 @@
+# CoApi
+
+> Zero-boilerplate HTTP client auto-configuration for Spring 6 HTTP Interface clients. Supports both reactive (WebClient) and synchronous (RestClient) programming models with optional client-side load balancing.
+
+## Onboarding
+
+- [Contributor Guide](wiki/onboarding/contributor-guide.md) — Setup, architecture, testing, and contributing
+- [Staff Engineer Guide](wiki/onboarding/staff-engineer-guide.md) — Architectural insights and design tradeoffs
+- [Executive Guide](wiki/onboarding/executive-guide.md) — Technology investment thesis for engineering leaders
+- [Product Manager Guide](wiki/onboarding/product-manager-guide.md) — Feature map and user journey
+
+## Getting Started
+
+- [What is CoApi?](wiki/getting-started/overview.md) — Why CoApi exists, comparison with OpenFeign
+- [Installation & Setup](wiki/getting-started/installation.md) — Gradle/Maven dependencies, module structure
+- [Quick Start](wiki/getting-started/quick-start.md) — Define your first HTTP client in 4 steps
+- [Configuration Reference](wiki/getting-started/configuration.md) — All YAML properties and resolution order
+
+## Deep Dive
+
+- [Architecture Overview](wiki/deep-dive/architecture.md) — Registration flow, bean lifecycle, module responsibilities
+- [Annotations](wiki/deep-dive/annotations.md) — @CoApi, @LoadBalanced, URL resolution, bean naming
+- [Client Modes](wiki/deep-dive/client-modes.md) — REACTIVE/SYNC/AUTO, WebClient vs RestClient internals
+- [Load Balancing](wiki/deep-dive/load-balancing.md) — lb:// protocol, Spring Cloud LoadBalancer integration
+- [Customization](wiki/deep-dive/customization.md) — Builder customizer SPI, filter/interceptor chains
+- [Authentication](wiki/deep-dive/authentication.md) — BearerTokenFilter, JWT caching, HeaderSetFilter
+- [Auto-Configuration](wiki/deep-dive/auto-configuration.md) — Boot auto-config vs @EnableCoApi, classpath scanning
+- [Examples & Patterns](wiki/deep-dive/examples.md) — Provider-consumer pattern, sync Java, URI clients

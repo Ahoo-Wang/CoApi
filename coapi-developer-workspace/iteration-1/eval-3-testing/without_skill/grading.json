@@ -1,0 +1,47 @@
+{
+  "eval_id": 3,
+  "eval_name": "testing",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "Uses ApplicationContextRunner for unit-level bean verification",
+      "passed": true,
+      "evidence": "WeatherApiClientContextTest uses ApplicationContextRunner"
+    },
+    {
+      "text": "Uses @SpringBootTest for integration test",
+      "passed": true,
+      "evidence": "WeatherApiClientIntegrationTest annotated with @SpringBootTest"
+    },
+    {
+      "text": "Uses fluent-assert (.assert()) syntax",
+      "passed": true,
+      "evidence": "Uses .assert().isNotNull(), .assert().isNotBlank() throughout"
+    },
+    {
+      "text": "Uses JUnit 5 (@Test from jupiter)",
+      "passed": true,
+      "evidence": "All test classes import org.junit.jupiter.api.Test"
+    },
+    {
+      "text": "Verifies bean registration with hasSingleBean or similar",
+      "passed": true,
+      "evidence": "Uses AssertionsForInterfaceTypes.assertThat(context).hasSingleBean()"
+    },
+    {
+      "text": "Has proper test class structure with @EnableCoApi configuration",
+      "passed": true,
+      "evidence": "EnableWeatherClientConfiguration annotated with @EnableCoApi(clients = [WeatherApiClient::class])"
+    },
+    {
+      "text": "Provides MockClientProperties for ApplicationContextRunner tests",
+      "passed": false,
+      "evidence": "Missing ClientProperties bean registration in ApplicationContextRunner tests, which would cause tests to fail without CoApiAutoConfiguration providing it"
+    },
+    {
+      "text": "Tests both reactive and sync client modes",
+      "passed": true,
+      "evidence": "Has separate tests for REACTIVE and SYNC mode bean registration"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: user-service-consumer
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        # Register this service with Consul
+        register: true
+        # Service name in Consul
+        service-name: ${spring.application.name}
+    # Spring Cloud LoadBalancer configuration
+    loadbalancer:
+      # Use Consul as the service discovery provider
+      consul:
+        enabled: true
+
+# CoApi configuration for REACTIVE mode
+coapi:
+  mode: REACTIVE
+  clients:
+    ReactiveUserClient:
+      # Load balancing is automatically enabled when serviceId is set.
+      # The loadBalancerExchangeFilterFunction is auto-configured by
+      # spring-cloud-starter-loadbalancer for WebClient.
+      reactive:
+        filter:
+          names:
+            - loadBalancerExchangeFilterFunction
+    SyncUserClient:
+      # Even in REACTIVE mode, sync clients need interceptor configuration
+      sync:
+        interceptor:
+          names:
+            - loadBalancerInterceptor
+
+# Consul health check configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

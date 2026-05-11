@@ -1,0 +1,39 @@
+{
+  "eval_id": 1,
+  "eval_name": "create-interface",
+  "prompt": "I need to create a CoApi client for the JSONPlaceholder API (https://jsonplaceholder.typicode.com). It should have endpoints to get all posts, get a post by ID, and create a new post. I want to use the reactive programming model with Flux/Mono. Generate the interface and data classes, plus the application.yml config.",
+  "assertions": [
+    {
+      "text": "Interface has @CoApi annotation",
+      "type": "contains_annotation"
+    },
+    {
+      "text": "Interface has @HttpExchange annotation",
+      "type": "contains_annotation"
+    },
+    {
+      "text": "Methods use Flux/Mono return types (reactive)",
+      "type": "code_pattern"
+    },
+    {
+      "text": "Has @GetExchange for GET endpoints",
+      "type": "contains_annotation"
+    },
+    {
+      "text": "Has @PostExchange for POST endpoint",
+      "type": "contains_annotation"
+    },
+    {
+      "text": "Has @PathVariable for path parameters",
+      "type": "contains_annotation"
+    },
+    {
+      "text": "Defines Post data class",
+      "type": "code_pattern"
+    },
+    {
+      "text": "Includes application.yml with base URL config",
+      "type": "config_present"
+    }
+  ]
+}

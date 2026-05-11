@@ -1,0 +1,47 @@
+{
+  "eval_id": 1,
+  "eval_name": "create-interface",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "Interface has @CoApi annotation",
+      "passed": true,
+      "evidence": "PostClient is annotated with @CoApi(baseUrl = \"\\${jsonplaceholder.url}\")"
+    },
+    {
+      "text": "Interface has @HttpExchange annotation",
+      "passed": true,
+      "evidence": "PostApi is annotated with @HttpExchange(\"posts\") at class level"
+    },
+    {
+      "text": "Methods use Flux/Mono return types (reactive)",
+      "passed": true,
+      "evidence": "getPosts() returns Flux<Post>, getPostById() and createPost() return Mono<Post>"
+    },
+    {
+      "text": "Has @GetExchange for GET endpoints",
+      "passed": true,
+      "evidence": "@GetExchange on getPosts() and getPostById()"
+    },
+    {
+      "text": "Has @PostExchange for POST endpoint",
+      "passed": true,
+      "evidence": "@PostExchange on createPost()"
+    },
+    {
+      "text": "Has @PathVariable for path parameters",
+      "passed": true,
+      "evidence": "@PathVariable id: Int on getPostById()"
+    },
+    {
+      "text": "Defines Post data class",
+      "passed": true,
+      "evidence": "Post and CreatePostRequest data classes defined"
+    },
+    {
+      "text": "Includes application.yml with base URL config",
+      "passed": true,
+      "evidence": "application.yml has jsonplaceholder.url and coapi.mode=REACTIVE"
+    }
+  ]
+}

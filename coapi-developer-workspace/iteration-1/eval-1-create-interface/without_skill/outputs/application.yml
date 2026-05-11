@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: jsonplaceholder-client
+
+jsonplaceholder:
+  url: https://jsonplaceholder.typicode.com
+
+coapi:
+  base-packages:
+    - me.ahoo.coapi.example.jsonplaceholder.client

@@ -1,0 +1,42 @@
+{
+  "eval_id": 2,
+  "eval_name": "load-balancing",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "Includes spring-cloud-starter-loadbalancer dependency",
+      "passed": true,
+      "evidence": "build.gradle.kts has implementation(\"org.springframework.cloud:spring-cloud-starter-loadbalancer\")"
+    },
+    {
+      "text": "Uses serviceId in @CoApi annotation",
+      "passed": true,
+      "evidence": "ReactiveUserClient and SyncUserClient both use @CoApi(serviceId = \"user-service\")"
+    },
+    {
+      "text": "Has coapi.mode configuration",
+      "passed": true,
+      "evidence": "application-reactive.yml has coapi.mode=REACTIVE, application-sync.yml has coapi.mode=SYNC"
+    },
+    {
+      "text": "Shows reactive filter configuration",
+      "passed": true,
+      "evidence": "application-reactive.yml configures coapi.clients.UserApiClient.reactive.filter"
+    },
+    {
+      "text": "Shows sync interceptor configuration",
+      "passed": true,
+      "evidence": "application-sync.yml configures coapi.clients.UserSyncApiClient.sync.interceptor"
+    },
+    {
+      "text": "Interface has getUser and listUsers methods",
+      "passed": true,
+      "evidence": "UserApi defines getUser(@PathVariable id: String): Mono<User> and listUsers(): Flux<User>"
+    },
+    {
+      "text": "Uses correct Maven artifact for CoApi starter",
+      "passed": false,
+      "evidence": "Uses me.ahoo.coapi:spring-boot-starter:latest-SNAPSHOT instead of correct me.ahoo.coapi:coapi-spring-boot-starter"
+    }
+  ]
+}

@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "coapi-developer", "runs": [{"id": "eval-1-create-interface-with_skill", "prompt": "I need to create a CoApi client for the JSONPlaceholder API (https://jsonplaceholder.typicode.com). It should have endpoints to get all posts, get a post by ID, and create a new post. I want to use the reactive programming model with Flux/Mono. Generate the interface and data classes, plus the application.yml config.", "eval_id": 1, "outputs": [{"name": "PostApi.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,cGFja2FnZSBtZS5haG9vLmNvYXBpLmV4YW1wbGUuanNvbnBsYWNlaG9sZGVyLmFwaQoKaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsud2ViLmJpbmQuYW5ub3RhdGlvbi5QYXRoVmFyaWFibGUKaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsud2ViLmJpbmQuYW5ub3RhdGlvbi5SZXF1ZXN0Qm9keQppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay53ZWIuc2VydmljZS5hbm5vdGF0aW9uLkdldEV4Y2hhbmdlCmltcG9ydCBvcmcuc3ByaW5nZnJhbWV3b3JrLndlYi5zZXJ2aWNlLmFubm90YXRpb24uSHR0cEV4Y2hhbmdlCmltcG9ydCBvcmcuc3ByaW5nZnJhbWV3b3JrLndlYi5zZXJ2aWNlLmFubm90YXRpb24uUG9zdEV4Y2hhbmdlCmltcG9ydCByZWFjdG9yLmNvcmUucHVibGlzaGVyLkZsdXgKaW1wb3J0IHJlYWN0b3IuY29yZS5wdWJsaXNoZXIuTW9ubwoKQEh0dHBFeGNoYW5nZSgicG9zdHMiKQppbnRlcmZhY2UgUG9zdEFwaSB7CgogICAgQEdldEV4Y2hhbmdlCiAgICBmdW4gZ2V0UG9zdHMoKTogRmx1eDxQb3N0PgoKICAgIEBHZXRFeGNoYW5nZSgie2lkfSIpCiAgICBmdW4gZ2V0UG9zdEJ5SWQoQFBhdGhWYXJpYWJsZSBpZDogSW50KTogTW9ubzxQb3N0PgoKICAgIEBQb3N0RXhjaGFuZ2UKICAgIGZ1biBjcmVhdGVQb3N0KEBSZXF1ZXN0Qm9keSBwb3N0OiBDcmVhdGVQb3N0UmVxdWVzdCk6IE1vbm88UG9zdD4KfQoKZGF0YSBjbGFzcyBQb3N0KAogICAgdmFsIHVzZXJJZDogSW50LAogICAgdmFsIGlkOiBJbnQsCiAgICB2YWwgdGl0bGU6IFN0cmluZywKICAgIHZhbCBib2R5OiBTdHJpbmcKKQoKZGF0YSBjbGFzcyBDcmVhdGVQb3N0UmVxdWVzdCgKICAgIHZhbCB1c2VySWQ6IEludCwKICAgIHZhbCB0aXRsZTogU3RyaW5nLAogICAgdmFsIGJvZHk6IFN0cmluZwopCg=="}, {"name": "PostClient.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,cGFja2FnZSBtZS5haG9vLmNvYXBpLmV4YW1wbGUuanNvbnBsYWNlaG9sZGVyLmNsaWVudAoKaW1wb3J0IG1lLmFob28uY29hcGkuYXBpLkNvQXBpCmltcG9ydCBtZS5haG9vLmNvYXBpLmV4YW1wbGUuanNvbnBsYWNlaG9sZGVyLmFwaS5Qb3N0QXBpCgpAQ29BcGkoYmFzZVVybCA9ICJcJHtqc29ucGxhY2Vob2xkZXIudXJsfSIpCmludGVyZmFjZSBQb3N0Q2xpZW50IDogUG9zdEFwaQo="}, {"name": "application.yml", "type": "text", "content": "server:\n  port: 8080\n\njsonplaceholder:\n  url: https://jsonplaceholder.typicode.com\n\nspring:\n  application:\n    name: jsonplaceholder-consumer\n\ncoapi:\n  mode: REACTIVE\n  base-packages:\n    - me.ahoo.coapi.example.jsonplaceholder.client\n"}], "grading": {"eval_id": 1, "eval_name": "create-interface", "configuration": "with_skill", "expectations": [{"text": "Interface has @CoApi annotation", "passed": true, "evidence": "PostClient is annotated with @CoApi(baseUrl = \"\\${jsonplaceholder.url}\")"}, {"text": "Interface has @HttpExchange annotation", "passed": true, "evidence": "PostApi is annotated with @HttpExchange(\"posts\") at class level"}, {"text": "Methods use Flux/Mono return types (reactive)", "passed": true, "evidence": "getPosts() returns Flux<Post>, getPostById() and createPost() return Mono<Post>"}, {"text": "Has @GetExchange for GET endpoints", "passed": true, "evidence": "@GetExchange on getPosts() and getPostById()"}, {"text": "Has @PostExchange for POST endpoint", "passed": true, "evidence": "@PostExchange on createPost()"}, {"text": "Has @PathVariable for path parameters", "passed": true, "evidence": "@PathVariable id: Int on getPostById()"}, {"text": "Defines Post data class", "passed": true, "evidence": "Post and CreatePostRequest data classes defined"}, {"text": "Includes application.yml with base URL config", "passed": true, "evidence": "application.yml has jsonplaceholder.url and coapi.mode=REACTIVE"}]}}, {"id": "eval-1-create-interface-without_skill", "prompt": "I need to create a CoApi client for the JSONPlaceholder API (https://jsonplaceholder.typicode.com). It should have endpoints to get all posts, get a post by ID, and create a new post. I want to use the reactive programming model with Flux/Mono. Generate the interface and data classes, plus the application.yml config.", "eval_id": 1, "outputs": [{"name": "CreatePostRequest.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoKICogQ29weXJpZ2h0IFsyMDIyLXByZXNlbnRdIFthaG9vIHdhbmcgPGFob293YW5nQHFxLmNvbT4gKGh0dHBzOi8vZ2l0aHViLmNvbS9BaG9vLVdhbmcpXS4KICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlICJMaWNlbnNlIik7CiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS4KICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmUKICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywKICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQKICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuCiAqLwoKcGFja2FnZSBtZS5haG9vLmNvYXBpLmV4YW1wbGUuanNvbnBsYWNlaG9sZGVyLmNsaWVudAoKZGF0YSBjbGFzcyBDcmVhdGVQb3N0UmVxdWVzdCgKICAgIHZhbCB1c2VySWQ6IEludCwKICAgIHZhbCB0aXRsZTogU3RyaW5nLAogICAgdmFsIGJvZHk6IFN0cmluZwopCg=="}, {"name": "JsonPlaceholderClient.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoKICogQ29weXJpZ2h0IFsyMDIyLXByZXNlbnRdIFthaG9vIHdhbmcgPGFob293YW5nQHFxLmNvbT4gKGh0dHBzOi8vZ2l0aHViLmNvbS9BaG9vLVdhbmcpXS4KICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlICJMaWNlbnNlIik7CiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS4KICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmUKICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywKICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQKICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuCiAqLwoKcGFja2FnZSBtZS5haG9vLmNvYXBpLmV4YW1wbGUuanNvbnBsYWNlaG9sZGVyLmNsaWVudAoKaW1wb3J0IG1lLmFob28uY29hcGkuYXBpLkNvQXBpCmltcG9ydCBvcmcuc3ByaW5nZnJhbWV3b3JrLndlYi5iaW5kLmFubm90YXRpb24uUGF0aFZhcmlhYmxlCmltcG9ydCBvcmcuc3ByaW5nZnJhbWV3b3JrLndlYi5iaW5kLmFubm90YXRpb24uUmVxdWVzdEJvZHkKaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsud2ViLnNlcnZpY2UuYW5ub3RhdGlvbi5HZXRFeGNoYW5nZQppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay53ZWIuc2VydmljZS5hbm5vdGF0aW9uLlBvc3RFeGNoYW5nZQppbXBvcnQgcmVhY3Rvci5jb3JlLnB1Ymxpc2hlci5GbHV4CmltcG9ydCByZWFjdG9yLmNvcmUucHVibGlzaGVyLk1vbm8KCkBDb0FwaShiYXNlVXJsID0gIlwke2pzb25wbGFjZWhvbGRlci51cmx9IikKaW50ZXJmYWNlIEpzb25QbGFjZWhvbGRlckNsaWVudCB7CgogICAgQEdldEV4Y2hhbmdlKCJwb3N0cyIpCiAgICBmdW4gZ2V0UG9zdHMoKTogRmx1eDxQb3N0PgoKICAgIEBHZXRFeGNoYW5nZSgicG9zdHMve2lkfSIpCiAgICBmdW4gZ2V0UG9zdEJ5SWQoQFBhdGhWYXJpYWJsZSBpZDogSW50KTogTW9ubzxQb3N0PgoKICAgIEBQb3N0RXhjaGFuZ2UoInBvc3RzIikKICAgIGZ1biBjcmVhdGVQb3N0KEBSZXF1ZXN0Qm9keSByZXF1ZXN0OiBDcmVhdGVQb3N0UmVxdWVzdCk6IE1vbm88UG9zdD4KfQo="}, {"name": "Post.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoKICogQ29weXJpZ2h0IFsyMDIyLXByZXNlbnRdIFthaG9vIHdhbmcgPGFob293YW5nQHFxLmNvbT4gKGh0dHBzOi8vZ2l0aHViLmNvbS9BaG9vLVdhbmcpXS4KICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlICJMaWNlbnNlIik7CiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS4KICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmUKICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywKICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQKICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuCiAqLwoKcGFja2FnZSBtZS5haG9vLmNvYXBpLmV4YW1wbGUuanNvbnBsYWNlaG9sZGVyLmNsaWVudAoKZGF0YSBjbGFzcyBQb3N0KAogICAgdmFsIGlkOiBJbnQsCiAgICB2YWwgdXNlcklkOiBJbnQsCiAgICB2YWwgdGl0bGU6IFN0cmluZywKICAgIHZhbCBib2R5OiBTdHJpbmcKKQo="}, {"name": "application.yml", "type": "text", "content": "server:\n  port: 8080\n\nspring:\n  application:\n    name: jsonplaceholder-client\n\njsonplaceholder:\n  url: https://jsonplaceholder.typicode.com\n\ncoapi:\n  base-packages:\n    - me.ahoo.coapi.example.jsonplaceholder.client\n"}], "grading": {"eval_id": 1, "eval_name": "create-interface", "configuration": "without_skill", "expectations": [{"text": "Interface has @CoApi annotation", "passed": true, "evidence": "JsonPlaceholderClient annotated with @CoApi(baseUrl = \"\\${jsonplaceholder.url}\")"}, {"text": "Interface has @HttpExchange annotation", "passed": false, "evidence": "No class-level @HttpExchange annotation; methods specify full paths directly like @GetExchange(\"posts\") and @GetExchange(\"posts/{id}\")"}, {"text": "Methods use Flux/Mono return types (reactive)", "passed": true, "evidence": "getPosts() returns Flux<Post>, getPostById() and createPost() return Mono<Post>"}, {"text": "Has @GetExchange for GET endpoints", "passed": true, "evidence": "@GetExchange on getPosts() and getPostById()"}, {"text": "Has @PostExchange for POST endpoint", "passed": true, "evidence": "@PostExchange on createPost()"}, {"text": "Has @PathVariable for path parameters", "passed": true, "evidence": "@PathVariable id: Int on getPostById()"}, {"text": "Defines Post data class", "passed": true, "evidence": "Post and CreatePostRequest data classes defined"}, {"text": "Includes application.yml with base URL config", "passed": true, "evidence": "application.yml has jsonplaceholder.url property"}]}}, {"id": "eval-2-load-balancing-with_skill", "prompt": "I have a microservice architecture with a user-service registered in Consul. I want to create a CoApi client that uses Spring Cloud LoadBalancer to call user-service. The client should have endpoints for getUser(id) and listUsers(). Show me the full setup including dependencies, the client interface, and the application.yml configuration for both reactive and sync modes.", "eval_id": 2, "outputs": [{"name": "build.gradle.kts", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,cGx1Z2lucyB7CiAgICBgamF2YS1saWJyYXJ5YAogICAga290bGluKCJqdm0iKSB2ZXJzaW9uICIxLjkuMjUiCiAgICBrb3RsaW4oInBsdWdpbi5zcHJpbmciKSB2ZXJzaW9uICIxLjkuMjUiCiAgICBpZCgib3JnLnNwcmluZ2ZyYW1ld29yay5ib290IikgdmVyc2lvbiAiMy4zLjAiCiAgICBpZCgiaW8uc3ByaW5nLmRlcGVuZGVuY3ktbWFuYWdlbWVudCIpIHZlcnNpb24gIjEuMS41Igp9Cgpncm91cCA9ICJjb20uZXhhbXBsZSIKdmVyc2lvbiA9ICIwLjAuMS1TTkFQU0hPVCIKCmphdmEgewogICAgdG9vbGNoYWluIHsKICAgICAgICBsYW5ndWFnZVZlcnNpb24gPSBKYXZhTGFuZ3VhZ2VWZXJzaW9uLm9mKDE3KQogICAgfQp9CgpyZXBvc2l0b3JpZXMgewogICAgbWF2ZW5DZW50cmFsKCkKfQoKZGVwZW5kZW5jaWVzIHsKICAgIC8vIENvQXBpIHN0YXJ0ZXIgLSBhdXRvLWNvbmZpZ3VyZXMgQENvQXBpIGludGVyZmFjZXMKICAgIGltcGxlbWVudGF0aW9uKCJtZS5haG9vLmNvYXBpOmNvYXBpLXNwcmluZy1ib290LXN0YXJ0ZXIiKQoKICAgIC8vIFNwcmluZyBCb290IFdlYkZsdXggKHByb3ZpZGVzIFdlYkNsaWVudCBmb3IgcmVhY3RpdmUgbW9kZSkKICAgIGltcGxlbWVudGF0aW9uKCJvcmcuc3ByaW5nZnJhbWV3b3JrLmJvb3Q6c3ByaW5nLWJvb3Qtc3RhcnRlci13ZWJmbHV4IikKCiAgICAvLyBTcHJpbmcgQm9vdCBSZXN0Q2xpZW50IChmb3Igc3luYyBtb2RlKQogICAgaW1wbGVtZW50YXRpb24oIm9yZy5zcHJpbmdmcmFtZXdvcmsuYm9vdDpzcHJpbmctYm9vdC1zdGFydGVyLXJlc3RjbGllbnQiKQoKICAgIC8vIFNwcmluZyBDbG91ZCBMb2FkQmFsYW5jZXIgZm9yIGNsaWVudC1zaWRlIGxvYWQgYmFsYW5jaW5nIHdpdGggQ29uc3VsCiAgICBpbXBsZW1lbnRhdGlvbigib3JnLnNwcmluZ2ZyYW1ld29yay5jbG91ZDpzcHJpbmctY2xvdWQtc3RhcnRlci1sb2FkYmFsYW5jZXIiKQoKICAgIC8vIFNwcmluZyBDbG91ZCBDb25zdWwgZm9yIHNlcnZpY2UgZGlzY292ZXJ5CiAgICBpbXBsZW1lbnRhdGlvbigib3JnLnNwcmluZ2ZyYW1ld29yay5jbG91ZDpzcHJpbmctY2xvdWQtc3RhcnRlci1jb25zdWwtZGlzY292ZXJ5IikKCiAgICAvLyBKYWNrc29uIEtvdGxpbiBtb2R1bGUgZm9yIEpTT04gc2VyaWFsaXphdGlvbgogICAgaW1wbGVtZW50YXRpb24oImNvbS5mYXN0ZXJ4bWwuamFja3Nvbi5tb2R1bGU6amFja3Nvbi1tb2R1bGUta290bGluIikKCiAgICAvLyBSZWFjdG9yIEtvdGxpbiBleHRlbnNpb25zCiAgICBpbXBsZW1lbnRhdGlvbigiaW8ucHJvamVjdHJlYWN0b3Iua290bGluOnJlYWN0b3Ita290bGluLWV4dGVuc2lvbnMiKQoKICAgIC8vIEtvdGxpbiBzdGRsaWIKICAgIGltcGxlbWVudGF0aW9uKCJvcmcuamV0YnJhaW5zLmtvdGxpbjprb3RsaW4tcmVmbGVjdCIpCgogICAgLy8gVGVzdCBkZXBlbmRlbmNpZXMKICAgIHRlc3RJbXBsZW1lbnRhdGlvbigib3JnLnNwcmluZ2ZyYW1ld29yay5ib290OnNwcmluZy1ib290LXN0YXJ0ZXItdGVzdCIpCiAgICB0ZXN0UnVudGltZU9ubHkoIm9yZy5qdW5pdC5wbGF0Zm9ybTpqdW5pdC1wbGF0Zm9ybS1sYXVuY2hlciIpCiAgICB0ZXN0UnVudGltZU9ubHkoIm9yZy5qdW5pdC5qdXBpdGVyOmp1bml0LWp1cGl0ZXItZW5naW5lIikKfQoKZGVwZW5kZW5jeU1hbmFnZW1lbnQgewogICAgaW1wb3J0cyB7CiAgICAgICAgbWF2ZW5Cb20oIm9yZy5zcHJpbmdmcmFtZXdvcmsuY2xvdWQ6c3ByaW5nLWNsb3VkLWRlcGVuZGVuY2llczoyMDIzLjAuMiIpCiAgICB9Cn0KCnRhc2tzLndpdGhUeXBlPFRlc3Q+IHsKICAgIHVzZUpVbml0UGxhdGZvcm0oKQp9Cgp0YXNrcy53aXRoVHlwZTxKYXZhQ29tcGlsZT4gewogICAgb3B0aW9ucy5jb21waWxlckFyZ3MuYWRkQWxsKGxpc3RPZigiLXBhcmFtZXRlcnMiKSkKfQo="}], "grading": {"eval_id": 2, "eval_name": "load-balancing", "configuration": "with_skill", "expectations": [{"text": "Includes spring-cloud-starter-loadbalancer dependency", "passed": true, "evidence": "build.gradle.kts has implementation(\"org.springframework.cloud:spring-cloud-starter-loadbalancer\")"}, {"text": "Uses serviceId in @CoApi annotation", "passed": true, "evidence": "ReactiveUserClient and SyncUserClient both use @CoApi(serviceId = \"user-service\")"}, {"text": "Has coapi.mode configuration", "passed": true, "evidence": "application-reactive.yml has coapi.mode=REACTIVE, application-sync.yml has coapi.mode=SYNC"}, {"text": "Shows reactive filter configuration", "passed": true, "evidence": "application-reactive.yml configures coapi.clients.UserApiClient.reactive.filter"}, {"text": "Shows sync interceptor configuration", "passed": true, "evidence": "application-sync.yml configures coapi.clients.UserSyncApiClient.sync.interceptor"}, {"text": "Interface has getUser and listUsers methods", "passed": true, "evidence": "UserApi defines getUser(@PathVariable id: String): Mono<User> and listUsers(): Flux<User>"}, {"text": "Uses correct Maven artifact for CoApi starter", "passed": false, "evidence": "Uses me.ahoo.coapi:spring-boot-starter:latest-SNAPSHOT instead of correct me.ahoo.coapi:coapi-spring-boot-starter"}]}}, {"id": "eval-2-load-balancing-without_skill", "prompt": "I have a microservice architecture with a user-service registered in Consul. I want to create a CoApi client that uses Spring Cloud LoadBalancer to call user-service. The client should have endpoints for getUser(id) and listUsers(). Show me the full setup including dependencies, the client interface, and the application.yml configuration for both reactive and sync modes.", "eval_id": 2, "outputs": [{"name": "build.gradle.kts", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,cGx1Z2lucyB7CiAgICBrb3RsaW4oImp2bSIpIHZlcnNpb24gIjIuMS4yMCIKICAgIGtvdGxpbigicGx1Z2luLnNwcmluZyIpIHZlcnNpb24gIjIuMS4yMCIKICAgIGlkKCJvcmcuc3ByaW5nZnJhbWV3b3JrLmJvb3QiKSB2ZXJzaW9uICI0LjAuMiIKICAgIGlkKCJpby5zcHJpbmcuZGVwZW5kZW5jeS1tYW5hZ2VtZW50IikgdmVyc2lvbiAiMS4xLjciCn0KCmdyb3VwID0gImNvbS5leGFtcGxlIgp2ZXJzaW9uID0gIjAuMC4xLVNOQVBTSE9UIgoKa290bGluIHsKICAgIGp2bVRvb2xjaGFpbigxNykKfQoKcmVwb3NpdG9yaWVzIHsKICAgIG1hdmVuQ2VudHJhbCgpCiAgICBtYXZlbkxvY2FsKCkKfQoKZGVwZW5kZW5jaWVzIHsKICAgIC8vIENvQXBpIFNwcmluZyBCb290IFN0YXJ0ZXIgKGF1dG8tY29uZmlndXJhdGlvbiBmb3IgQENvQXBpIGludGVyZmFjZXMpCiAgICBpbXBsZW1lbnRhdGlvbigibWUuYWhvby5jb2FwaTpzcHJpbmctYm9vdC1zdGFydGVyOmxhdGVzdC1TTkFQU0hPVCIpCgogICAgLy8gU3ByaW5nIEJvb3QgV2ViRmx1eCAocmVhY3RpdmUgbW9kZSkKICAgIGltcGxlbWVudGF0aW9uKCJvcmcuc3ByaW5nZnJhbWV3b3JrLmJvb3Q6c3ByaW5nLWJvb3Qtc3RhcnRlci13ZWJmbHV4IikKCiAgICAvLyBTcHJpbmcgQm9vdCBXZWIgKyBSZXN0Q2xpZW50IChzeW5jIG1vZGUpCiAgICBpbXBsZW1lbnRhdGlvbigib3JnLnNwcmluZ2ZyYW1ld29yay5ib290OnNwcmluZy1ib290LXN0YXJ0ZXItd2ViIikKICAgIGltcGxlbWVudGF0aW9uKCJvcmcuc3ByaW5nZnJhbWV3b3JrLmJvb3Q6c3ByaW5nLWJvb3Qtc3RhcnRlci1yZXN0Y2xpZW50IikKCiAgICAvLyBTcHJpbmcgQ2xvdWQgQ29uc3VsIERpc2NvdmVyeSAoc2VydmljZSByZWdpc3RyYXRpb24gYW5kIGRpc2NvdmVyeSB2aWEgQ29uc3VsKQogICAgaW1wbGVtZW50YXRpb24oIm9yZy5zcHJpbmdmcmFtZXdvcmsuY2xvdWQ6c3ByaW5nLWNsb3VkLXN0YXJ0ZXItY29uc3VsLWRpc2NvdmVyeSIpCgogICAgLy8gU3ByaW5nIENsb3VkIExvYWRCYWxhbmNlciAoY2xpZW50LXNpZGUgbG9hZCBiYWxhbmNpbmcpCiAgICBpbXBsZW1lbnRhdGlvbigib3JnLnNwcmluZ2ZyYW1ld29yay5jbG91ZDpzcHJpbmctY2xvdWQtc3RhcnRlci1sb2FkYmFsYW5jZXIiKQoKICAgIC8vIEphY2tzb24gS290bGluIG1vZHVsZSBmb3IgSlNPTiBzZXJpYWxpemF0aW9uCiAgICBpbXBsZW1lbnRhdGlvbigiY29tLmZhc3RlcnhtbC5qYWNrc29uLm1vZHVsZTpqYWNrc29uLW1vZHVsZS1rb3RsaW4iKQoKICAgIC8vIEtvdGxpbiBjb3JvdXRpbmVzIHJlYWN0b3Igc3VwcG9ydAogICAgaW1wbGVtZW50YXRpb24oImlvLnByb2plY3RyZWFjdG9yLmtvdGxpbjpyZWFjdG9yLWtvdGxpbi1leHRlbnNpb25zIikKCiAgICAvLyBUZXN0IGRlcGVuZGVuY2llcwogICAgdGVzdEltcGxlbWVudGF0aW9uKCJvcmcuc3ByaW5nZnJhbWV3b3JrLmJvb3Q6c3ByaW5nLWJvb3Qtc3RhcnRlci10ZXN0IikKICAgIHRlc3RJbXBsZW1lbnRhdGlvbigiaW8ucHJvamVjdHJlYWN0b3I6cmVhY3Rvci10ZXN0IikKfQoKZGVwZW5kZW5jeU1hbmFnZW1lbnQgewogICAgaW1wb3J0cyB7CiAgICAgICAgbWF2ZW5Cb20oIm9yZy5zcHJpbmdmcmFtZXdvcmsuY2xvdWQ6c3ByaW5nLWNsb3VkLWRlcGVuZGVuY2llczoyMDI1LjAuMCIpCiAgICB9Cn0KCnRhc2tzLndpdGhUeXBlPFRlc3Q+IHsKICAgIHVzZUpVbml0UGxhdGZvcm0oKQp9Cg=="}], "grading": {"eval_id": 2, "eval_name": "load-balancing", "configuration": "without_skill", "expectations": [{"text": "Includes spring-cloud-starter-loadbalancer dependency", "passed": true, "evidence": "build.gradle.kts has implementation(\"org.springframework.cloud:spring-cloud-starter-loadbalancer\")"}, {"text": "Uses serviceId in @CoApi annotation", "passed": true, "evidence": "UserApiClient and UserSyncApiClient both use @CoApi(serviceId = \"user-service\")"}, {"text": "Has coapi.mode configuration", "passed": true, "evidence": "application-reactive.yml has coapi.mode=REACTIVE, application-sync.yml has coapi.mode=SYNC"}, {"text": "Shows reactive filter configuration", "passed": true, "evidence": "application-reactive.yml configures coapi.clients.ReactiveUserClient.reactive.filter with loadBalancerExchangeFilterFunction"}, {"text": "Shows sync interceptor configuration", "passed": true, "evidence": "application-sync.yml configures coapi.clients.SyncUserClient.sync.interceptor with loadBalancerInterceptor"}, {"text": "Interface has getUser and listUsers methods", "passed": true, "evidence": "UserApiClient defines getUser() and listUsers()"}, {"text": "Uses correct Maven artifact for CoApi starter", "passed": true, "evidence": "Uses me.ahoo.coapi:coapi-spring-boot-starter (correct artifact name)"}, {"text": "Uses compatible Spring Cloud BOM version", "passed": false, "evidence": "Uses spring-cloud-dependencies:2023.0.2 which is incompatible with Spring Boot 4.x"}]}}, {"id": "eval-3-testing-with_skill", "prompt": "I'm writing tests for my CoApi client that calls an external weather API. I want to use ApplicationContextRunner to verify the client bean is registered correctly, and also write a Spring Boot integration test that actually calls the API. Show me both test patterns using the project's testing conventions (fluent-assert, JUnit 5).", "eval_id": 3, "outputs": [{"name": "WeatherApiClient.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoKICogQ29weXJpZ2h0IFsyMDIyLXByZXNlbnRdIFthaG9vIHdhbmcgPGFob293YW5nQHFxLmNvbT4gKGh0dHBzOi8vZ2l0aHViLmNvbS9BaG9vLVdhbmcpXS4KICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlICJMaWNlbnNlIik7CiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS4KICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmUKICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywKICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQKICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuCiAqLwoKcGFja2FnZSBtZS5haG9vLmNvYXBpLmV4YW1wbGUud2VhdGhlci5jbGllbnQKCmltcG9ydCBtZS5haG9vLmNvYXBpLmFwaS5Db0FwaQppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay53ZWIuYmluZC5hbm5vdGF0aW9uLlBhdGhWYXJpYWJsZQppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay53ZWIuc2VydmljZS5hbm5vdGF0aW9uLkdldEV4Y2hhbmdlCmltcG9ydCByZWFjdG9yLmNvcmUucHVibGlzaGVyLk1vbm8KCkBDb0FwaShiYXNlVXJsID0gIlwke3dlYXRoZXIudXJsfSIpCmludGVyZmFjZSBXZWF0aGVyQXBpQ2xpZW50IHsKCiAgICBAR2V0RXhjaGFuZ2UoInYxL2N1cnJlbnQ/Y2l0eT17Y2l0eX0iKQogICAgZnVuIGdldEN1cnJlbnRXZWF0aGVyKEBQYXRoVmFyaWFibGUgY2l0eTogU3RyaW5nKTogTW9ubzxXZWF0aGVyUmVzcG9uc2U+Cn0KCmRhdGEgY2xhc3MgV2VhdGhlclJlc3BvbnNlKAogICAgdmFsIGNpdHk6IFN0cmluZywKICAgIHZhbCB0ZW1wZXJhdHVyZTogRG91YmxlLAogICAgdmFsIGNvbmRpdGlvbjogU3RyaW5nLAogICAgdmFsIGh1bWlkaXR5OiBJbnQKKQo="}, {"name": "WeatherApiClientContextTest.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoKICogQ29weXJpZ2h0IFsyMDIyLXByZXNlbnRdIFthaG9vIHdhbmcgPGFob293YW5nQHFxLmNvbT4gKGh0dHBzOi8vZ2l0aHViLmNvbS9BaG9vLVdhbmcpXS4KICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlICJMaWNlbnNlIik7CiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS4KICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmUKICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywKICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQKICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuCiAqLwoKcGFja2FnZSBtZS5haG9vLmNvYXBpLmV4YW1wbGUud2VhdGhlci5jbGllbnQKCmltcG9ydCBtZS5haG9vLmNvYXBpLnNwcmluZy5DbGllbnRNb2RlCmltcG9ydCBtZS5haG9vLmNvYXBpLnNwcmluZy5FbmFibGVDb0FwaQppbXBvcnQgbWUuYWhvby5jb2FwaS5zcHJpbmcuY2xpZW50LnJlYWN0aXZlLlJlYWN0aXZlSHR0cEV4Y2hhbmdlQWRhcHRlckZhY3RvcnkKaW1wb3J0IG1lLmFob28uY29hcGkuc3ByaW5nLmNsaWVudC5yZWFjdGl2ZS5XZWJDbGllbnRCdWlsZGVyQ3VzdG9taXplcgppbXBvcnQgbWUuYWhvby5jb2FwaS5zcHJpbmcuY2xpZW50LnN5bmMuUmVzdENsaWVudEJ1aWxkZXJDdXN0b21pemVyCmltcG9ydCBtZS5haG9vLmNvYXBpLnNwcmluZy5jbGllbnQuc3luYy5TeW5jSHR0cEV4Y2hhbmdlQWRhcHRlckZhY3RvcnkKaW1wb3J0IG1lLmFob28udGVzdC5hc3NlcnRzLmFzc2VydAppbXBvcnQgb3JnLmFzc2VydGouY29yZS5hcGkuQXNzZXJ0aW9uc0ZvckludGVyZmFjZVR5cGVzCmltcG9ydCBvcmcuanVuaXQuanVwaXRlci5hcGkuVGVzdAppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay5ib290LnJlc3RjbGllbnQuYXV0b2NvbmZpZ3VyZS5SZXN0Q2xpZW50QXV0b0NvbmZpZ3VyYXRpb24KaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsuYm9vdC50ZXN0LmNvbnRleHQucnVubmVyLkFwcGxpY2F0aW9uQ29udGV4dFJ1bm5lcgppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay5ib290LndlYmNsaWVudC5hdXRvY29uZmlndXJlLldlYkNsaWVudEF1dG9Db25maWd1cmF0aW9uCmltcG9ydCBvcmcuc3ByaW5nZnJhbWV3b3JrLndlYi5jbGllbnQuUmVzdENsaWVudAoKY2xhc3MgV2VhdGhlckFwaUNsaWVudENvbnRleHRUZXN0IHsKCiAgICBAVGVzdAogICAgZnVuIGBzaG91bGQgcmVnaXN0ZXIgUmVhY3RpdmUgV2VhdGhlckFwaUNsaWVudCBiZWFuYCgpIHsKICAgICAgICBBcHBsaWNhdGlvbkNvbnRleHRSdW5uZXIoKQogICAgICAgICAgICAud2l0aFByb3BlcnR5VmFsdWVzKCJ3ZWF0aGVyLnVybD1odHRwczovL2FwaS53ZWF0aGVyLmV4YW1wbGUuY29tIikKICAgICAgICAgICAgLndpdGhCZWFuKFdlYkNsaWVudEJ1aWxkZXJDdXN0b21pemVyOjpjbGFzcy5qYXZhLCB7IFdlYkNsaWVudEJ1aWxkZXJDdXN0b21pemVyLk5vT3AgfSkKICAgICAgICAgICAgLndpdGhVc2VyQ29uZmlndXJhdGlvbihXZWJDbGllbnRBdXRvQ29uZmlndXJhdGlvbjo6Y2xhc3MuamF2YSkKICAgICAgICAgICAgLndpdGhVc2VyQ29uZmlndXJhdGlvbihFbmFibGVXZWF0aGVyQ2xpZW50Q29uZmlndXJhdGlvbjo6Y2xhc3MuamF2YSkKICAgICAgICAgICAgLnJ1biB7IGNvbnRleHQgLT4KICAgICAgICAgICAgICAgIEFzc2VydGlvbnNGb3JJbnRlcmZhY2VUeXBlcy5hc3NlcnRUaGF0KGNvbnRleHQpCiAgICAgICAgICAgICAgICAgICAgLmhhc1NpbmdsZUJlYW4oUmVhY3RpdmVIdHRwRXhjaGFuZ2VBZGFwdGVyRmFjdG9yeTo6Y2xhc3MuamF2YSkKICAgICAgICAgICAgICAgICAgICAuaGFzU2luZ2xlQmVhbihXZWF0aGVyQXBpQ2xpZW50OjpjbGFzcy5qYXZhKQoKICAgICAgICAgICAgICAgIHZhbCB3ZWF0aGVyQ2xpZW50ID0gY29udGV4dC5nZXRCZWFuKFdlYXRoZXJBcGlDbGllbnQ6OmNsYXNzLmphdmEpCiAgICAgICAgICAgICAgICB3ZWF0aGVyQ2xpZW50LmFzc2VydCgpLmlzTm90TnVsbCgpCiAgICAgICAgICAgIH0KICAgIH0KCiAgICBAVGVzdAogICAgZnVuIGBzaG91bGQgcmVnaXN0ZXIgU3luYyBXZWF0aGVyQXBpQ2xpZW50IGJlYW5gKCkgewogICAgICAgIEFwcGxpY2F0aW9uQ29udGV4dFJ1bm5lcigpCiAgICAgICAgICAgIC53aXRoUHJvcGVydHlWYWx1ZXMoIiR7Q2xpZW50TW9kZS5DT0FQSV9DTElFTlRfTU9ERV9QUk9QRVJUWX09U1lOQyIpCiAgICAgICAgICAgIC53aXRoUHJvcGVydHlWYWx1ZXMoIndlYXRoZXIudXJsPWh0dHBzOi8vYXBpLndlYXRoZXIuZXhhbXBsZS5jb20iKQogICAgICAgICAgICAud2l0aEJlYW4oUmVzdENsaWVudEJ1aWxkZXJDdXN0b21pemVyOjpjbGFzcy5qYXZhLCB7IFJlc3RDbGllbnRCdWlsZGVyQ3VzdG9taXplci5Ob09wIH0pCiAgICAgICAgICAgIC53aXRoQmVhbihSZXN0Q2xpZW50LkJ1aWxkZXI6OmNsYXNzLmphdmEsIHsgUmVzdENsaWVudC5idWlsZGVyKCkgfSkKICAgICAgICAgICAgLndpdGhVc2VyQ29uZmlndXJhdGlvbihSZXN0Q2xpZW50QXV0b0NvbmZpZ3VyYXRpb246OmNsYXNzLmphdmEpCiAgICAgICAgICAgIC53aXRoVXNlckNvbmZpZ3VyYXRpb24oRW5hYmxlV2VhdGhlckNsaWVudENvbmZpZ3VyYXRpb246OmNsYXNzLmphdmEpCiAgICAgICAgICAgIC5ydW4geyBjb250ZXh0IC0+CiAgICAgICAgICAgICAgICBBc3NlcnRpb25zRm9ySW50ZXJmYWNlVHlwZXMuYXNzZXJ0VGhhdChjb250ZXh0KQogICAgICAgICAgICAgICAgICAgIC5oYXNTaW5nbGVCZWFuKFN5bmNIdHRwRXhjaGFuZ2VBZGFwdGVyRmFjdG9yeTo6Y2xhc3MuamF2YSkKICAgICAgICAgICAgICAgICAgICAuaGFzU2luZ2xlQmVhbihXZWF0aGVyQXBpQ2xpZW50OjpjbGFzcy5qYXZhKQoKICAgICAgICAgICAgICAgIHZhbCB3ZWF0aGVyQ2xpZW50ID0gY29udGV4dC5nZXRCZWFuKFdlYXRoZXJBcGlDbGllbnQ6OmNsYXNzLmphdmEpCiAgICAgICAgICAgICAgICB3ZWF0aGVyQ2xpZW50LmFzc2VydCgpLmlzTm90TnVsbCgpCiAgICAgICAgICAgIH0KICAgIH0KfQoKQEVuYWJsZUNvQXBpKGNsaWVudHMgPSBbV2VhdGhlckFwaUNsaWVudDo6Y2xhc3NdKQpjbGFzcyBFbmFibGVXZWF0aGVyQ2xpZW50Q29uZmlndXJhdGlvbgo="}, {"name": "WeatherApiClientIntegrationTest.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoKICogQ29weXJpZ2h0IFsyMDIyLXByZXNlbnRdIFthaG9vIHdhbmcgPGFob293YW5nQHFxLmNvbT4gKGh0dHBzOi8vZ2l0aHViLmNvbS9BaG9vLVdhbmcpXS4KICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlICJMaWNlbnNlIik7CiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS4KICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmUKICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywKICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQKICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuCiAqLwoKcGFja2FnZSBtZS5haG9vLmNvYXBpLmV4YW1wbGUud2VhdGhlcgoKaW1wb3J0IG1lLmFob28uY29hcGkuZXhhbXBsZS53ZWF0aGVyLmNsaWVudC5XZWF0aGVyQXBpQ2xpZW50CmltcG9ydCBtZS5haG9vLmNvYXBpLmV4YW1wbGUud2VhdGhlci5jbGllbnQuV2VhdGhlclJlc3BvbnNlCmltcG9ydCBtZS5haG9vLmNvYXBpLnNwcmluZy5jbGllbnQucmVhY3RpdmUuUmVhY3RpdmVIdHRwRXhjaGFuZ2VBZGFwdGVyRmFjdG9yeQppbXBvcnQgbWUuYWhvby50ZXN0LmFzc2VydHMuYXNzZXJ0CmltcG9ydCBvcmcuanVuaXQuanVwaXRlci5hcGkuVGVzdAppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay5iZWFucy5mYWN0b3J5LmFubm90YXRpb24uQXV0b3dpcmVkCmltcG9ydCBvcmcuc3ByaW5nZnJhbWV3b3JrLmJvb3QuYXV0b2NvbmZpZ3VyZS5TcHJpbmdCb290QXBwbGljYXRpb24KaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsuYm9vdC50ZXN0LmNvbnRleHQuU3ByaW5nQm9vdFRlc3QKaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsuY29udGV4dC5hbm5vdGF0aW9uLkNvbXBvbmVudFNjYW4KCkBTcHJpbmdCb290VGVzdApjbGFzcyBXZWF0aGVyQXBpQ2xpZW50SW50ZWdyYXRpb25UZXN0IHsKCiAgICBAQXV0b3dpcmVkCiAgICBwcml2YXRlIGxhdGVpbml0IHZhciByZWFjdGl2ZUh0dHBFeGNoYW5nZUFkYXB0ZXJGYWN0b3J5OiBSZWFjdGl2ZUh0dHBFeGNoYW5nZUFkYXB0ZXJGYWN0b3J5CgogICAgQEF1dG93aXJlZAogICAgcHJpdmF0ZSBsYXRlaW5pdCB2YXIgd2VhdGhlckFwaUNsaWVudDogV2VhdGhlckFwaUNsaWVudAoKICAgIEBUZXN0CiAgICBmdW4gYHNob3VsZCBhdXRvd2lyZSBSZWFjdGl2ZUh0dHBFeGNoYW5nZUFkYXB0ZXJGYWN0b3J5YCgpIHsKICAgICAgICByZWFjdGl2ZUh0dHBFeGNoYW5nZUFkYXB0ZXJGYWN0b3J5LmFzc2VydCgpLmlzTm90TnVsbCgpCiAgICB9CgogICAgQFRlc3QKICAgIGZ1biBgc2hvdWxkIGF1dG93aXJlIFdlYXRoZXJBcGlDbGllbnRgKCkgewogICAgICAgIHdlYXRoZXJBcGlDbGllbnQuYXNzZXJ0KCkuaXNOb3ROdWxsKCkKICAgIH0KCiAgICBAVGVzdAogICAgZnVuIGBzaG91bGQgY2FsbCB3ZWF0aGVyIEFQSSBhbmQgZ2V0IHJlc3BvbnNlYCgpIHsKICAgICAgICB2YWwgcmVzcG9uc2U6IFdlYXRoZXJSZXNwb25zZT8gPSB3ZWF0aGVyQXBpQ2xpZW50LmdldEN1cnJlbnRXZWF0aGVyKCJTaGFuZ2hhaSIpCiAgICAgICAgICAgIC5kb09uTmV4dCB7IHdlYXRoZXIgLT4KICAgICAgICAgICAgICAgIHdlYXRoZXIuYXNzZXJ0KCkuaXNOb3ROdWxsKCkKICAgICAgICAgICAgICAgIHdlYXRoZXIuY2l0eS5hc3NlcnQoKS5pc05vdEJsYW5rKCkKICAgICAgICAgICAgICAgIHdlYXRoZXIuY29uZGl0aW9uLmFzc2VydCgpLmlzTm90QmxhbmsoKQogICAgICAgICAgICB9CiAgICAgICAgICAgIC5ibG9jaygpCiAgICAgICAgcmVzcG9uc2UuYXNzZXJ0KCkuaXNOb3ROdWxsKCkKICAgIH0KfQoKQFNwcmluZ0Jvb3RBcHBsaWNhdGlvbgpAQ29tcG9uZW50U2NhbihiYXNlUGFja2FnZXMgPSBbIm1lLmFob28uY29hcGkuZXhhbXBsZS53ZWF0aGVyIl0pCmNsYXNzIFdlYXRoZXJUZXN0QXBwbGljYXRpb24K"}], "grading": {"eval_id": 3, "eval_name": "testing", "configuration": "with_skill", "expectations": [{"text": "Uses ApplicationContextRunner for unit-level bean verification", "passed": true, "evidence": "WeatherApiClientContextTest uses ApplicationContextRunner with withBean/withUserConfiguration"}, {"text": "Uses @SpringBootTest for integration test", "passed": true, "evidence": "WeatherApiClientIntegrationTest annotated with @SpringBootTest"}, {"text": "Uses fluent-assert (.assert()) syntax", "passed": true, "evidence": "Uses .assert().isTrue(), .assert().isNotNull(), .assert().isNotBlank() throughout"}, {"text": "Uses JUnit 5 (@Test from jupiter)", "passed": true, "evidence": "All test classes import org.junit.jupiter.api.Test"}, {"text": "Verifies bean registration with hasSingleBean or similar", "passed": true, "evidence": "Uses context.hasSingleBean() and context.hasBean() for verification"}, {"text": "Has proper test class structure with @EnableCoApi configuration", "passed": true, "evidence": "WeatherApiEnableCoApiConfiguration annotated with @EnableCoApi(clients = [WeatherApiClient::class])"}, {"text": "Provides MockClientProperties for ApplicationContextRunner tests", "passed": true, "evidence": "MockWeatherClientProperties implements ClientProperties with proper overrides"}, {"text": "Tests both reactive and sync client modes", "passed": true, "evidence": "Has separate tests for REACTIVE and SYNC mode bean registration"}]}}, {"id": "eval-3-testing-without_skill", "prompt": "I'm writing tests for my CoApi client that calls an external weather API. I want to use ApplicationContextRunner to verify the client bean is registered correctly, and also write a Spring Boot integration test that actually calls the API. Show me both test patterns using the project's testing conventions (fluent-assert, JUnit 5).", "eval_id": 3, "outputs": [{"name": "WeatherApiClient.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoKICogQ29weXJpZ2h0IFsyMDIyLXByZXNlbnRdIFthaG9vIHdhbmcgPGFob293YW5nQHFxLmNvbT4gKGh0dHBzOi8vZ2l0aHViLmNvbS9BaG9vLVdhbmcpXS4KICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlICJMaWNlbnNlIik7CiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS4KICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmUKICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywKICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQKICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuCiAqLwoKcGFja2FnZSBtZS5haG9vLmNvYXBpLndlYXRoZXIuY2xpZW50CgppbXBvcnQgbWUuYWhvby5jb2FwaS5hcGkuQ29BcGkKaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsud2ViLmJpbmQuYW5ub3RhdGlvbi5QYXRoVmFyaWFibGUKaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsud2ViLmJpbmQuYW5ub3RhdGlvbi5SZXF1ZXN0UGFyYW0KaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsud2ViLnNlcnZpY2UuYW5ub3RhdGlvbi5HZXRFeGNoYW5nZQppbXBvcnQgcmVhY3Rvci5jb3JlLnB1Ymxpc2hlci5Nb25vCgpAQ29BcGkoYmFzZVVybCA9ICJcJHt3ZWF0aGVyLmFwaS5iYXNlLXVybH0iLCBuYW1lID0gIldlYXRoZXJBcGkiKQppbnRlcmZhY2UgV2VhdGhlckFwaUNsaWVudCB7CgogICAgQEdldEV4Y2hhbmdlKCJ2MS9jdXJyZW50IikKICAgIGZ1biBnZXRDdXJyZW50V2VhdGhlcigKICAgICAgICBAUmVxdWVzdFBhcmFtIGNpdHk6IFN0cmluZywKICAgICAgICBAUmVxdWVzdFBhcmFtKGRlZmF1bHRWYWx1ZSA9ICJtZXRyaWMiKSB1bml0czogU3RyaW5nID0gIm1ldHJpYyIKICAgICk6IE1vbm88V2VhdGhlclJlc3BvbnNlPgoKICAgIEBHZXRFeGNoYW5nZSgidjEvZm9yZWNhc3Qve2NpdHl9IikKICAgIGZ1biBnZXRGb3JlY2FzdChAUGF0aFZhcmlhYmxlIGNpdHk6IFN0cmluZyk6IE1vbm88Rm9yZWNhc3RSZXNwb25zZT4KfQoKZGF0YSBjbGFzcyBXZWF0aGVyUmVzcG9uc2UoCiAgICB2YWwgY2l0eTogU3RyaW5nLAogICAgdmFsIHRlbXBlcmF0dXJlOiBEb3VibGUsCiAgICB2YWwgaHVtaWRpdHk6IEludCwKICAgIHZhbCBkZXNjcmlwdGlvbjogU3RyaW5nCikKCmRhdGEgY2xhc3MgRm9yZWNhc3RSZXNwb25zZSgKICAgIHZhbCBjaXR5OiBTdHJpbmcsCiAgICB2YWwgZm9yZWNhc3RzOiBMaXN0PERhaWx5Rm9yZWNhc3Q+CikKCmRhdGEgY2xhc3MgRGFpbHlGb3JlY2FzdCgKICAgIHZhbCBkYXRlOiBTdHJpbmcsCiAgICB2YWwgdGVtcGVyYXR1cmVIaWdoOiBEb3VibGUsCiAgICB2YWwgdGVtcGVyYXR1cmVMb3c6IERvdWJsZSwKICAgIHZhbCBkZXNjcmlwdGlvbjogU3RyaW5nCikK"}, {"name": "WeatherApiClientContextTest.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoKICogQ29weXJpZ2h0IFsyMDIyLXByZXNlbnRdIFthaG9vIHdhbmcgPGFob293YW5nQHFxLmNvbT4gKGh0dHBzOi8vZ2l0aHViLmNvbS9BaG9vLVdhbmcpXS4KICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlICJMaWNlbnNlIik7CiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS4KICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmUKICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywKICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQKICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuCiAqLwoKcGFja2FnZSBtZS5haG9vLmNvYXBpLndlYXRoZXIuY2xpZW50CgppbXBvcnQgbWUuYWhvby5jb2FwaS5zcHJpbmcuQ2xpZW50TW9kZQppbXBvcnQgbWUuYWhvby5jb2FwaS5zcHJpbmcuRW5hYmxlQ29BcGkKaW1wb3J0IG1lLmFob28uY29hcGkuc3ByaW5nLmNsaWVudC5DbGllbnRQcm9wZXJ0aWVzCmltcG9ydCBtZS5haG9vLmNvYXBpLnNwcmluZy5jbGllbnQucmVhY3RpdmUuUmVhY3RpdmVIdHRwRXhjaGFuZ2VBZGFwdGVyRmFjdG9yeQppbXBvcnQgbWUuYWhvby5jb2FwaS5zcHJpbmcuY2xpZW50LnJlYWN0aXZlLldlYkNsaWVudEJ1aWxkZXJDdXN0b21pemVyCmltcG9ydCBtZS5haG9vLmNvYXBpLnNwcmluZy5jbGllbnQuc3luYy5SZXN0Q2xpZW50QnVpbGRlckN1c3RvbWl6ZXIKaW1wb3J0IG1lLmFob28uY29hcGkuc3ByaW5nLmNsaWVudC5zeW5jLlN5bmNIdHRwRXhjaGFuZ2VBZGFwdGVyRmFjdG9yeQppbXBvcnQgbWUuYWhvby50ZXN0LmFzc2VydHMuYXNzZXJ0CmltcG9ydCBvcmcuanVuaXQuanVwaXRlci5hcGkuVGVzdAppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay5ib290LnRlc3QuY29udGV4dC5ydW5uZXIuQXBwbGljYXRpb25Db250ZXh0UnVubmVyCmltcG9ydCBvcmcuc3ByaW5nZnJhbWV3b3JrLmJvb3Qud2ViY2xpZW50LmF1dG9jb25maWd1cmUuV2ViQ2xpZW50QXV0b0NvbmZpZ3VyYXRpb24KaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsud2ViLmNsaWVudC5SZXN0Q2xpZW50CgpjbGFzcyBXZWF0aGVyQXBpQ2xpZW50Q29udGV4dFRlc3QgewoKICAgIEBUZXN0CiAgICBmdW4gYHNob3VsZCByZWdpc3RlciBXZWF0aGVyQXBpQ2xpZW50IGJlYW4gaW4gcmVhY3RpdmUgbW9kZWAoKSB7CiAgICAgICAgQXBwbGljYXRpb25Db250ZXh0UnVubmVyKCkKICAgICAgICAgICAgLndpdGhQcm9wZXJ0eVZhbHVlcygid2VhdGhlci5hcGkuYmFzZS11cmw9aHR0cHM6Ly9hcGkud2VhdGhlci5leGFtcGxlLmNvbSIpCiAgICAgICAgICAgIC53aXRoQmVhbihXZWJDbGllbnRCdWlsZGVyQ3VzdG9taXplcjo6Y2xhc3MuamF2YSwgeyBXZWJDbGllbnRCdWlsZGVyQ3VzdG9taXplci5Ob09wIH0pCiAgICAgICAgICAgIC53aXRoQmVhbihDbGllbnRQcm9wZXJ0aWVzOjpjbGFzcy5qYXZhLCB7IE1vY2tXZWF0aGVyQ2xpZW50UHJvcGVydGllcygpIH0pCiAgICAgICAgICAgIC53aXRoVXNlckNvbmZpZ3VyYXRpb24oV2ViQ2xpZW50QXV0b0NvbmZpZ3VyYXRpb246OmNsYXNzLmphdmEpCiAgICAgICAgICAgIC53aXRoVXNlckNvbmZpZ3VyYXRpb24oV2VhdGhlckFwaUVuYWJsZUNvQXBpQ29uZmlndXJhdGlvbjo6Y2xhc3MuamF2YSkKICAgICAgICAgICAgLnJ1biB7IGNvbnRleHQgLT4KICAgICAgICAgICAgICAgIGNvbnRleHQuaGFzU2luZ2xlQmVhbihSZWFjdGl2ZUh0dHBFeGNoYW5nZUFkYXB0ZXJGYWN0b3J5OjpjbGFzcy5qYXZhKS5hc3NlcnQoKS5pc1RydWUoKQogICAgICAgICAgICAgICAgY29udGV4dC5oYXNTaW5nbGVCZWFuKFdlYXRoZXJBcGlDbGllbnQ6OmNsYXNzLmphdmEpLmFzc2VydCgpLmlzVHJ1ZSgpCgogICAgICAgICAgICAgICAgdmFsIHdlYXRoZXJBcGlDbGllbnQgPSBjb250ZXh0LmdldEJlYW4oV2VhdGhlckFwaUNsaWVudDo6Y2xhc3MuamF2YSkKICAgICAgICAgICAgICAgIHdlYXRoZXJBcGlDbGllbnQuYXNzZXJ0KCkuaXNOb3ROdWxsKCkKICAgICAgICAgICAgfQogICAgfQoKICAgIEBUZXN0CiAgICBmdW4gYHNob3VsZCByZWdpc3RlciBXZWF0aGVyQXBpQ2xpZW50IGJlYW4gaW4gc3luYyBtb2RlYCgpIHsKICAgICAgICBBcHBsaWNhdGlvbkNvbnRleHRSdW5uZXIoKQogICAgICAgICAgICAud2l0aFByb3BlcnR5VmFsdWVzKCJ3ZWF0aGVyLmFwaS5iYXNlLXVybD1odHRwczovL2FwaS53ZWF0aGVyLmV4YW1wbGUuY29tIikKICAgICAgICAgICAgLndpdGhQcm9wZXJ0eVZhbHVlcygiJHtDbGllbnRNb2RlLkNPQVBJX0NMSUVOVF9NT0RFX1BST1BFUlRZfT1TWU5DIikKICAgICAgICAgICAgLndpdGhCZWFuKFJlc3RDbGllbnRCdWlsZGVyQ3VzdG9taXplcjo6Y2xhc3MuamF2YSwgeyBSZXN0Q2xpZW50QnVpbGRlckN1c3RvbWl6ZXIuTm9PcCB9KQogICAgICAgICAgICAud2l0aEJlYW4oUmVzdENsaWVudC5CdWlsZGVyOjpjbGFzcy5qYXZhLCB7IFJlc3RDbGllbnQuYnVpbGRlcigpIH0pCiAgICAgICAgICAgIC53aXRoQmVhbihDbGllbnRQcm9wZXJ0aWVzOjpjbGFzcy5qYXZhLCB7IE1vY2tXZWF0aGVyQ2xpZW50UHJvcGVydGllcygpIH0pCiAgICAgICAgICAgIC53aXRoVXNlckNvbmZpZ3VyYXRpb24oV2VhdGhlckFwaUVuYWJsZUNvQXBpQ29uZmlndXJhdGlvbjo6Y2xhc3MuamF2YSkKICAgICAgICAgICAgLnJ1biB7IGNvbnRleHQgLT4KICAgICAgICAgICAgICAgIGNvbnRleHQuaGFzU2luZ2xlQmVhbihTeW5jSHR0cEV4Y2hhbmdlQWRhcHRlckZhY3Rvcnk6OmNsYXNzLmphdmEpLmFzc2VydCgpLmlzVHJ1ZSgpCiAgICAgICAgICAgICAgICBjb250ZXh0Lmhhc1NpbmdsZUJlYW4oV2VhdGhlckFwaUNsaWVudDo6Y2xhc3MuamF2YSkuYXNzZXJ0KCkuaXNUcnVlKCkKCiAgICAgICAgICAgICAgICB2YWwgd2VhdGhlckFwaUNsaWVudCA9IGNvbnRleHQuZ2V0QmVhbihXZWF0aGVyQXBpQ2xpZW50OjpjbGFzcy5qYXZhKQogICAgICAgICAgICAgICAgd2VhdGhlckFwaUNsaWVudC5hc3NlcnQoKS5pc05vdE51bGwoKQogICAgICAgICAgICB9CiAgICB9CgogICAgQFRlc3QKICAgIGZ1biBgc2hvdWxkIGZhaWwgd2hlbiBiYXNlLXVybCBwcm9wZXJ0eSBpcyBtaXNzaW5nYCgpIHsKICAgICAgICBBcHBsaWNhdGlvbkNvbnRleHRSdW5uZXIoKQogICAgICAgICAgICAud2l0aEJlYW4oV2ViQ2xpZW50QnVpbGRlckN1c3RvbWl6ZXI6OmNsYXNzLmphdmEsIHsgV2ViQ2xpZW50QnVpbGRlckN1c3RvbWl6ZXIuTm9PcCB9KQogICAgICAgICAgICAud2l0aEJlYW4oQ2xpZW50UHJvcGVydGllczo6Y2xhc3MuamF2YSwgeyBNb2NrV2VhdGhlckNsaWVudFByb3BlcnRpZXMoKSB9KQogICAgICAgICAgICAud2l0aFVzZXJDb25maWd1cmF0aW9uKFdlYkNsaWVudEF1dG9Db25maWd1cmF0aW9uOjpjbGFzcy5qYXZhKQogICAgICAgICAgICAud2l0aFVzZXJDb25maWd1cmF0aW9uKFdlYXRoZXJBcGlFbmFibGVDb0FwaUNvbmZpZ3VyYXRpb246OmNsYXNzLmphdmEpCiAgICAgICAgICAgIC5ydW4geyBjb250ZXh0IC0+CiAgICAgICAgICAgICAgICAvLyBUaGUgY29udGV4dCBzaG91bGQgZmFpbCBiZWNhdXNlIHRoZSBwbGFjZWhvbGRlciAke3dlYXRoZXIuYXBpLmJhc2UtdXJsfQogICAgICAgICAgICAgICAgLy8gY2Fubm90IGJlIHJlc29sdmVkCiAgICAgICAgICAgICAgICBjb250ZXh0LnN0YXJ0dXBGYWlsdXJlLmFzc2VydCgpLmlzTm90TnVsbCgpCiAgICAgICAgICAgIH0KICAgIH0KCiAgICBAVGVzdAogICAgZnVuIGBzaG91bGQgcmVnaXN0ZXIgYmVhbiB3aXRoIGV4cGVjdGVkIG5hbWUgZGVyaXZlZCBmcm9tIENvQXBpIG5hbWUgYXR0cmlidXRlYCgpIHsKICAgICAgICBBcHBsaWNhdGlvbkNvbnRleHRSdW5uZXIoKQogICAgICAgICAgICAud2l0aFByb3BlcnR5VmFsdWVzKCJ3ZWF0aGVyLmFwaS5iYXNlLXVybD1odHRwczovL2FwaS53ZWF0aGVyLmV4YW1wbGUuY29tIikKICAgICAgICAgICAgLndpdGhCZWFuKFdlYkNsaWVudEJ1aWxkZXJDdXN0b21pemVyOjpjbGFzcy5qYXZhLCB7IFdlYkNsaWVudEJ1aWxkZXJDdXN0b21pemVyLk5vT3AgfSkKICAgICAgICAgICAgLndpdGhCZWFuKENsaWVudFByb3BlcnRpZXM6OmNsYXNzLmphdmEsIHsgTW9ja1dlYXRoZXJDbGllbnRQcm9wZXJ0aWVzKCkgfSkKICAgICAgICAgICAgLndpdGhVc2VyQ29uZmlndXJhdGlvbihXZWJDbGllbnRBdXRvQ29uZmlndXJhdGlvbjo6Y2xhc3MuamF2YSkKICAgICAgICAgICAgLndpdGhVc2VyQ29uZmlndXJhdGlvbihXZWF0aGVyQXBpRW5hYmxlQ29BcGlDb25maWd1cmF0aW9uOjpjbGFzcy5qYXZhKQogICAgICAgICAgICAucnVuIHsgY29udGV4dCAtPgogICAgICAgICAgICAgICAgLy8gVGhlIGJlYW4gbmFtZSBmb2xsb3dzIHRoZSBjb252ZW50aW9uOiB7Y29BcGlOYW1lfS5Db0FwaQogICAgICAgICAgICAgICAgY29udGV4dC5oYXNCZWFuKCJXZWF0aGVyQXBpLkNvQXBpIikuYXNzZXJ0KCkuaXNUcnVlKCkKICAgICAgICAgICAgICAgIC8vIFRoZSBIdHRwQ2xpZW50IGJlYW4gbmFtZSBmb2xsb3dzOiB7Y29BcGlOYW1lfS5IdHRwQ2xpZW50CiAgICAgICAgICAgICAgICBjb250ZXh0Lmhhc0JlYW4oIldlYXRoZXJBcGkuSHR0cENsaWVudCIpLmFzc2VydCgpLmlzVHJ1ZSgpCiAgICAgICAgICAgIH0KICAgIH0KfQoKQEVuYWJsZUNvQXBpKGNsaWVudHMgPSBbV2VhdGhlckFwaUNsaWVudDo6Y2xhc3NdKQpjbGFzcyBXZWF0aGVyQXBpRW5hYmxlQ29BcGlDb25maWd1cmF0aW9uCgpkYXRhIGNsYXNzIE1vY2tXZWF0aGVyQ2xpZW50UHJvcGVydGllcygKICAgIHZhbCBmaWx0ZXI6IE1hcDxTdHJpbmcsIENsaWVudFByb3BlcnRpZXMuRmlsdGVyRGVmaW5pdGlvbj4gPSBlbXB0eU1hcCgpLAogICAgdmFsIGludGVyY2VwdG9yOiBNYXA8U3RyaW5nLCBDbGllbnRQcm9wZXJ0aWVzLkludGVyY2VwdG9yRGVmaW5pdGlvbj4gPSBlbXB0eU1hcCgpLAopIDogQ2xpZW50UHJvcGVydGllcyB7CiAgICBvdmVycmlkZSBmdW4gZ2V0QmFzZVVyaShjb0FwaU5hbWU6IFN0cmluZyk6IFN0cmluZyB7CiAgICAgICAgcmV0dXJuICIiCiAgICB9CgogICAgb3ZlcnJpZGUgZnVuIGdldExvYWRCYWxhbmNlZChjb0FwaU5hbWU6IFN0cmluZyk6IEJvb2xlYW4/IHsKICAgICAgICByZXR1cm4gbnVsbAogICAgfQoKICAgIG92ZXJyaWRlIGZ1biBnZXRGaWx0ZXIoY29BcGlOYW1lOiBTdHJpbmcpOiBDbGllbnRQcm9wZXJ0aWVzLkZpbHRlckRlZmluaXRpb24gewogICAgICAgIHJldHVybiBmaWx0ZXJbY29BcGlOYW1lXSA/OiBDbGllbnRQcm9wZXJ0aWVzLkZpbHRlckRlZmluaXRpb24oKQogICAgfQoKICAgIG92ZXJyaWRlIGZ1biBnZXRJbnRlcmNlcHRvcihjb0FwaU5hbWU6IFN0cmluZyk6IENsaWVudFByb3BlcnRpZXMuSW50ZXJjZXB0b3JEZWZpbml0aW9uIHsKICAgICAgICByZXR1cm4gaW50ZXJjZXB0b3JbY29BcGlOYW1lXSA/OiBDbGllbnRQcm9wZXJ0aWVzLkludGVyY2VwdG9yRGVmaW5pdGlvbigpCiAgICB9Cn0K"}, {"name": "WeatherApiClientIntegrationTest.kt", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoKICogQ29weXJpZ2h0IFsyMDIyLXByZXNlbnRdIFthaG9vIHdhbmcgPGFob293YW5nQHFxLmNvbT4gKGh0dHBzOi8vZ2l0aHViLmNvbS9BaG9vLVdhbmcpXS4KICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlICJMaWNlbnNlIik7CiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS4KICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiAqICAgICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmUKICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywKICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQKICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuCiAqLwoKcGFja2FnZSBtZS5haG9vLmNvYXBpLndlYXRoZXIuY2xpZW50CgppbXBvcnQgbWUuYWhvby5jb2FwaS5zcHJpbmcuRW5hYmxlQ29BcGkKaW1wb3J0IG1lLmFob28uY29hcGkuc3ByaW5nLmNsaWVudC5yZWFjdGl2ZS5SZWFjdGl2ZUh0dHBFeGNoYW5nZUFkYXB0ZXJGYWN0b3J5CmltcG9ydCBtZS5haG9vLnRlc3QuYXNzZXJ0cy5hc3NlcnQKaW1wb3J0IG9yZy5qdW5pdC5qdXBpdGVyLmFwaS5UZXN0CmltcG9ydCBvcmcuc3ByaW5nZnJhbWV3b3JrLmJlYW5zLmZhY3RvcnkuYW5ub3RhdGlvbi5BdXRvd2lyZWQKaW1wb3J0IG9yZy5zcHJpbmdmcmFtZXdvcmsuYm9vdC5hdXRvY29uZmlndXJlLlNwcmluZ0Jvb3RBcHBsaWNhdGlvbgppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay5ib290LnRlc3QuY29udGV4dC5TcHJpbmdCb290VGVzdAppbXBvcnQgb3JnLnNwcmluZ2ZyYW1ld29yay50ZXN0LmNvbnRleHQuVGVzdFByb3BlcnR5U291cmNlCgpAU3ByaW5nQm9vdFRlc3QoY2xhc3NlcyA9IFtXZWF0aGVyQXBpSW50ZWdyYXRpb25UZXN0QXBwOjpjbGFzc10pCkBUZXN0UHJvcGVydHlTb3VyY2UoCiAgICBwcm9wZXJ0aWVzID0gWwogICAgICAgICJ3ZWF0aGVyLmFwaS5iYXNlLXVybD1odHRwczovL2FwaS53ZWF0aGVyLmV4YW1wbGUuY29tIgogICAgXQopCmNsYXNzIFdlYXRoZXJBcGlDbGllbnRJbnRlZ3JhdGlvblRlc3QgewoKICAgIEBBdXRvd2lyZWQKICAgIHByaXZhdGUgbGF0ZWluaXQgdmFyIGh0dHBFeGNoYW5nZUFkYXB0ZXJGYWN0b3J5OiBSZWFjdGl2ZUh0dHBFeGNoYW5nZUFkYXB0ZXJGYWN0b3J5CgogICAgQEF1dG93aXJlZAogICAgcHJpdmF0ZSBsYXRlaW5pdCB2YXIgd2VhdGhlckFwaUNsaWVudDogV2VhdGhlckFwaUNsaWVudAoKICAgIEBUZXN0CiAgICBmdW4gaHR0cEV4Y2hhbmdlQWRhcHRlckZhY3RvcnlJc05vdE51bGwoKSB7CiAgICAgICAgaHR0cEV4Y2hhbmdlQWRhcHRlckZhY3RvcnkuYXNzZXJ0KCkuaXNOb3ROdWxsKCkKICAgIH0KCiAgICBAVGVzdAogICAgZnVuIHdlYXRoZXJBcGlDbGllbnRJc05vdE51bGwoKSB7CiAgICAgICAgd2VhdGhlckFwaUNsaWVudC5hc3NlcnQoKS5pc05vdE51bGwoKQogICAgfQoKICAgIEBUZXN0CiAgICBmdW4gZ2V0Q3VycmVudFdlYXRoZXIoKSB7CiAgICAgICAgd2VhdGhlckFwaUNsaWVudC5nZXRDdXJyZW50V2VhdGhlcihjaXR5ID0gIkxvbmRvbiIpCiAgICAgICAgICAgIC5kb09uTmV4dCB7IHJlc3BvbnNlIC0+CiAgICAgICAgICAgICAgICByZXNwb25zZS5hc3NlcnQoKS5pc05vdE51bGwoKQogICAgICAgICAgICAgICAgcmVzcG9uc2UuY2l0eS5hc3NlcnQoKS5pc05vdEJsYW5rKCkKICAgICAgICAgICAgICAgIHJlc3BvbnNlLmRlc2NyaXB0aW9uLmFzc2VydCgpLmlzTm90QmxhbmsoKQogICAgICAgICAgICB9CiAgICAgICAgICAgIC5ibG9jaygpCiAgICB9CgogICAgQFRlc3QKICAgIGZ1biBnZXRDdXJyZW50V2VhdGhlcldpdGhDdXN0b21Vbml0cygpIHsKICAgICAgICB3ZWF0aGVyQXBpQ2xpZW50LmdldEN1cnJlbnRXZWF0aGVyKGNpdHkgPSAiTG9uZG9uIiwgdW5pdHMgPSAiaW1wZXJpYWwiKQogICAgICAgICAgICAuZG9Pbk5leHQgeyByZXNwb25zZSAtPgogICAgICAgICAgICAgICAgcmVzcG9uc2UuYXNzZXJ0KCkuaXNOb3ROdWxsKCkKICAgICAgICAgICAgICAgIHJlc3BvbnNlLmNpdHkuYXNzZXJ0KCkuaXNFcXVhbFRvKCJMb25kb24iKQogICAgICAgICAgICB9CiAgICAgICAgICAgIC5ibG9jaygpCiAgICB9CgogICAgQFRlc3QKICAgIGZ1biBnZXRGb3JlY2FzdCgpIHsKICAgICAgICB3ZWF0aGVyQXBpQ2xpZW50LmdldEZvcmVjYXN0KGNpdHkgPSAiTG9uZG9uIikKICAgICAgICAgICAgLmRvT25OZXh0IHsgcmVzcG9uc2UgLT4KICAgICAgICAgICAgICAgIHJlc3BvbnNlLmFzc2VydCgpLmlzTm90TnVsbCgpCiAgICAgICAgICAgICAgICByZXNwb25zZS5jaXR5LmFzc2VydCgpLmlzTm90QmxhbmsoKQogICAgICAgICAgICAgICAgcmVzcG9uc2UuZm9yZWNhc3RzLmFzc2VydCgpLmlzTm90RW1wdHkoKQogICAgICAgICAgICB9CiAgICAgICAgICAgIC5ibG9jaygpCiAgICB9Cn0KCkBFbmFibGVDb0FwaShjbGllbnRzID0gW1dlYXRoZXJBcGlDbGllbnQ6OmNsYXNzXSkKQFNwcmluZ0Jvb3RBcHBsaWNhdGlvbgpjbGFzcyBXZWF0aGVyQXBpSW50ZWdyYXRpb25UZXN0QXBwCg=="}], "grading": {"eval_id": 3, "eval_name": "testing", "configuration": "without_skill", "expectations": [{"text": "Uses ApplicationContextRunner for unit-level bean verification", "passed": true, "evidence": "WeatherApiClientContextTest uses ApplicationContextRunner"}, {"text": "Uses @SpringBootTest for integration test", "passed": true, "evidence": "WeatherApiClientIntegrationTest annotated with @SpringBootTest"}, {"text": "Uses fluent-assert (.assert()) syntax", "passed": true, "evidence": "Uses .assert().isNotNull(), .assert().isNotBlank() throughout"}, {"text": "Uses JUnit 5 (@Test from jupiter)", "passed": true, "evidence": "All test classes import org.junit.jupiter.api.Test"}, {"text": "Verifies bean registration with hasSingleBean or similar", "passed": true, "evidence": "Uses AssertionsForInterfaceTypes.assertThat(context).hasSingleBean()"}, {"text": "Has proper test class structure with @EnableCoApi configuration", "passed": true, "evidence": "EnableWeatherClientConfiguration annotated with @EnableCoApi(clients = [WeatherApiClient::class])"}, {"text": "Provides MockClientProperties for ApplicationContextRunner tests", "passed": false, "evidence": "Missing ClientProperties bean registration in ApplicationContextRunner tests, which would cause tests to fail without CoApiAutoConfiguration providing it"}, {"text": "Tests both reactive and sync client modes", "passed": true, "evidence": "Has separate tests for REACTIVE and SYNC mode bean registration"}]}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"skill_name": "coapi-developer", "iteration": 1, "timestamp": "2026-05-08T00:00:00Z", "configurations": [{"name": "with_skill", "label": "With Skill", "total_assertions": 23, "passed": 22, "failed": 1, "pass_rate": 0.957, "total_duration_seconds": 503.5, "evals": [{"eval_name": "create-interface", "passed": 8, "failed": 0, "total": 8, "pass_rate": 1.0, "duration_seconds": 105.2, "failed_assertions": [], "note": "Separated API interface (PostApi) from client (PostClient) following project pattern"}, {"eval_name": "load-balancing", "passed": 6, "failed": 1, "total": 7, "pass_rate": 0.857, "duration_seconds": 212.0, "failed_assertions": ["Uses correct Maven artifact for CoApi starter - used spring-boot-starter instead of coapi-spring-boot-starter"], "note": "Used wrong Maven artifact name: me.ahoo.coapi:spring-boot-starter instead of me.ahoo.coapi:coapi-spring-boot-starter"}, {"eval_name": "testing", "passed": 8, "failed": 0, "total": 8, "pass_rate": 1.0, "duration_seconds": 186.3, "failed_assertions": [], "note": "Excellent test coverage including MockClientProperties, both reactive/sync modes, bean naming"}]}, {"name": "without_skill", "label": "Without Skill (Baseline)", "total_assertions": 23, "passed": 21, "failed": 2, "pass_rate": 0.913, "total_duration_seconds": 530.0, "evals": [{"eval_name": "create-interface", "passed": 7, "failed": 1, "total": 8, "pass_rate": 0.875, "duration_seconds": 91.3, "failed_assertions": ["No class-level @HttpExchange annotation"], "note": "Solid output but no separation between API interface and client, methods use full paths"}, {"eval_name": "load-balancing", "passed": 7, "failed": 1, "total": 8, "pass_rate": 0.875, "duration_seconds": 221.9, "failed_assertions": ["Uses Spring Cloud 2023.0.2 BOM which is incompatible with Spring Boot 4.x"], "note": "Correct Maven artifact but outdated Spring Cloud BOM version"}, {"eval_name": "testing", "passed": 7, "failed": 1, "total": 8, "pass_rate": 0.875, "duration_seconds": 216.8, "failed_assertions": ["Missing ClientProperties mock in ApplicationContextRunner tests"], "note": "Tests would likely fail without ClientProperties bean registered"}]}], "summary": {"with_skill_pass_rate": 0.957, "without_skill_pass_rate": 0.913, "delta_pass_rate": 0.044, "with_skill_avg_duration": 167.8, "without_skill_avg_duration": 176.7, "key_findings": ["With-skill version correctly separates API interface from client following the project's pattern (TodoApi/TodoClient)", "With-skill testing output includes MockClientProperties and tests both modes more thoroughly", "With-skill version used wrong Maven artifact name (spring-boot-starter vs coapi-spring-boot-starter)", "Without-skill version had outdated Spring Cloud BOM and missing ClientProperties mock in tests", "Both versions produced high-quality output; the skill mainly adds value in testing patterns and project conventions"]}}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

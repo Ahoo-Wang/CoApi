@@ -1,0 +1,36 @@
+# ===================================================================
+# Base Configuration (shared across all profiles)
+# ===================================================================
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: user-service-consumer
+
+  # Consul service discovery -- connect to local Consul agent
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        # Do not register this consumer as a service in Consul
+        register: false
+
+    # Spring Cloud LoadBalancer
+    loadbalancer:
+      cache:
+        enabled: true
+        ttl: 30s
+
+# CoApi configuration
+# mode: AUTO (default) -- CoApi detects reactive vs sync based on classpath.
+#   - If spring-boot-starter-webflux is present -> REACTIVE (WebClient)
+#   - Otherwise -> SYNC (RestClient)
+# Override explicitly with: coapi.mode=REACTIVE | coapi.mode=SYNC
+coapi:
+  mode: AUTO
+  # base-packages can be used for component scanning instead of @EnableCoApi(clients=[...])
+  # base-packages:
+  #   - com.example.userservice.client

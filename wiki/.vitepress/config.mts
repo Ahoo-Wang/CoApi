@@ -1,47 +1,47 @@
 import { defineConfig } from 'vitepress'
 
 const navbarEn = [
-  { text: 'Getting Started', link: '/getting-started/overview' },
-  { text: 'Deep Dive', link: '/deep-dive/architecture' },
-  { text: 'Onboarding', link: '/onboarding/contributor-guide' }
+  { text: 'Getting Started', link: '/en/getting-started/overview' },
+  { text: 'Deep Dive', link: '/en/deep-dive/architecture' },
+  { text: 'Onboarding', link: '/en/onboarding/contributor-guide' }
 ]
 
 const sidebarEn = {
-  '/onboarding/': [
+  '/en/onboarding/': [
     {
       text: 'Onboarding',
       collapsed: false,
       items: [
-        { text: 'Contributor Guide', link: '/onboarding/contributor-guide' },
-        { text: 'Staff Engineer Guide', link: '/onboarding/staff-engineer-guide' },
-        { text: 'Executive Guide', link: '/onboarding/executive-guide' },
-        { text: 'Product Manager Guide', link: '/onboarding/product-manager-guide' }
+        { text: 'Contributor Guide', link: '/en/onboarding/contributor-guide' },
+        { text: 'Staff Engineer Guide', link: '/en/onboarding/staff-engineer-guide' },
+        { text: 'Executive Guide', link: '/en/onboarding/executive-guide' },
+        { text: 'Product Manager Guide', link: '/en/onboarding/product-manager-guide' }
       ]
     }
   ],
-  '/getting-started/': [
+  '/en/getting-started/': [
     {
       text: 'Getting Started',
       items: [
-        { text: 'What is CoApi?', link: '/getting-started/overview' },
-        { text: 'Installation & Setup', link: '/getting-started/installation' },
-        { text: 'Quick Start', link: '/getting-started/quick-start' },
-        { text: 'Configuration Reference', link: '/getting-started/configuration' }
+        { text: 'What is CoApi?', link: '/en/getting-started/overview' },
+        { text: 'Installation & Setup', link: '/en/getting-started/installation' },
+        { text: 'Quick Start', link: '/en/getting-started/quick-start' },
+        { text: 'Configuration Reference', link: '/en/getting-started/configuration' }
       ]
     }
   ],
-  '/deep-dive/': [
+  '/en/deep-dive/': [
     {
       text: 'Deep Dive',
       items: [
-        { text: 'Architecture Overview', link: '/deep-dive/architecture' },
-        { text: 'Annotations', link: '/deep-dive/annotations' },
-        { text: 'Client Modes', link: '/deep-dive/client-modes' },
-        { text: 'Load Balancing', link: '/deep-dive/load-balancing' },
-        { text: 'Customization', link: '/deep-dive/customization' },
-        { text: 'Authentication', link: '/deep-dive/authentication' },
-        { text: 'Auto-Configuration', link: '/deep-dive/auto-configuration' },
-        { text: 'Examples & Patterns', link: '/deep-dive/examples' }
+        { text: 'Architecture Overview', link: '/en/deep-dive/architecture' },
+        { text: 'Annotations', link: '/en/deep-dive/annotations' },
+        { text: 'Client Modes', link: '/en/deep-dive/client-modes' },
+        { text: 'Load Balancing', link: '/en/deep-dive/load-balancing' },
+        { text: 'Customization', link: '/en/deep-dive/customization' },
+        { text: 'Authentication', link: '/en/deep-dive/authentication' },
+        { text: 'Auto-Configuration', link: '/en/deep-dive/auto-configuration' },
+        { text: 'Examples & Patterns', link: '/en/deep-dive/examples' }
       ]
     }
   ],
@@ -50,34 +50,34 @@ const sidebarEn = {
       text: 'Onboarding',
       collapsed: false,
       items: [
-        { text: 'Contributor Guide', link: '/onboarding/contributor-guide' },
-        { text: 'Staff Engineer Guide', link: '/onboarding/staff-engineer-guide' },
-        { text: 'Executive Guide', link: '/onboarding/executive-guide' },
-        { text: 'Product Manager Guide', link: '/onboarding/product-manager-guide' }
+        { text: 'Contributor Guide', link: '/en/onboarding/contributor-guide' },
+        { text: 'Staff Engineer Guide', link: '/en/onboarding/staff-engineer-guide' },
+        { text: 'Executive Guide', link: '/en/onboarding/executive-guide' },
+        { text: 'Product Manager Guide', link: '/en/onboarding/product-manager-guide' }
       ]
     },
     {
       text: 'Getting Started',
       collapsed: true,
       items: [
-        { text: 'What is CoApi?', link: '/getting-started/overview' },
-        { text: 'Installation & Setup', link: '/getting-started/installation' },
-        { text: 'Quick Start', link: '/getting-started/quick-start' },
-        { text: 'Configuration Reference', link: '/getting-started/configuration' }
+        { text: 'What is CoApi?', link: '/en/getting-started/overview' },
+        { text: 'Installation & Setup', link: '/en/getting-started/installation' },
+        { text: 'Quick Start', link: '/en/getting-started/quick-start' },
+        { text: 'Configuration Reference', link: '/en/getting-started/configuration' }
       ]
     },
     {
       text: 'Deep Dive',
       collapsed: true,
       items: [
-        { text: 'Architecture Overview', link: '/deep-dive/architecture' },
-        { text: 'Annotations', link: '/deep-dive/annotations' },
-        { text: 'Client Modes', link: '/deep-dive/client-modes' },
-        { text: 'Load Balancing', link: '/deep-dive/load-balancing' },
-        { text: 'Customization', link: '/deep-dive/customization' },
-        { text: 'Authentication', link: '/deep-dive/authentication' },
-        { text: 'Auto-Configuration', link: '/deep-dive/auto-configuration' },
-        { text: 'Examples & Patterns', link: '/deep-dive/examples' }
+        { text: 'Architecture Overview', link: '/en/deep-dive/architecture' },
+        { text: 'Annotations', link: '/en/deep-dive/annotations' },
+        { text: 'Client Modes', link: '/en/deep-dive/client-modes' },
+        { text: 'Load Balancing', link: '/en/deep-dive/load-balancing' },
+        { text: 'Customization', link: '/en/deep-dive/customization' },
+        { text: 'Authentication', link: '/en/deep-dive/authentication' },
+        { text: 'Auto-Configuration', link: '/en/deep-dive/auto-configuration' },
+        { text: 'Examples & Patterns', link: '/en/deep-dive/examples' }
       ]
     }
   ]
@@ -189,9 +189,10 @@ export default defineConfig({
     }
   },
   locales: {
-    root: {
+    en: {
       label: 'English',
       lang: 'en-US',
+      link: '/en/',
       themeConfig: {
         nav: navbarEn,
         sidebar: sidebarEn,

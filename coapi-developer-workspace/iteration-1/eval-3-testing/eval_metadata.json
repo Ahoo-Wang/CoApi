@@ -1,0 +1,31 @@
+{
+  "eval_id": 3,
+  "eval_name": "testing",
+  "prompt": "I'm writing tests for my CoApi client that calls an external weather API. I want to use ApplicationContextRunner to verify the client bean is registered correctly, and also write a Spring Boot integration test that actually calls the API. Show me both test patterns using the project's testing conventions (fluent-assert, JUnit 5).",
+  "assertions": [
+    {
+      "text": "Uses ApplicationContextRunner for unit-level bean verification",
+      "type": "code_pattern"
+    },
+    {
+      "text": "Uses @SpringBootTest for integration test",
+      "type": "contains_annotation"
+    },
+    {
+      "text": "Uses fluent-assert (.assert()) syntax",
+      "type": "code_pattern"
+    },
+    {
+      "text": "Uses JUnit 5 (@Test from jupiter)",
+      "type": "code_pattern"
+    },
+    {
+      "text": "Verifies bean registration with hasSingleBean or similar",
+      "type": "code_pattern"
+    },
+    {
+      "text": "Has proper test class structure with @EnableCoApi configuration",
+      "type": "code_pattern"
+    }
+  ]
+}

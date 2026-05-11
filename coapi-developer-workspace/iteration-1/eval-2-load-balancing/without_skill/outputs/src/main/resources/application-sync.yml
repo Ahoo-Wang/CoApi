@@ -1,0 +1,52 @@
+# ===================================================================
+# Sync (Servlet) Mode Configuration
+# ===================================================================
+# This profile configures the application for SYNC mode using
+# RestClient + Spring Cloud LoadBalancer + Consul service discovery.
+#
+# Start with: --spring.profiles.active=sync
+# Or set:     coapi.mode=SYNC
+#
+# NOTE: For sync mode to work, ensure spring-boot-starter-web (servlet)
+#       is on the classpath. If spring-boot-starter-webflux is also
+#       present, CoApi AUTO mode will select REACTIVE; you must set
+#       coapi.mode=SYNC explicitly to override.
+# ===================================================================
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: user-service-consumer
+
+  # Consul service discovery configuration
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        register: false
+
+    # Spring Cloud LoadBalancer configuration
+    loadbalancer:
+      cache:
+        enabled: true
+        ttl: 30s
+
+# CoApi configuration
+coapi:
+  # Force sync mode (RestClient-based). In sync mode CoApi uses
+  # RestClient.Builder + LoadBalancerInterceptor for load balancing.
+  mode: SYNC
+  clients:
+    UserSyncApiClient:
+      # No explicit baseUrl needed -- @CoApi(serviceId="user-service")
+      # already resolves to lb://user-service -> http://user-service.
+      # loadBalanced is automatically true when serviceId is used.
+      sync:
+        interceptor:
+          # The LoadBalancerInterceptor is added automatically by CoApi
+          # when loadBalanced=true. You can add extra interceptors here:
+          names: []
+          types: []
