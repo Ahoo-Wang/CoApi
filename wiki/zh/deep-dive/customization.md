@@ -222,10 +222,10 @@ coapi:
 
 ## 相关页面
 
-- [客户端模式（响应式和同步）](./client-modes.md) — WebClient 与 RestClient 内部原理
-- [负载均衡](./load-balancing.md) — LB 过滤器/拦截器集成
-- [认证](./authentication.md) — BearerTokenFilter 和 JWT 缓存
-- [配置参考](../getting-started/configuration.md) — 所有 YAML 属性
+- [客户端模式（响应式和同步）](/zh/deep-dive/client-modes.md) — WebClient 与 RestClient 内部原理
+- [负载均衡](/zh/deep-dive/load-balancing.md) — LB 过滤器/拦截器集成
+- [认证](/zh/deep-dive/authentication.md) — BearerTokenFilter 和 JWT 缓存
+- [配置参考](/zh/getting-started/configuration.md) — 所有 YAML 属性
 
 ## 参考资料
 

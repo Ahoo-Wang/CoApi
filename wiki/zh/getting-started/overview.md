@@ -163,7 +163,7 @@ graph BT
 - [安装与设置](./installation.md) — 将 CoApi 添加到您的项目
 - [快速开始](./quick-start.md) — 定义您的第一个 HTTP 客户端
 - [配置参考](./configuration.md) — 所有属性详解
-- [架构概述](../deep-dive/architecture.md) — 深入了解注册流程
+- [架构概述](/zh/deep-dive/architecture.md) — 深入了解注册流程
 
 ## 参考资料
 

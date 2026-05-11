@@ -212,8 +212,8 @@ graph TD
 
 ## 相关页面
 
-- [入门指南](../getting-started.md) - 基础设置和配置
-- [配置](../getting-started/configuration.md) - 详细配置选项
-- [高级主题](.md) - 高级模式和自定义
-- [最佳实践](.md) - 推荐的方法和模式
-- [故障排除](.md) - 常见问题和解决方案
+- [入门指南](/zh/getting-started/index.md) - 基础设置和配置
+- [配置](/zh/getting-started/configuration.md) - 详细配置选项
+- [高级主题](/zh/deep-dive/examples.md) - 高级模式和自定义
+- [最佳实践](/zh/deep-dive/examples.md) - 推荐的方法和模式
+- [故障排除](/zh/deep-dive/examples.md) - 常见问题和解决方案

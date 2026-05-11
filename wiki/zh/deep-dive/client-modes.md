@@ -403,8 +403,8 @@ features {
 
 ## 相关页面
 
-- [HTTP 客户端配置](../getting-started/configuration.md) - 详细的配置选项和属性
-- [负载均衡](./load-balancing.md) - 负载均衡器集成和配置
-- [重试机制](.md) - 重试策略和退避算法
-- [认证](./authentication.md) - JWT 和其他认证方法
-- [监控](.md) - HTTP 客户端的指标和日志记录
+- [HTTP 客户端配置](/zh/getting-started/configuration.md) - 详细的配置选项和属性
+- [负载均衡](/zh/deep-dive/load-balancing.md) - 负载均衡器集成和配置
+- [重试机制](/zh/deep-dive/client-modes.md) - 重试策略和退避算法
+- [认证](/zh/deep-dive/authentication.md) - JWT 和其他认证方法
+- [监控](/zh/deep-dive/client-modes.md) - HTTP 客户端的指标和日志记录

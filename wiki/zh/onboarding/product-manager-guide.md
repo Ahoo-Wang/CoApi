@@ -1,31 +1,39 @@
-# Product Manager Guide - CoApi
+---
+title: 产品经理指南 - CoApi
+description: 了解 CoApi 的关键优势、功能特性和业务价值，为产品决策提供参考。
+---
 
-## Overview
+# 产品经理指南 - CoApi
 
-CoApi is a Spring Framework library that helps developers connect to web services with minimal setup. Think of it as a bridge that makes it easy for applications to talk to each other over the internet.
+## 概述
 
-### What Is CoApi?
+CoApi 是一个 Spring Framework 库，帮助开发者以最少设置连接到 Web 服务。将其视为一座桥梁，使应用程序能够轻松地通过互联网相互通信。
 
-CoApi is a tool that lets developers define how to connect to external web services using simple Java/Kotlin interfaces. Instead of writing complex connection code, developers just create an interface with annotations, and CoApi handles all the behind-the-scenes work.
+### 什么是 CoApi？
 
-## Key Benefits for Your Organization
+CoApi 是一个允许开发者使用简单的 Java/Kotlin 接口定义如何连接外部 Web 服务的工具。开发者无需编写复杂的连接代码，只需创建一个带有注解的接口，CoApi 就会处理所有幕后工作。
 
-### Faster Development
-- **Less boilerplate code**: Developers save time on repetitive connection setup
-- **Simpler integration**: Connect to external services in just a few lines of code
-- **Faster iterations**: Changes to API connections are quick and predictable
+## 为组织带来的关键优势
 
-### Better Quality
-- **Standardized approach**: All API connections follow the same pattern
-- **Built-in load balancing**: Automatically distributes requests across multiple services
-- **Active maintenance**: Regular updates and community support
+### 更快开发
 
-### Cost Savings
-- **Open source**: Free to use without licensing fees
-- **Reduced training**: Developers can get started quickly
-- **Lower maintenance**: Less code means fewer bugs to fix
+- **减少样板代码**：开发者节省重复连接设置的时间
+- **简化集成**：仅需几行代码即可连接到外部服务
+- **更快迭代**：API 连接变更快速且可预测
 
-## User Journey Map
+### 更高质量
+
+- **标准化方法**：所有 API 连接遵循相同模式
+- **内置负载均衡**：自动跨多个服务分发请求
+- **积极维护**：定期更新和社区支持
+
+### 成本节约
+
+- **开源**：免费使用，无需许可费用
+- **减少培训**：开发者可以快速上手
+- **降低维护**：更少代码意味着更少需要修复的错误
+
+## 用户旅程图
 
 ```mermaid
 graph TD
@@ -48,51 +56,57 @@ graph TD
     D2 --> D3[Load Testing]
 ```
 
-### User Journey Details
+### 用户旅程详情
 
-#### 1. Project Start
-- **Goal**: Understand the service integration requirements
-- **PM Activities**: 
-  - Define which external services need to be connected
-  - Determine integration timeline and dependencies
-  - Assess team familiarity with Spring Framework
+#### 1. 项目启动
 
-#### 2. Define API Interface
-- **Goal**: Create the contract for service communication
-- **Developer Activities**:
-  - Define the interface with required methods
-  - Add annotations to specify request types and parameters
-  - Test interface definition with mock data
+- **目标**：理解服务集成需求
+- **产品经理活动**：
+  - 定义需要连接的外部服务
+  - 确定集成时间表和依赖关系
+  - 评估团队对 Spring Framework 的熟悉程度
 
-#### 3. Configure CoApi
-- **Goal**: Set up the library in the application
-- **Developer Activities**:
-  - Add CoApi dependencies to the project
-  - Configure service URLs or service IDs
-  - Enable auto-configuration with annotations
+#### 2. 定义 API 接口
 
-#### 4. Test Integration
-- **Goal**: Verify the integration works correctly
-- **Activities**:
-  - Unit testing of individual methods
-  - Integration testing with real services
-  - Load testing to ensure performance requirements are met
+- **目标**：创建服务通信契约
+- **开发者活动**：
+  - 使用所需方法定义接口
+  - 添加注解以指定请求类型和参数
+  - 使用模拟数据测试接口定义
 
-#### 5. Deploy to Production
-- **Goal**: Release the integration to production environment
-- **Activities**:
-  - Deploy with proper monitoring and logging
-  - Configure load balancing for production
-  - Set up error handling and fallback mechanisms
+#### 3. 配置 CoApi
 
-#### 6. Monitor Performance
-- **Goal**: Ensure ongoing integration health
-- **Activities**:
-  - Monitor response times and error rates
-  - Track usage patterns
-  - Perform ongoing optimization
+- **目标**：在应用程序中设置库
+- **开发者活动**：
+  - 将 CoApi 依赖添加到项目
+  - 配置服务 URL 或服务 ID
+  - 使用注解启用自动配置
 
-## Feature Capability Map
+#### 4. 测试集成
+
+- **目标**：验证集成正确工作
+- **活动**：
+  - 单个方法的单元测试
+  - 与真实服务的集成测试
+  - 负载测试以确保满足性能要求
+
+#### 5. 部署到生产环境
+
+- **目标**：将集成发布到生产环境
+- **活动**：
+  - 使用适当的监控和日志记录进行部署
+  - 为生产环境配置负载均衡
+  - 设置错误处理和回退机制
+
+#### 6. 监控性能
+
+- **目标**：确保持续集成健康
+- **活动**：
+  - 监控响应时间和错误率
+  - 跟踪使用模式
+  - 进行持续优化
+
+## 功能能力地图
 
 ```mermaid
 graph LR
@@ -129,85 +143,96 @@ graph LR
     H --> K
 ```
 
-### Feature Details
+### 功能详情
 
-#### Core Capabilities
+#### 核心能力
 
-**HTTP Interface Support**
-- **What**: Define HTTP clients as Java/Kotlin interfaces
-- **Benefit**: Clean, type-safe API definitions
-- **Usage**: Use annotations like `@GetExchange`, `@PostExchange` to define HTTP methods
-- **Source**: [GitHubApiClient.java:21-26](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
+**HTTP Interface 支持**
 
-**Auto-Configuration**
-- **What**: Automatic setup of HTTP clients with minimal code
-- **Benefit**: Developers don't need to write complex configuration
-- **Usage**: Add `@EnableCoApi` annotation to enable auto-configuration
-- **Source**: [ConsumerServer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerServer.kt)
+- **内容**：将 HTTP 客户端定义为 Java/Kotlin 接口
+- **优势**：清晰、类型安全的 API 定义
+- **用法**：使用 `@GetExchange`、`@PostExchange` 等注解定义 HTTP 方法
+- **源码**：[GitHubApiClient.java:21-26](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
 
-**Load Balancing**
-- **What**: Distribute requests across multiple service instances
-- **Benefit**: Improved reliability and performance
-- **Usage**: Use `lb://` prefix in service URLs or use service IDs
-- **Source**: [ServiceApiClient.java:98-103](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L98)
+**自动配置**
 
-#### Programming Models
+- **内容**：最少代码自动设置 HTTP 客户端
+- **优势**：开发者无需编写复杂配置
+- **用法**：添加 `@EnableCoApi` 注解启用自动配置
+- **源码**：[ConsumerServer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerServer.kt)
 
-**Reactive Programming**
-- **What**: Handle data streams asynchronously
-- **Benefit**: Better performance for high-volume operations
-- **Usage**: Return `Flux<T>` or `Mono<T>` from methods
-- **Source**: [GitHubApiClient.kt:25](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
+**负载均衡**
 
-**Synchronous Programming**
-- **What**: Traditional request-response model
-- **Benefit**: Simpler code for straightforward operations
-- **Usage**: Return standard Java/Kotlin collections
-- **Source**: [GitHubSyncClient.java:26](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-sync/src/main/java/me/ahoo/coapi/example/sync/GitHubSyncClient.java)
+- **内容**：跨多个服务实例分发请求
+- **优势**：提高可靠性和性能
+- **用法**：在服务 URL 中使用 `lb://` 前缀或使用服务 ID
+- **源码**：[ServiceApiClient.java:98-103](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L98)
 
-#### Configuration Options
+#### 编程模型
 
-**Base URL Configuration**
-- **What**: Define the base URL for service calls
-- **Benefit**: Centralized configuration management
-- **Usage**: Use `baseUrl = "${config.property}"` in annotations
-- **Source**: [GitHubApiClient.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
+**响应式编程**
 
-**Service ID Configuration**
-- **What**: Use service discovery for service locations
-- **Benefit**: Dynamic service location management
-- **Usage**: Use `serviceId = "service-name"` in annotations
-- **Source**: [ServiceApiClient.java:98](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L98)
+- **内容**：异步处理数据流
+- **优势**：高容量操作性能更好
+- **用法**：从方法返回 `Flux<T>` 或 `Mono<T>`
+- **源码**：[GitHubApiClient.kt:25](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
 
-**Custom Filtering**
-- **What**: Add custom filters for request/response processing
-- **Benefit**: Advanced request handling and transformation
-- **Usage**: Implement filter beans and register them
-- **Source**: [ServiceApiClientUseFilterBeanName.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClientUseFilterBeanName.kt)
+**同步编程**
 
-#### Spring Framework Integration
+- **内容**：传统的请求-响应模型
+- **优势**：简单操作的代码更简单
+- **用法**：返回标准 Java/Kotlin 集合
+- **源码**：[GitHubSyncClient.java:26](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-sync/src/main/java/me/ahoo/coapi/example/sync/GitHubSyncClient.java)
 
-**Spring Boot 3.x Support**
-- **What**: Compatibility with Spring Boot 3.x
-- **Benefit**: Access to latest Spring Framework features
-- **Usage**: Use CoApi 1.x with Spring Boot 3.x
-- **Source**: [README.md:33-34](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L33)
+#### 配置选项
 
-**Spring Boot 4.x Support**
-- **What**: Compatibility with Spring Boot 4.x
-- **Benefit**: Future-proof integration with latest Spring releases
-- **Usage**: Use CoApi 2.x with Spring Boot 4.x
-- **Source**: [README.md:33-34](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L34)
+**Base URL 配置**
 
-**Spring Cloud Integration**
-- **What**: Integration with Spring Cloud services
-- **Benefit**: Enterprise-grade microservice features
-- **Usage**: Combine with Spring Cloud LoadBalancer
-- **Source**: [GitHubApiClient.java:91-92](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L91)
+- **内容**：定义服务调用的基础 URL
+- **优势**：集中配置管理
+- **用法**：在注解中使用 `baseUrl = "${config.property}"`
+- **源码**：[GitHubApiClient.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt)
 
-## Usage Scenarios
+**服务 ID 配置**
 
-### Scenario 1: Simple REST API Integration
+- **内容**：使用服务发现获取服务位置
+- **优势**：动态服务位置管理
+- **用法**：在注解中使用 `serviceId = "service-name"`
+- **源码**：[ServiceApiClient.java:98](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L98)
+
+**自定义过滤**
+
+- **内容**：添加用于请求/响应处理的自定义过滤器
+- **优势**：高级请求处理和转换
+- **用法**：实现过滤器 bean 并注册
+- **源码**：[ServiceApiClientUseFilterBeanName.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClientUseFilterBeanName.kt)
+
+#### Spring Framework 集成
+
+**Spring Boot 3.x 支持**
+
+- **内容**：与 Spring Boot 3.x 兼容
+- **优势**：访问最新 Spring Framework 特性
+- **用法**：CoApi 1.x 配合 Spring Boot 3.x 使用
+- **源码**：[README.md:33-34](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L33)
+
+**Spring Boot 4.x 支持**
+
+- **内容**：与 Spring Boot 4.x 兼容
+- **优势**：与最新 Spring 版本的未来保障集成
+- **用法**：CoApi 2.x 配合 Spring Boot 4.x 使用
+- **源码**：[README.md:33-34](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L34)
+
+**Spring Cloud 集成**
+
+- **内容**：与 Spring Cloud 服务集成
+- **优势**：企业级微服务特性
+- **用法**：结合 Spring Cloud LoadBalancer 使用
+- **源码**：[GitHubApiClient.java:91-92](https://github.com/Ahoo-Wang/CoApi/blob/main/README.md#L91)
+
+## 使用场景
+
+### 场景 1：简单 REST API 集成
 
 ```mermaid
 sequenceDiagram
@@ -221,11 +246,11 @@ sequenceDiagram
     CoApi-->>Client: Map to Issue objects
 ```
 
-**Business Value**: Quick integration with third-party services
-**Time to Implement**: 30 minutes
-**Maintenance Effort**: Low
+**业务价值**：快速与第三方服务集成
+**实施时间**：30 分钟
+**维护工作量**：低
 
-### Scenario 2: Microservice Communication
+### 场景 2：微服务通信
 
 ```mermaid
 sequenceDiagram
@@ -246,11 +271,11 @@ sequenceDiagram
     API Gateway-->>Frontend: Final response
 ```
 
-**Business Value**: Reliable microservice communication
-**Time to Implement**: 2 hours
-**Maintenance Effort**: Medium
+**业务价值**：可靠的微服务通信
+**实施时间**：2 小时
+**维护工作量**：中等
 
-### Scenario 3: Reactive Data Processing
+### 场景 3：响应式数据处理
 
 ```mermaid
 sequenceDiagram
@@ -266,213 +291,233 @@ sequenceDiagram
     Streaming Processor-->>Client: Real-time updates
 ```
 
-**Business Value**: Real-time data processing capabilities
-**Time to Implement**: 4 hours
-**Maintenance Effort**: Medium-High
+**业务价值**：实时数据处理能力
+**实施时间**：4 小时
+**维护工作量**：中高
 
-## Known Limitations
+## 已知限制
 
-### Technical Limitations
+### 技术限制
 
-1. **Framework Dependency**
-   - CoApi requires Spring Boot 3.x or 4.x
-   - Not compatible with other Java web frameworks
-   - **Impact**: Projects using other frameworks cannot use CoApi
+1. **框架依赖**
+   - CoApi 需要 Spring Boot 3.x 或 4.x
+   - 与其他 Java Web 框架不兼容
+   - **影响**：使用其他框架的项目无法使用 CoApi
 
-2. **Programming Model Knowledge**
-   - Requires understanding of reactive programming concepts
-   - Development team needs Spring Framework experience
-   - **Impact**: Learning curve for teams new to Spring ecosystem
+2. **编程模型知识**
+   - 需要理解响应式编程概念
+   - 开发团队需要 Spring Framework 经验
+   - **影响**：对 Spring 生态系统新手团队有学习曲线
 
-3. **Service Discovery**
-   - Load balancing requires additional Spring Cloud LoadBalancer dependency
-   - Limited support for other service discovery mechanisms
-   - **Impact**: Additional configuration required for complex microservice setups
+3. **服务发现**
+   - 负载均衡需要额外的 Spring Cloud LoadBalancer 依赖
+   - 对其他服务发现机制支持有限
+   - **影响**：复杂微服务设置需要额外配置
 
-### Business Limitations
+### 业务限制
 
-1. **Third-Party API Changes**
-   - Changes in external API require interface updates
-   - Version management for multiple API versions
-   - **Impact**: Maintenance overhead when APIs change
+1. **第三方 API 变更**
+   - 外部 API 变更需要接口更新
+   - 多个 API 版本需要版本管理
+   - **影响**：API 变更时的维护开销
 
-2. **Performance Considerations**
-   - Reactive programming has higher learning curve
-   - Synchronous vs. reactive performance trade-offs
-   - **Impact**: Requires careful design for performance-critical applications
+2. **性能考虑**
+   - 响应式编程学习曲线较高
+   - 同步与响应式性能权衡
+   - **影响**：性能关键应用需要仔细设计
 
-3. **Enterprise Features**
-   - Limited built-in security features
-   - Requires additional configuration for advanced use cases
-   - **Impact**: May need custom development for enterprise requirements
+3. **企业特性**
+   - 内置安全特性有限
+   - 高级用例需要额外配置
+   - **影响**：企业需求可能需要自定义开发
 
-### Support Limitations
+### 支持限制
 
-1. **Community Size**
-   - Smaller community compared to established frameworks
-   - Fewer third-party integrations available
-   - **Impact**: May require more custom development
+1. **社区规模**
+   - 与成熟框架相比社区较小
+   - 可用的第三方集成较少
+   - **影响**：可能需要更多自定义开发
 
-2. **Documentation**
-   - Primarily technical documentation
-   - Limited business-focused documentation
-   - **Impact**: Higher learning curve for non-technical stakeholders
+2. **文档**
+   - 主要是技术文档
+   - 面向业务的文档有限
+   - **影响**：对非技术利益相关者学习曲线较高
 
-## Data & Privacy Overview
+## 数据与隐私概述
 
-### Data Handling
+### 数据处理
 
-**What Data is Processed**
-- HTTP request and response data
-- Configuration settings
-- Load balancing metrics
-- Error logging information
+**处理哪些数据**
 
-**Data Storage**
-- Configuration data stored in application properties
-- Logging data stored in application logs
-- Metrics stored in monitoring systems
-- No persistent storage of user data
+- HTTP 请求和响应数据
+- 配置设置
+- 负载均衡指标
+- 错误日志信息
 
-### Security Considerations
+**数据存储**
 
-**Data Protection**
-- All data transmission uses standard HTTP/HTTPS protocols
-- Sensitive data should be encrypted in transit
-- No encryption of data at rest by default
+- 配置数据存储在应用程序属性中
+- 日志数据存储在应用程序日志中
+- 指标存储在监控系统中
+- 不存储用户数据的持久化数据
 
-**Access Control**
-- Standard Spring Security integration
-- Authentication and authorization managed by Spring Security
-- No built-in access control in CoApi itself
+### 安全考虑
 
-**Privacy Compliance**
-- GDPR compliance depends on implementation
-- CCPA compliance depends on implementation
-- CoApi itself does not process personal data
+**数据保护**
 
-### Best Practices
+- 所有数据传输使用标准 HTTP/HTTPS 协议
+- 传输中的敏感数据应加密
+- 默认不加密静态数据
 
-1. **Data Minimization**
-   - Only collect necessary configuration data
-   - Avoid storing sensitive data in logs
-   - Use environment variables for sensitive configuration
+**访问控制**
 
-2. **Security Configuration**
-   - Always use HTTPS for external API calls
-   - Implement proper authentication and authorization
-   - Regular security updates and patches
+- 标准 Spring Security 集成
+- 身份验证和授权由 Spring Security 管理
+- CoApi 本身没有内置访问控制
 
-3. **Compliance**
-   - Review specific compliance requirements for your use case
-   - Implement necessary controls based on regulatory requirements
-   - Regular security audits and assessments
+**隐私合规**
 
-## Frequently Asked Questions
+- GDPR 合规取决于实现
+- CCPA 合规取决于实现
+- CoApi 本身不处理个人数据
 
-### General Questions
+### 最佳实践
 
-**Q: What programming languages does CoApi support?**
-A: CoApi is designed for Java and Kotlin applications that use the Spring Framework.
+1. **数据最小化**
+   - 仅收集必要的配置数据
+   - 避免在日志中存储敏感数据
+   - 使用环境变量进行敏感配置
 
-**Q: Is CoApi free to use?**
-A: Yes, CoApi is open source under the Apache 2.0 license, which means it's free to use for commercial and non-commercial projects.
+2. **安全配置**
+   - 始终使用 HTTPS 进行外部 API 调用
+   - 实施适当的身份验证和授权
+   - 定期安全更新和补丁
 
-**Q: What Spring Boot versions are supported?**
-A: CoApi 1.x supports Spring Boot 3.x, and CoApi 2.x supports Spring Boot 4.x.
+3. **合规**
+   - 审查您的用例的特定合规要求
+   - 根据监管要求实施必要的控制
+   - 定期安全审计和评估
 
-### Technical Questions
+## 常见问题
 
-**Q: How do I add CoApi to my project?**
-A: Add the dependency to your build configuration file:
-- Gradle: `implementation("me.ahoo.coapi:coapi-spring-boot-starter")`
-- Maven: Add the CoApi Spring Boot starter dependency
+### 一般问题
 
-**Q: Can I use CoApi with reactive programming?**
-A: Yes, CoApi supports both reactive (Flux/Mono) and traditional synchronous programming models.
+**Q：CoApi 支持哪些编程语言？**
 
-**Q: Does CoApi support load balancing?**
-A: Yes, CoApi has built-in load balancing support when used with Spring Cloud LoadBalancer.
+A：CoApi 专为使用 Spring Framework 的 Java 和 Kotlin 应用程序设计。
 
-**Q: How do I configure service endpoints?**
-A: You can configure endpoints using base URLs or service IDs for service discovery.
+**Q：CoApi 可以免费使用吗？**
 
-### Business Questions
+A：是的，CoApi 采用 Apache 2.0 许可证开源，这意味着它可以免费用于商业和非商业项目。
 
-**Q: How much time does CoApi save in development?**
-A: Most developers report saving 60-80% of the time typically spent on HTTP client configuration, depending on the complexity of the integration.
+**Q：支持哪些 Spring Boot 版本？**
 
-**Q: Is CoApi suitable for production use?**
-A: Yes, CoApi is actively maintained with CI/CD, code coverage tracking, and automated releases.
+A：CoApi 1.x 支持 Spring Boot 3.x，CoApi 2.x 支持 Spring Boot 4.x。
 
-**Q: What level of support is available?**
-A: Support is available through the GitHub community, with active maintenance by the core development team.
+### 技术问题
 
-**Q: Can I use CoApi for microservice architecture?**
-A: Yes, CoApi is specifically designed for microservice communication and integrates well with Spring Cloud ecosystems.
+**Q：如何将 CoApi 添加到我的项目？**
 
-### Security Questions
+A：将依赖添加到构建配置文件：
 
-**Q: What security features does CoApi provide?**
-A: CoApi itself provides basic security features, but relies on Spring Security for comprehensive security controls.
+- Gradle：`implementation("me.ahoo.coapi:coapi-spring-boot-starter")`
+- Maven：添加 CoApi Spring Boot starter 依赖
 
-**Q: Does CoApi handle authentication?**
-A: CoApi doesn't handle authentication directly but integrates seamlessly with Spring Security for authentication and authorization.
+**Q：我可以将 CoApi 与响应式编程一起使用吗？**
 
-**Q: Is CoApi compliant with GDPR?**
-A: CoApi itself doesn't process personal data, but you need to ensure your implementation complies with relevant regulations.
+A：是的，CoApi 支持响应式（Flux/Mono）和传统同步编程模型。
 
-## Getting Started Checklist
+**Q：CoApi 支持负载均衡吗？**
 
-### For Product Managers
+A：是的，CoApi 与 Spring Cloud LoadBalancer 配合使用时具有内置负载均衡支持。
 
-- [ ] Review integration requirements with development team
-- [ ] Assess team familiarity with Spring Framework
-- [ ] Identify third-party services that need integration
-- [ ] Define performance requirements for API calls
-- [ ] Plan monitoring and logging strategy
+**Q：如何配置服务端点？**
 
-### For Development Teams
+A：可以使用基础 URL 或用于服务发现的服务 ID 配置端点。
 
-- [ ] Set up development environment with Spring Boot
-- [ ] Add CoApi dependencies to project
-- [ ] Define API interfaces with required methods
-- [ ] Configure service endpoints and properties
-- [ ] Write unit and integration tests
-- [ ] Configure monitoring and error handling
+### 业务问题
 
-### For Operations Teams
+**Q：CoApi 在开发中节省多少时间？**
 
-- [ ] Set up monitoring for API performance
-- [ ] Configure logging for debugging
-- [ ] Plan deployment strategy for service configurations
-- [ ] Set up load balancing for production
-- [ ] Configure backup and failover mechanisms
+A：大多数开发者报告称节省了通常花在 HTTP 客户端配置上的 60-80% 的时间，具体取决于集成的复杂性。
 
-## Success Metrics
+**Q：CoApi 适合生产使用吗？**
 
-### Technical Metrics
+A：是的，CoApi 积极维护，具有 CI/CD、代码覆盖率跟踪和自动化发布。
 
-- **Integration Time**: Time from requirements to working integration
-- **Code Reduction**: Percentage of boilerplate code eliminated
-- **Performance**: Response times and throughput compared to manual implementation
-- **Error Rate**: API call error rates and failure recovery time
+**Q：可以获得什么级别的支持？**
 
-### Business Metrics
+A：通过 GitHub 社区提供支持，由核心开发团队积极维护。
 
-- **Development Speed**: Number of integrations completed per month
-- **Quality**: Number of production issues related to API integration
-- **Maintenance Effort**: Time spent maintaining API integrations
-- **Team Satisfaction**: Developer feedback on ease of use
+**Q：我可以将 CoApi 用于微服务架构吗？**
 
-## Conclusion
+A：是的，CoApi 专为微服务通信设计，与 Spring Cloud 生态系统配合良好。
 
-CoApi provides a streamlined approach to HTTP client development in Spring applications, offering significant benefits in development speed, code quality, and maintainability. While there are limitations to consider, the overall value proposition for organizations using Spring Framework is strong.
+### 安全问题
 
-For product managers, understanding the capabilities and limitations of CoApi helps in planning integration projects and setting appropriate expectations for development timelines. The library's focus on simplicity and automation aligns well with modern software development practices, making it a valuable tool for building robust, maintainable applications.
+**Q：CoApi 提供哪些安全特性？**
 
-Remember to consider your team's expertise with Spring Framework and reactive programming when planning CoApi adoption, and ensure proper monitoring and security measures are in place for production use.
+A：CoApi 本身提供基本的安全特性，但依赖 Spring Security 进行全面的安全控制。
+
+**Q：CoApi 处理身份验证吗？**
+
+A：CoApi 不直接处理身份验证，但与 Spring Security 无缝集成进行身份验证和授权。
+
+**Q：CoApi 符合 GDPR 吗？**
+
+A：CoApi 本身不处理个人数据，但您需要确保您的实现符合相关法规。
+
+## 入门清单
+
+### 产品经理
+
+- [ ] 与开发团队审查集成需求
+- [ ] 评估团队对 Spring Framework 的熟悉程度
+- [ ] 确定需要集成的第三方服务
+- [ ] 定义 API 调用的性能要求
+- [ ] 规划监控和日志策略
+
+### 开发团队
+
+- [ ] 使用 Spring Boot 设置开发环境
+- [ ] 将 CoApi 依赖添加到项目
+- [ ] 使用所需方法定义 API 接口
+- [ ] 配置服务端点和属性
+- [ ] 编写单元和集成测试
+- [ ] 配置监控和错误处理
+
+### 运维团队
+
+- [ ] 设置 API 性能监控
+- [ ] 配置调试日志
+- [ ] 规划服务配置部署策略
+- [ ] 为生产设置负载均衡
+- [ ] 配置备份和故障转移机制
+
+## 成功指标
+
+### 技术指标
+
+- **集成时间**：从需求到工作集成的时间
+- **代码减少**：消除的样板代码百分比
+- **性能**：与手动实现相比的响应时间和吞吐量
+- **错误率**：API 调用错误率和故障恢复时间
+
+### 业务指标
+
+- **开发速度**：每月完成的集成数量
+- **质量**：与 API 集成相关的生产问题数量
+- **维护工作量**：维护 API 集成花费的时间
+- **团队满意度**：开发者对易用性的反馈
+
+## 结论
+
+CoApi 为 Spring 应用程序中的 HTTP 客户端开发提供了一种精简的方法，在开发速度、代码质量和可维护性方面提供了显著优势。虽然存在需要考虑的局限性，但对于使用 Spring Framework 的组织来说，整体价值主张很强。
+
+对于产品经理来说，了解 CoApi 的能力和局限性有助于规划集成项目并为开发时间表设定适当的期望。该库对简单性和自动化的关注与现代软件开发实践很好地契合，使其成为构建健壮、可维护应用程序的宝贵工具。
+
+在规划 CoApi 采用时，请记住考虑团队对 Spring Framework 和响应式编程的专业知识，并确保为生产使用设置适当的监控和安全措施。
 
 ---
 
-*This guide is maintained by the CoApi team. For updates and questions, please refer to the [official repository](https://github.com/Ahoo-Wang/CoApi).*
+*本指南由 CoApi 团队维护。如需更新和问题，请参阅[官方仓库](https://github.com/Ahoo-Wang/CoApi)。*

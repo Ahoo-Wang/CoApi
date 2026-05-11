@@ -216,8 +216,8 @@ class TodoController : TodoApi {
 - [什么是 CoApi？](./overview.md) — CoApi 存在的原因
 - [安装与设置](./installation.md) — 详细的依赖管理
 - [配置参考](./configuration.md) — 所有属性
-- [架构概述](../deep-dive/architecture.md) — 内部注册工作原理
-- [示例与模式](../deep-dive/examples.md) — 完整的示例演练
+- [架构概述](/zh/deep-dive/architecture.md) — 内部注册工作原理
+- [示例与模式](/zh/deep-dive/examples.md) — 完整的示例演练
 
 ## 参考资料
 

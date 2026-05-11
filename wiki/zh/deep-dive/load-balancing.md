@@ -203,10 +203,10 @@ spring:
 
 ## 相关页面
 
-- [注解（@CoApi, @LoadBalanced）](./annotations.md) — 注解参数和 URL 解析
-- [客户端模式（响应式和同步）](./client-modes.md) — WebClient 与 RestClient 内部原理
-- [自定义和扩展](./customization.md) — 自定义 SPI 和过滤器链
-- [配置参考](../getting-started/configuration.md) — 所有 YAML 属性
+- [注解（@CoApi, @LoadBalanced）](/zh/deep-dive/annotations.md) — 注解参数和 URL 解析
+- [客户端模式（响应式和同步）](/zh/deep-dive/client-modes.md) — WebClient 与 RestClient 内部原理
+- [自定义和扩展](/zh/deep-dive/customization.md) — 自定义 SPI 和过滤器链
+- [配置参考](/zh/getting-started/configuration.md) — 所有 YAML 属性
 
 ## 参考资料
 

@@ -231,10 +231,8 @@ coapi:
 
 ## 交叉引用
 
-- [客户端模式](../concepts/client-modes.md) - 不同客户端操作模式的详细信息
-- [注解配置](../annotations/annotations.md) - 使用注解进行配置
-- [Spring Boot 集成](../integrations/spring-boot.md) - Spring Boot 特定的配置模式
-- [负载均衡](../features/load-balancing.md) - 负载均衡配置和行为
+- [客户端模式](/zh/getting-started/overview.md) - 不同客户端操作模式的详细信息
+- [架构概述](/zh/deep-dive/architecture.md) - 深入了解注册流程
 
 ## 参考资料
 
@@ -248,7 +246,5 @@ coapi:
 
 ### 相关页面
 
-- [入门指南](../getting-started/index.md) - CoApi 基础介绍
-- [配置参考](../getting-started/configuration.md) - 完整配置指南
-- [客户端模式](../concepts/client-modes.md) - 理解客户端操作模式
-- [Spring Boot 集成](../integrations/spring-boot.md) - Spring Boot 特定模式
+- [概述](/zh/getting-started/overview.md) - CoApi 基础介绍
+- [配置参考](/zh/getting-started/configuration.md) - 完整配置指南

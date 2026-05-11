@@ -355,11 +355,11 @@ class WebClientConfig {
 
 ## 交叉引用
 
-- [快速入门](../getting-started/index.md) - CoApi 基础介绍
-- [客户端模式](./client-modes.md) - 了解响应式与同步操作
-- [Spring Boot 集成](.md) - Spring Boot 特定模式
-- [配置参考](../getting-started/configuration.md) - 完整配置指南
-- [注解](./annotations.md) - 基于注解的配置
+- [快速入门](/zh/getting-started/index.md) - CoApi 基础介绍
+- [客户端模式](/zh/deep-dive/client-modes.md) - 了解响应式与同步操作
+- [Spring Boot 集成](/zh/deep-dive/auto-configuration.md) - Spring Boot 特定模式
+- [配置参考](/zh/getting-started/configuration.md) - 完整配置指南
+- [注解](/zh/deep-dive/annotations.md) - 基于注解的配置
 
 ## 参考文献
 
@@ -373,8 +373,8 @@ class WebClientConfig {
 
 ### 相关页面
 
-- [客户端模式](./client-modes.md) - 了解响应式与同步操作
-- [配置参考](../getting-started/configuration.md) - 完整配置指南
-- [Spring Boot 集成](.md) - Spring Boot 特定模式
-- [负载均衡](./load-balancing.md) - 负载均衡集成
-- [架构概览](./architecture.md) - 系统架构与设计
+- [客户端模式](/zh/deep-dive/client-modes.md) - 了解响应式与同步操作
+- [配置参考](/zh/getting-started/configuration.md) - 完整配置指南
+- [Spring Boot 集成](/zh/deep-dive/auto-configuration.md) - Spring Boot 特定模式
+- [负载均衡](/zh/deep-dive/load-balancing.md) - 负载均衡集成
+- [架构概览](/zh/deep-dive/architecture.md) - 系统架构与设计

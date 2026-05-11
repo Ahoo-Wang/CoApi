@@ -286,12 +286,12 @@ me.ahoo.coapi.spring.boot.starter.CoApiAutoConfiguration
 2. [Spring Boot @Conditional 注解](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-conditional-on-property)
 3. [Spring ClassPathScanningCandidateComponentProvider](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ClassPathScanningCandidateComponentProvider.html)
 4. [Spring ImportBeanDefinitionRegistrar 接口](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ImportBeanDefinitionRegistrar.html)
-5. [CoApi @EnableCoApi 注解](.././annotations.md)
-6. [CoApi 客户端配置](.././customization
+5. [CoApi @EnableCoApi 注解](/zh/deep-dive/annotations.md)
+6. [CoApi 客户端配置](/zh/deep-dive/customization.md)
 
 ## 相关页面
 
-- [客户端配置](./customization
-- [Api 注解](./annotations.md) - 使用 @CoApi 注解
-- [属性配置](../getting-started/configuration.md) - CoApi 属性配置
-- [Spring 集成](.md) - 高级 Spring 集成模式
+- [客户端配置](/zh/deep-dive/customization.md)
+- [Api 注解](/zh/deep-dive/annotations.md) - 使用 @CoApi 注解
+- [属性配置](/zh/getting-started/configuration.md) - CoApi 属性配置
+- [Spring 集成](/zh/deep-dive/auto-configuration.md) - 高级 Spring 集成模式

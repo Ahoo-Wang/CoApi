@@ -328,10 +328,9 @@ logging:
 
 完成安装后，继续学习：
 
-1. [基础使用指南](../usage/basic-usage.md) - 学习如何定义和使用 CoApi 接口
-2. [高级配置](../advanced/configuration.md) - 探索高级配置选项
-3. [示例](../examples/) - 查看实际实现示例
-4. [迁移指南](../migration/) - 从其他 HTTP 客户端框架迁移
+1. [快速开始](./quick-start.md) - 定义您的第一个 HTTP 客户端
+2. [配置参考](./configuration.md) - 探索详细配置选项
+3. [架构概述](/zh/deep-dive/architecture.md) - 深入了解内部工作原理
 
 ## 参考资料
 
@@ -346,8 +345,6 @@ logging:
 
 ## 相关页面
 
-- [入门指南](../) - 主要入门指南
-- [快速开始](../quick-start.md) - 5 分钟设置教程
-- [配置](../configuration/) - 详细配置选项
-- [示例](../examples/) - 工作代码示例
-- [常见问题](../faq/) - 常见问题
+- [概述](./overview.md) - CoApi 简介
+- [快速开始](./quick-start.md) - 5 分钟设置教程
+- [配置参考](./configuration.md) - 详细配置选项

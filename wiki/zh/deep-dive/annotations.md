@@ -288,7 +288,7 @@ graph LR
 - [example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt) - 服务发现示例
 
 ### 相关页面
-- [配置](../getting-started/configuration.md) - 详细配置指南
-- [服务发现](./load-balancing.md) - 负载均衡与服务发现
-- [测试](.md) - CoApi 客户端测试策略
-- [示例](./examples.md) - 完整使用示例
+- [配置](/zh/getting-started/configuration.md) - 详细配置指南
+- [服务发现](/zh/deep-dive/load-balancing.md) - 负载均衡与服务发现
+- [测试](/zh/deep-dive/annotations.md) - CoApi 客户端测试策略
+- [示例](/zh/deep-dive/examples.md) - 完整使用示例

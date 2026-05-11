@@ -231,10 +231,10 @@ coapi:
 
 ## Cross-References
 
-- [Client Mode](../concepts/client-modes.md) - Details about different client operation modes
-- [Annotation Configuration](../annotations/annotations.md) - Using annotations for configuration
-- [Spring Boot Integration](../integrations/spring-boot.md) - Spring Boot specific configuration patterns
-- [Load Balancing](../features/load-balancing.md) - Load balancing configuration and behavior
+- [Client Mode](../deep-dive/client-modes.md) - Details about different client operation modes
+- [Annotation Configuration](../deep-dive/annotations.md) - Using annotations for configuration
+- [Auto Configuration](../deep-dive/auto-configuration.md) - Spring Boot auto configuration patterns
+- [Load Balancing](../deep-dive/load-balancing.md) - Load balancing configuration and behavior
 
 ## References
 
@@ -248,7 +248,7 @@ coapi:
 
 ### Related Pages
 
-- [Getting Started](../getting-started/index.md) - Introduction to CoApi basics
-- [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
-- [Client Mode](../concepts/client-modes.md) - Understanding client operation modes
-- [Spring Boot Integration](../integrations/spring-boot.md) - Spring Boot specific patterns
+- [Getting Started](./overview.md) - Introduction to CoApi basics
+- [Installation](./installation.md) - Installation and setup guide
+- [Client Mode](../deep-dive/client-modes.md) - Understanding client operation modes
+- [Auto Configuration](../deep-dive/auto-configuration.md) - Spring Boot auto configuration

@@ -1,84 +1,89 @@
-# CoApi Contributor Guide
+---
+title: CoApi 贡献者指南
+description: 了解如何为 CoApi 项目做出贡献，包括环境设置、构建流程和代码规范。
+---
 
-[Repository](https://github.com/Ahoo-Wang/CoApi) | [Main Branch](https://github.com/Ahoo-Wang/CoApi/blob/main)
+# CoApi 贡献者指南
 
-## Table of Contents
+[代码仓库](https://github.com/Ahoo-Wang/CoApi) | [主分支](https://github.com/Ahoo-Wang/CoApi/blob/main)
 
-- [Introduction](#introduction)
-- [Part I: Language/Framework Foundations](#part-i-languageframework-foundations)
-  - [Spring Framework 6 & Spring Boot 4.x](#spring-framework-6--spring-boot-4x)
-  - [Kotlin Language Essentials](#kotlin-language-essentials)
+## 目录
+
+- [简介](#简介)
+- [第一部分：语言/框架基础](#第一部分语言框架基础)
+  - [Spring Framework 6 和 Spring Boot 4.x](#spring-framework-6-和-spring-boot-4x)
+  - [Kotlin 语言要点](#kotlin-语言要点)
   - [Spring HTTP Interface](#spring-http-interface)
-  - [HTTP Clients: WebClient vs RestClient](#http-clients-webclient-vs-restclient)
-  - [Dependency Injection & Configuration](#dependency-injection--configuration)
-- [Part II: CoApi Architecture & Domain Model](#part-ii-coapi-architecture--domain-model)
-  - [Project Structure](#project-structure)
-  - [Core Architecture](#core-architecture)
-  - [Registration Flow](#registration-flow)
-  - [Client Mode Configuration](#client-mode-configuration)
-  - [Load Balancing](#load-balancing)
-  - [Authentication](#authentication)
-- [Part III: Getting Productive](#part-iii-getting-productive)
-  - [Development Environment Setup](#development-environment-setup)
-  - [Building the Project](#building-the-project)
-  - [Testing Strategy](#testing-strategy)
-  - [Code Quality & Static Analysis](#code-quality--static-analysis)
-  - [Contributing Guidelines](#contributing-guidelines)
-  - [Release Process](#release-process)
-- [Glossary](#glossary)
-- [Key File Reference](#key-file-reference)
-- [Cross-Language Comparisons](#cross-language-comparisons)
-- [Appendices](#appendices)
-  - [Appendix A: Configuration Properties](#appendix-a-configuration-properties)
-  - [Appendix B: Common Patterns](#appendix-b-common-patterns)
-  - [Appendix C: Troubleshooting](#appendix-c-troubleshooting)
+  - [HTTP 客户端：WebClient 与 RestClient](#http-客户端webclient-与-restclient)
+  - [依赖注入与配置](#依赖注入与配置)
+- [第二部分：CoApi 架构与领域模型](#第二部分coapi-架构与领域模型)
+  - [项目结构](#项目结构)
+  - [核心架构](#核心架构)
+  - [注册流程](#注册流程)
+  - [客户端模式配置](#客户端模式配置)
+  - [负载均衡](#负载均衡)
+  - [认证](#认证)
+- [第三部分：高效工作](#第三部分高效工作)
+  - [开发环境设置](#开发环境设置)
+  - [构建项目](#构建项目)
+  - [测试策略](#测试策略)
+  - [代码质量与静态分析](#代码质量与静态分析)
+  - [贡献指南](#贡献指南)
+  - [发布流程](#发布流程)
+- [术语表](#术语表)
+- [关键文件参考](#关键文件参考)
+- [跨语言对比](#跨语言对比)
+- [附录](#附录)
+  - [附录 A：配置属性](#附录-a配置属性)
+  - [附录 B：常见模式](#附录-b常见模式)
+  - [附录 C：故障排除](#附录-c故障排除)
 
-## Introduction
+## 简介
 
-Welcome to the CoApi contributor guide! CoApi is a Spring Framework library providing zero-boilerplate auto-configuration for Spring 6 HTTP Interface clients. This guide is designed to help you understand the codebase, contribute effectively, and become productive with the project.
+欢迎阅读 CoApi 贡献者指南！CoApi 是一个 Spring Framework 库，为 Spring 6 HTTP Interface 客户端提供零样板自动配置。本指南旨在帮助你理解代码库、有效贡献代码，并快速上手项目开发。
 
-CoApi addresses the gap in the Spring ecosystem by providing automatic configuration for HTTP Interface clients while supporting both reactive and synchronous programming models. Whether you're a seasoned Spring developer or new to HTTP clients, this guide will help you understand how CoApi works and how to contribute to its ongoing development.
+CoApi 通过在支持响应式和同步编程模型的同时，为 HTTP Interface 客户端提供自动配置，填补了 Spring 生态系统的空白。无论你是经验丰富的 Spring 开发者还是 HTTP 客户端的新手，本指南都将帮助你理解 CoApi 的工作原理以及如何为其持续开发做出贡献。
 
-### What You'll Learn
+### 你将学到什么
 
-By the end of this guide, you'll understand:
+通过阅读本指南，你将了解：
 
-- The foundations of Spring Framework 6 and Spring Boot 4.x
-- How CoApi integrates with Spring's HTTP Interface
-- The architecture and design patterns used in CoApi
-- How to set up your development environment
-- Testing strategies and contribution workflows
-- Advanced features like load balancing and authentication
+- Spring Framework 6 和 Spring Boot 4.x 的基础知识
+- CoApi 如何与 Spring 的 HTTP Interface 集成
+- CoApi 中使用的架构和设计模式
+- 如何设置开发环境
+- 测试策略和贡献工作流程
+- 负载均衡和认证等高级功能
 
-### Prerequisites
+### 前提条件
 
-Before diving into this guide, you should have:
+在深入学习本指南之前，你应该具备：
 
-- Basic knowledge of Java/Kotlin and Spring Framework
-- Understanding of HTTP clients and REST APIs
-- Familiarity with Gradle build system
-- Git experience for version control
+- Java/Kotlin 和 Spring Framework 的基础知识
+- 理解 HTTP 客户端和 REST API
+- 熟悉 Gradle 构建系统
+- 使用 Git 进行版本控制的经验
 
 ---
 
-## Part I: Language/Framework Foundations
+## 第一部分：语言/框架基础
 
-### Spring Framework 6 & Spring Boot 4.x
+### Spring Framework 6 和 Spring Boot 4.x
 
-CoApi is built on top of Spring Framework 6 and Spring Boot 4.x, making it essential to understand the foundations of these frameworks.
+CoApi 基于 Spring Framework 6 和 Spring Boot 4.x 构建，因此理解这些框架的基础知识至关重要。
 
-#### Spring Framework 6 Key Features
+#### Spring Framework 6 主要特性
 
-Spring Framework 6 introduces several important changes and improvements:
+Spring Framework 6 引入了几项重要的变更和改进：
 
-- **Virtual Thread Support**: Java 17+ virtual threads for improved concurrency
-- **Performance Enhancements**: Optimized bean creation and dependency injection
-- **Type Hints**: Improved type inference and generic support
-- **Observability**: Enhanced integration with observability tools
+- **虚拟线程支持**：Java 17+ 虚拟线程，提升并发性能
+- **性能优化**：优化的 bean 创建和依赖注入
+- **类型提示**：改进的类型推断和泛型支持
+- **可观测性**：增强的可观测性工具集成
 
-#### Spring Boot 4.x Compatibility
+#### Spring Boot 4.x 兼容性
 
-CoApi 2.x is specifically designed for Spring Boot 4.x:
+CoApi 2.x 专为 Spring Boot 4.x 设计：
 
 ```kotlin
 // build.gradle.kts
@@ -88,39 +93,39 @@ dependencies {
 }
 ```
 
-Spring Boot 4.x provides:
+Spring Boot 4.x 提供：
 
-- **Auto-configuration**: Simplified setup of Spring applications
-- **Actuator**: Production-ready features
-- **Embedded Servers**: Easy deployment options
+- **自动配置**：简化 Spring 应用程序的配置
+- **Actuator**：生产级功能
+- **嵌入式服务器**：便捷的部署选项
 
-### Kotlin Language Essentials
+### Kotlin 语言要点
 
-CoApi is written in Kotlin, leveraging its modern language features for cleaner, more expressive code.
+CoApi 使用 Kotlin 编写，利用其现代语言特性实现更清晰、更富有表现力的代码。
 
-#### Key Kotlin Features Used
+#### 使用的主要 Kotlin 特性
 
-1. **Type-Safe Builders**: For configuration and bean definitions
+1. **类型安全构建器**：用于配置和 bean 定义
 
 ```kotlin
 @BeanDefinitionBuilder.genericBeanDefinition(WebClientFactoryBean::class.java)
     .addConstructorArgValue(coApiDefinition)
 ```
 
-2. **Extension Functions**: For utility methods
+2. **扩展函数**：用于工具方法
 
 ```kotlin
 fun String.withBearerPrefix(): String = "Bearer $this"
 ```
 
-3. **Null Safety**: Compile-time null checks
+3. **空安全**：编译时空值检查
 
 ```kotlin
 val coApi = getAnnotation(CoApi::class.java)
     ?: throw IllegalArgumentException("The class must be annotated by @CoApi.")
 ```
 
-4. **Data Classes**: For immutable data holders
+4. **数据类**：用于不可变数据持有者
 
 ```kotlin
 data class CoApiDefinition(
@@ -133,7 +138,7 @@ data class CoApiDefinition(
 
 #### Kotlin DSL for Gradle
 
-The project uses Kotlin DSL for build scripts:
+项目使用 Kotlin DSL 进行构建脚本编写：
 
 ```kotlin
 plugins {
@@ -148,11 +153,11 @@ dependencies {
 
 ### Spring HTTP Interface
 
-Spring Framework 6 introduced the HTTP Interface, which allows defining HTTP services as Java interfaces using the `@HttpExchange` annotation.
+Spring Framework 6 引入了 HTTP Interface，允许使用 `@HttpExchange` 注解将 HTTP 服务定义为 Java 接口。
 
-#### @HttpExchange Annotation
+#### @HttpExchange 注解
 
-The `@HttpExchange` annotation marks an interface as an HTTP service:
+`@HttpExchange` 注解将接口标记为 HTTP 服务：
 
 ```java
 @HttpExchange("https://api.github.com")
@@ -166,9 +171,9 @@ public interface GitHubApiClient {
 }
 ```
 
-#### Supported HTTP Methods
+#### 支持的 HTTP 方法
 
-CoApi supports all standard HTTP methods:
+CoApi 支持所有标准 HTTP 方法：
 
 ```kotlin
 @GetExchange("GET /users/{user}")
@@ -184,20 +189,20 @@ fun updateUser(@PathVariable id: String, @RequestBody user: User): Mono<User>
 fun deleteUser(@PathVariable id: String): Mono<Void>
 ```
 
-#### HTTP Interface Benefits
+#### HTTP Interface 的优势
 
-1. **Type Safety**: Compile-time checking of HTTP methods and paths
-2. **Reactive Support**: Native support for Project Reactor types
-3. **Simplified Testing**: Easy to mock and test
-4. **Consistent API**: Standardized way to define HTTP services
+1. **类型安全**：HTTP 方法和路径的编译时检查
+2. **响应式支持**：原生支持 Project Reactor 类型
+3. **简化测试**：易于模拟和测试
+4. **一致的 API**：定义 HTTP 服务的标准化方式
 
-### HTTP Clients: WebClient vs RestClient
+### HTTP 客户端：WebClient 与 RestClient
 
-CoApi supports both reactive (`WebClient`) and synchronous (`RestClient`) HTTP clients, giving you flexibility based on your application needs.
+CoApi 同时支持响应式（`WebClient`）和同步（`RestClient`）HTTP 客户端，可根据应用需求灵活选择。
 
-#### WebClient (Reactive)
+#### WebClient（响应式）
 
-WebClient is Spring's reactive HTTP client:
+WebClient 是 Spring 的响应式 HTTP 客户端：
 
 ```kotlin
 val client = WebClient.builder()
@@ -211,15 +216,16 @@ client.get()
     .collectList()
 ```
 
-**Characteristics**:
-- Non-blocking and reactive
-- Supports streaming responses
-- Built on Project Reactor
-- Ideal for high-throughput applications
+**特性**：
 
-#### RestClient (Synchronous)
+- 非阻塞式响应式
+- 支持流式响应
+- 基于 Project Reactor 构建
+- 适合高吞吐量应用
 
-RestClient is Spring's modern synchronous HTTP client:
+#### RestClient（同步）
+
+RestClient 是 Spring 的现代同步 HTTP 客户端：
 
 ```kotlin
 val client = RestClient.builder()
@@ -232,15 +238,16 @@ val issues = client.get()
     .bodyToList<Issue>()
 ```
 
-**Characteristics**:
-- Simple and synchronous
-- Standard Java types
-- Easy to use and understand
-- Ideal for traditional applications
+**特性**：
 
-#### CoApi Client Mode Configuration
+- 简单同步
+- 标准 Java 类型
+- 易于使用和理解
+- 适合传统应用
 
-CoApi automatically selects the appropriate client mode:
+#### CoApi 客户端模式配置
+
+CoApi 自动选择合适的客户端模式：
 
 ```kotlin
 enum class ClientMode {
@@ -260,13 +267,13 @@ enum class ClientMode {
 }
 ```
 
-### Dependency Injection & Configuration
+### 依赖注入与配置
 
-Spring's dependency injection framework is central to CoApi's functionality.
+Spring 的依赖注入框架是 CoApi 功能的核心。
 
-#### @Bean Definitions
+#### @Bean 定义
 
-CoApi uses `@Bean` definitions to create proxy instances:
+CoApi 使用 `@Bean` 定义来创建代理实例：
 
 ```kotlin
 @Bean
@@ -275,9 +282,9 @@ fun coApiProxyFactory(): HttpServiceProxyFactory {
 }
 ```
 
-#### FactoryBean Pattern
+#### FactoryBean 模式
 
-CoApi implements the FactoryBean pattern to create proxies:
+CoApi 实现 FactoryBean 模式来创建代理：
 
 ```kotlin
 class CoApiFactoryBean(
@@ -295,7 +302,7 @@ class CoApiFactoryBean(
 
 #### Bean Definition Registry
 
-CoApi registers bean definitions programmatically:
+CoApi 以编程方式注册 bean 定义：
 
 ```kotlin
 fun register(coApiDefinition: CoApiDefinition) {
@@ -307,39 +314,39 @@ fun register(coApiDefinition: CoApiDefinition) {
 
 ---
 
-## Part II: CoApi Architecture & Domain Model
+## 第二部分：CoApi 架构与领域模型
 
-### Project Structure
+### 项目结构
 
-CoApi follows a modular architecture with clear separation of concerns:
+CoApi 采用模块化架构，职责划分清晰：
 
 ```
 CoApi/
-├── api/                    # Core annotations and interfaces
+├── api/                    # 核心注解和接口
 │   └── src/main/kotlin/me/ahoo/coapi/api/
-│       ├── CoApi.kt       # Main annotation
-│       └── LoadBalanced.kt # Load balancing annotation
-├── spring/                # Core Spring integration
+│       ├── CoApi.kt       # 主注解
+│       └── LoadBalanced.kt # 负载均衡注解
+├── spring/                # 核心 Spring 集成
 │   └── src/main/kotlin/me/ahoo/coapi/spring/
-│       ├── EnableCoApi.kt          # Enable annotation
-│       ├── CoApiRegistrar.kt       # Bean registration
-│       ├── CoApiDefinition.kt      # Domain model
-│       ├── ClientMode.kt          # Client mode configuration
-│       └── client/                # HTTP client implementations
-│           ├── reactive/           # WebClient implementation
-│           └── sync/               # RestClient implementation
-├── spring-boot-starter/   # Spring Boot auto-configuration
+│       ├── EnableCoApi.kt          # 启用注解
+│       ├── CoApiRegistrar.kt       # Bean 注册
+│       ├── CoApiDefinition.kt      # 领域模型
+│       ├── ClientMode.kt          # 客户端模式配置
+│       └── client/                # HTTP 客户端实现
+│           ├── reactive/           # WebClient 实现
+│           └── sync/               # RestClient 实现
+├── spring-boot-starter/   # Spring Boot 自动配置
 │   └── src/main/kotlin/me/ahoo/coapi/spring/boot/
 │       └── AutoCoApiConfiguration.kt
-├── bom/                   # Bill of materials
-└── dependencies/          # Shared dependency management
+├── bom/                   # 物料清单
+└── dependencies/          # 共享依赖管理
 ```
 
-### Core Architecture
+### 核心架构
 
-#### Layered Architecture
+#### 分层架构
 
-CoApi follows a layered architecture pattern:
+CoApi 采用分层架构模式：
 
 ```mermaid
 graph TD
@@ -354,31 +361,31 @@ graph TD
     D -->|WebClient/RestClient| E
 ```
 
-#### Component Responsibilities
+#### 组件职责
 
-1. **api Module**: Contains core annotations and interfaces
-   - `@CoApi`: Main annotation for marking interfaces
-   - `@LoadBalanced`: Enable client-side load balancing
+1. **api 模块**：包含核心注解和接口
+   - `@CoApi`：标记接口的主注解
+   - `@LoadBalanced`：启用客户端负载均衡
 
-2. **spring Module**: Core Spring integration
-   - Bean registration and configuration
-   - Client mode detection
-   - Proxy creation
+2. **spring 模块**：核心 Spring 集成
+   - Bean 注册和配置
+   - 客户端模式检测
+   - 代理创建
 
-3. **spring-boot-starter**: Auto-configuration
-   - Automatic detection and setup
-   - Property-based configuration
+3. **spring-boot-starter**：自动配置
+   - 自动检测和设置
+   - 基于属性的配置
 
-4. **dependencies**: Shared dependency management
-   - Version alignment across modules
+4. **dependencies**：共享依赖管理
+   - 跨模块版本对齐
 
-### Registration Flow
+### 注册流程
 
-The registration flow is the heart of CoApi's functionality, transforming annotated interfaces into proxied HTTP clients.
+注册流程是 CoApi 功能的核心，将注解接口转换为代理 HTTP 客户端。
 
-#### Annotation Processing
+#### 注解处理
 
-1. **@CoApi Annotation**: Marks interfaces as HTTP clients
+1. **@CoApi 注解**：将接口标记为 HTTP 客户端
 
 ```kotlin
 @CoApi(baseUrl = "${github.url}")
@@ -388,7 +395,7 @@ public interface GitHubApiClient {
 }
 ```
 
-2. **@EnableCoApi Annotation**: Enables auto-configuration
+2. **@EnableCoApi 注解**：启用自动配置
 
 ```kotlin
 @EnableCoApi(clients = [GitHubApiClient::class])
@@ -396,7 +403,7 @@ public interface GitHubApiClient {
 class Application
 ```
 
-#### Registration Process
+#### 注册流程
 
 ```mermaid
 sequenceDiagram
@@ -422,12 +429,12 @@ sequenceDiagram
     Note over Bean: GitHubApi.CoApi
 ```
 
-#### Bean Registration Details
+#### Bean 注册详情
 
-The registration process creates two types of beans:
+注册流程创建两种类型的 bean：
 
-1. **HTTP Client Bean**: The actual HTTP client (WebClient or RestClient)
-2. **CoApi Proxy Bean**: The proxy that implements the interface
+1. **HTTP Client Bean**：实际的 HTTP 客户端（WebClient 或 RestClient）
+2. **CoApi Proxy Bean**：实现该接口的代理
 
 ```kotlin
 // From CoApiRegistrar.kt
@@ -441,32 +448,32 @@ fun register(coApiDefinition: CoApiDefinition) {
 }
 ```
 
-### Client Mode Configuration
+### 客户端模式配置
 
-CoApi provides three client modes to support different programming paradigms.
+CoApi 提供三种客户端模式以支持不同的编程范式。
 
-#### Client Mode Options
+#### 客户端模式选项
 
 ```kotlin
 enum class ClientMode {
-    REACTIVE,   // WebClient reactive client
-    SYNC,       // RestClient synchronous client  
-    AUTO        // Auto-detect based on classpath
+    REACTIVE,   // WebClient 响应式客户端
+    SYNC,       // RestClient 同步客户端  
+    AUTO        // 基于 classpath 自动检测
 }
 ```
 
-#### Mode Detection Logic
+#### 模式检测逻辑
 
-The AUTO mode intelligently selects the appropriate client based on the Spring framework classpath:
+AUTO 模式根据 Spring 框架的 classpath 智能选择合适的客户端：
 
 ```kotlin
 // From ClientMode.kt
 private val INFERRED_MODE_BASED_ON_CLASS: ClientMode by lazy {
     try {
         Class.forName("org.springframework.web.reactive.HandlerResult")
-        REACTIVE  // Spring WebFlux is available
+        REACTIVE  // Spring WebFlux 可用
     } catch (ignore: ClassNotFoundException) {
-        SYNC      // Spring MVC is available
+        SYNC      // Spring MVC 可用
     }
 }
 
@@ -481,24 +488,24 @@ fun inferClientMode(getProperty: (propertyKey: String) -> String?): ClientMode {
 }
 ```
 
-#### Configuration Examples
+#### 配置示例
 
 ```kotlin
-// Force reactive mode
+// 强制响应式模式
 @CoApi(clientMode = ClientMode.REACTIVE)
 interface GitHubApiClient {
     @GetExchange("repos/{owner}/{repo}/issues")
     Flux<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
 }
 
-// Force synchronous mode
+// 强制同步模式
 @CoApi(clientMode = ClientMode.SYNC)
 interface GitHubApiClient {
     @GetExchange("repos/{owner}/{repo}/issues")
     List<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
 }
 
-// Auto-detect (default)
+// 自动检测（默认）
 @CoApi(clientMode = ClientMode.AUTO)
 interface GitHubApiClient {
     @GetExchange("repos/{owner}/{repo}/issues")
@@ -506,11 +513,11 @@ interface GitHubApiClient {
 }
 ```
 
-### Load Balancing
+### 负载均衡
 
-CoApi integrates with Spring Cloud LoadBalancer to provide client-side load balancing capabilities.
+CoApi 与 Spring Cloud LoadBalancer 集成，提供客户端负载均衡能力。
 
-#### Load Balancing Configuration
+#### 负载均衡配置
 
 ```kotlin
 @CoApi(serviceId = "github-service")
@@ -521,9 +528,9 @@ interface GitHubApiClient {
 }
 ```
 
-#### Load Balancing Protocol Support
+#### 负载均衡协议支持
 
-CoApi supports the `lb://` protocol for load-balanced services:
+CoApi 支持 `lb://` 协议用于负载均衡服务：
 
 ```kotlin
 @CoApi(baseUrl = "lb://github-service")
@@ -533,9 +540,9 @@ interface GitHubApiClient {
 }
 ```
 
-#### Load Balancing Implementation
+#### 负载均衡实现
 
-The load balancing is implemented through builder customizers:
+负载均衡通过构建器自定义器实现：
 
 ```kotlin
 // From WebClientFactoryBean.kt
@@ -553,26 +560,26 @@ private class LoadBalancedRestClientBuilderCustomizer : RestClient.Builder.() ->
 }
 ```
 
-### Authentication
+### 认证
 
-CoApi provides built-in authentication support with extensible token providers.
+CoApi 提供内置认证支持，具有可扩展的令牌提供程序。
 
-#### Bearer Token Authentication
+#### Bearer Token 认证
 
 ```kotlin
 @CoApi(baseUrl = "https://api.github.com")
 interface GitHubApiClient {
-    // Bearer token is automatically added to requests
+    // Bearer token 自动添加到请求中
     @GetExchange("user")
     Mono<User> getCurrentUser()
 }
 ```
 
-#### Authentication Components
+#### 认证组件
 
-1. **BearerTokenFilter**: Adds Bearer token to request headers
-2. **ExpirableTokenProvider**: Provides tokens with expiration handling
-3. **CachedExpirableTokenProvider**: Caches tokens for performance
+1. **BearerTokenFilter**：向请求头添加 Bearer 令牌
+2. **ExpirableTokenProvider**：提供带过期处理的令牌
+3. **CachedExpirableTokenProvider**：缓存令牌以提升性能
 
 ```kotlin
 // From BearerTokenFilter.kt
@@ -592,7 +599,7 @@ object BearerHeaderValueMapper : HeaderValueMapper {
 }
 ```
 
-#### Token Provider Implementation
+#### Token Provider 实现
 
 ```kotlin
 interface ExpirableTokenProvider {
@@ -620,30 +627,30 @@ class CachedExpirableTokenProvider(
 
 ---
 
-## Part III: Getting Productive
+## 第三部分：高效工作
 
-### Development Environment Setup
+### 开发环境设置
 
-#### Prerequisites
+#### 前置条件
 
-Ensure you have the following installed:
+确保已安装以下软件：
 
-1. **Java 17+**: CoApi requires Java 17 or later
-2. **Kotlin 1.8+**: Modern Kotlin features and coroutines
-3. **Gradle 8.0+**: Build automation and dependency management
-4. **Git 2.30+**: Version control
-5. **IDE**: IntelliJ IDEA (recommended) or VS Code with Kotlin plugin
+1. **Java 17+**：CoApi 需要 Java 17 或更高版本
+2. **Kotlin 1.8+**：现代 Kotlin 特性和协程
+3. **Gradle 8.0+**：构建自动化和依赖管理
+4. **Git 2.30+**：版本控制
+5. **IDE**：IntelliJ IDEA（推荐）或带 Kotlin 插件的 VS Code
 
-#### IDE Setup
+#### IDE 设置
 
-**IntelliJ IDEA**:
+**IntelliJ IDEA**：
 
-1. Install the Kotlin plugin
-2. Open the project in IntelliJ
-3. Import Gradle project
-4. Configure Kotlin SDK (JDK 17+)
+1. 安装 Kotlin 插件
+2. 在 IntelliJ 中打开项目
+3. 导入 Gradle 项目
+4. 配置 Kotlin SDK（JDK 17+）
 
-**VS Code**:
+**VS Code**：
 
 ```bash
 # Install recommended extensions
@@ -652,7 +659,7 @@ code --install-extension ms-kotlin.kotlin-debugger
 code --install-extension ms-python.python
 ```
 
-#### Build Environment Configuration
+#### 构建环境配置
 
 ```bash
 # Clone the repository
@@ -667,11 +674,11 @@ export PATH=$JAVA_HOME/bin:$PATH
 export GRADLE_OPTS="-Xmx2g -Dorg.gradle.daemon=true"
 ```
 
-### Building the Project
+### 构建项目
 
-CoApi uses Gradle with Kotlin DSL for builds. The project follows a multi-module structure with separate modules for different components.
+CoApi 使用 Gradle 和 Kotlin DSL 进行构建。项目采用多模块结构，不同组件有独立的模块。
 
-#### Build Commands
+#### 构建命令
 
 ```bash
 # Build all modules
@@ -695,7 +702,7 @@ CoApi uses Gradle with Kotlin DSL for builds. The project follows a multi-module
 ./gradlew javadoc
 ```
 
-#### Build Profiles
+#### 构建配置文件
 
 ```bash
 # Development build
@@ -708,9 +715,9 @@ CoApi uses Gradle with Kotlin DSL for builds. The project follows a multi-module
 ./gradlew build -PtargetJavaVersion=17
 ```
 
-#### Module Structure Builds
+#### 模块结构构建
 
-Each module can be built independently:
+每个模块可以独立构建：
 
 ```bash
 # Core API module
@@ -729,29 +736,29 @@ Each module can be built independently:
 ./gradlew :dependencies:build
 ```
 
-### Testing Strategy
+### 测试策略
 
-CoApi employs a comprehensive testing strategy covering unit tests, integration tests, and component tests.
+CoApi 采用全面的测试策略，覆盖单元测试、集成测试和组件测试。
 
-#### Test Structure
+#### 测试结构
 
 ```
 src/
 ├── test/kotlin/
-│   ├── unit/               # Unit tests
+│   ├── unit/               # 单元测试
 │   │   ├── CoApiDefinitionTest.kt
 │   │   └── ClientModeTest.kt
-│   ├── integration/       # Integration tests
+│   ├── integration/       # 集成测试
 │   │   ├── EnableCoApiIntegrationTest.kt
 │   │   └── LoadBalancingIntegrationTest.kt
-│   └── component/         # Component tests
+│   └── component/         # 组件测试
 │       ├── WebClientFactoryBeanTest.kt
 │       └── RestClientFactoryBeanTest.kt
 ```
 
-#### Unit Testing with FluentAssert
+#### 使用 FluentAssert 进行单元测试
 
-CoApi uses `me.ahoo.test:fluent-assert-core` for clean, type-safe assertions:
+CoApi 使用 `me.ahoo.test:fluent-assert-core` 进行简洁、类型安全的断言：
 
 ```kotlin
 import me.ahoo.test.asserts.assert
@@ -766,9 +773,9 @@ fun `CoApiDefinition should resolve base URL correctly`() {
 }
 ```
 
-#### Integration Testing
+#### 集成测试
 
-Integration tests use `ApplicationContextRunner` for testing Spring context setup:
+集成测试使用 `ApplicationContextRunner` 测试 Spring 上下文设置：
 
 ```kotlin
 @Test
@@ -782,9 +789,9 @@ fun `EnableCoApi should register CoApi beans`() {
 }
 ```
 
-#### Component Testing
+#### 组件测试
 
-Component tests focus on individual components:
+组件测试专注于单个组件：
 
 ```kotlin
 @Test
@@ -797,7 +804,7 @@ fun `WebClientFactoryBean should create WebClient`() {
 }
 ```
 
-#### Mock Testing with MockK
+#### 使用 MockK 进行 Mock 测试
 
 ```kotlin
 @Test
@@ -820,18 +827,18 @@ fun `GitHubApiClient should use mocked responses`() {
 }
 ```
 
-### Code Quality & Static Analysis
+### 代码质量与静态分析
 
-CoApi enforces high code quality standards through static analysis, code formatting, and style checks.
+CoApi 通过静态分析、代码格式化和样式检查来执行高代码质量标准。
 
-#### Static Analysis Tools
+#### 静态分析工具
 
-1. **Detekt**: Kotlin-specific static analysis
-2. **Ktlint**: Code formatting and style
-3. **SpotBugs**: Java bytecode analysis
-4. **JaCoCo**: Code coverage
+1. **Detekt**：Kotlin 专用静态分析
+2. **Ktlint**：代码格式化和样式
+3. **SpotBugs**：Java 字节码分析
+4. **JaCoCo**：代码覆盖率
 
-#### Static Analysis Commands
+#### 静态分析命令
 
 ```bash
 # Run all static analysis
@@ -850,9 +857,9 @@ CoApi enforces high code quality standards through static analysis, code formatt
 ./gradlew jacocoTestReport
 ```
 
-#### Code Coverage Standards
+#### 代码覆盖率标准
 
-CoApi maintains high code coverage standards:
+CoApi 保持高代码覆盖率标准：
 
 ```bash
 # Minimum coverage requirements
@@ -863,7 +870,7 @@ CoApi maintains high code coverage standards:
 open build/reports/jacoco/test/html/index.html
 ```
 
-#### Code Style Guidelines
+#### 代码样式指南
 
 ```kotlin
 // Use type-safe builders
@@ -882,20 +889,20 @@ data class CoApiDefinition(
 )
 ```
 
-### Contributing Guidelines
+### 贡献指南
 
-CoApi welcomes contributions from the community. Follow these guidelines to ensure your contributions align with the project's standards.
+CoApi 欢迎社区贡献。请遵循以下指南确保你的贡献符合项目标准。
 
-#### Contribution Workflow
+#### 贡献工作流程
 
-1. **Fork the Repository**: Create your fork
-2. **Create Feature Branch**: `git checkout -b feature/your-feature`
-3. **Make Changes**: Implement your changes
-4. **Test Changes**: Run `./gradlew test`
-5. **Update Documentation**: Update relevant docs
-6. **Submit Pull Request**: Use GitHub PR template
+1. **Fork the Repository**：创建你的分支
+2. **Create Feature Branch**：`git checkout -b feature/your-feature`
+3. **Make Changes**：实现你的更改
+4. **Test Changes**：运行 `./gradlew test`
+5. **Update Documentation**：更新相关文档
+6. **Submit Pull Request**：使用 GitHub PR 模板
 
-#### Pull Request Process
+#### Pull Request 流程
 
 ```bash
 # Create pull request template
@@ -920,17 +927,17 @@ CoApi welcomes contributions from the community. Follow these guidelines to ensu
 - [ ] CI checks pass
 ```
 
-#### Code Review Standards
+#### 代码审查标准
 
-1. **Functionality**: Code works as intended
-2. **Readability**: Clear and maintainable code
-3. **Performance**: No performance regressions
-4. **Testing**: Comprehensive test coverage
-5. **Documentation**: Updated and accurate docs
+1. **Functionality**：代码按预期工作
+2. **Readability**：清晰可维护的代码
+3. **Performance**：无性能回归
+4. **Testing**：全面的测试覆盖
+5. **Documentation**：更新且准确的文档
 
-#### Bug Reporting
+#### Bug 报告
 
-Use the bug report template:
+使用错误报告模板：
 
 ```markdown
 ## Bug Description
@@ -954,17 +961,17 @@ Use the bug report template:
 - OS
 ```
 
-### Release Process
+### 发布流程
 
-CoApi follows semantic versioning and automated release processes.
+CoApi 遵循语义化版本控制和自动化发布流程。
 
-#### Versioning Scheme
+#### 版本方案
 
-- **Major (X.0.0)**: Breaking changes
-- **Minor (X.Y.0)**: New features, backward compatible
-- **Patch (X.Y.Z)**: Bug fixes, backward compatible
+- **Major (X.0.0)**：破坏性变更
+- **Minor (X.Y.0)**：新功能，向后兼容
+- **Patch (X.Y.Z)**：错误修复，向后兼容
 
-#### Release Process
+#### 发布流程
 
 ```bash
 # 1. Update version numbers
@@ -1012,86 +1019,86 @@ jobs:
 
 ---
 
-## Glossary
+## 术语表
 
-### Core Concepts
+### 核心概念
 
-- **@CoApi**: Main annotation for marking interfaces as HTTP clients
-- **@EnableCoApi**: Annotation to enable CoApi auto-configuration
-- **HttpInterface**: Spring Framework 6 feature for defining HTTP services
-- **@HttpExchange**: Annotation for defining HTTP method mappings
-- **FactoryBean**: Spring interface for creating objects
-- **BeanDefinitionRegistry**: Spring interface for registering bean definitions
+- **@CoApi**：将接口标记为 HTTP 客户端的主注解
+- **@EnableCoApi**：启用 CoApi 自动配置的注解
+- **HttpInterface**：Spring Framework 6 用于定义 HTTP 服务的特性
+- **@HttpExchange**：定义 HTTP 方法映射的注解
+- **FactoryBean**：用于创建对象的 Spring 接口
+- **BeanDefinitionRegistry**：用于注册 bean 定义的 Spring 接口
 
-### Technical Terms
+### 技术术语
 
-- **ClientMode**: Configuration for reactive vs. synchronous clients
-- **CoApiDefinition**: Domain model representing a CoApi client
-- **LoadBalanced**: Annotation for enabling client-side load balancing
-- **WebClient**: Spring's reactive HTTP client
-- **RestClient**: Spring's synchronous HTTP client
-- **ExchangeFilterFunction**: WebClient filter for request/response processing
-- **HttpServiceProxyFactory**: Factory for creating HTTP interface proxies
+- **ClientMode**：响应式与同步客户端的配置
+- **CoApiDefinition**：表示 CoApi 客户端的领域模型
+- **LoadBalanced**：启用客户端负载均衡的注解
+- **WebClient**：Spring 的响应式 HTTP 客户端
+- **RestClient**：Spring 的同步 HTTP 客户端
+- **ExchangeFilterFunction**：用于请求/响应处理的 WebClient 过滤器
+- **HttpServiceProxyFactory**：用于创建 HTTP 接口代理的工厂
 
-### Architecture Terms
+### 架构术语
 
-- **Registrar**: Component responsible for registering beans
-- **Proxy Pattern**: Technique for creating dynamic proxies
-- **Dependency Injection**: Pattern for providing dependencies
-- **Auto-configuration**: Spring Boot's automatic bean setup
-- **Bean Factory**: Spring component for creating and managing beans
-
----
-
-## Key File Reference
-
-### Core Annotations
-
-| File | Purpose | Key Classes |
-|------|---------|-------------|
-| [api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) | Main annotation for HTTP clients | `@CoApi` |
-| [api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) | Load balancing annotation | `@LoadBalanced` |
-
-### Spring Integration
-
-| File | Purpose | Key Classes |
-|------|---------|-------------|
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApi.kt) | Enable annotation | `@EnableCoApi` |
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) | Bean registration | `CoApiRegistrar` |
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) | Domain model | `CoApiDefinition` |
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) | Client mode configuration | `ClientMode` |
-
-### HTTP Client Implementations
-
-| File | Purpose | Key Classes |
-|------|---------|-------------|
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) | WebClient implementation | `WebClientFactoryBean` |
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) | RestClient implementation | `RestClientFactoryBean` |
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) | Proxy factory | `CoApiFactoryBean` |
-
-### Authentication
-
-| File | Purpose | Key Classes |
-|------|---------|-------------|
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt) | Bearer token authentication | `BearerTokenFilter` |
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt) | Token provider interface | `ExpirableTokenProvider` |
-| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt) | Cached token provider | `CachedExpirableTokenProvider` |
-
-### Configuration
-
-| File | Purpose | Key Classes |
-|------|---------|-------------|
-| [spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/AutoCoApiConfiguration.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/AutoCoApiConfiguration.kt) | Spring Boot auto-configuration | `AutoCoApiConfiguration` |
-| [build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/build.gradle.kts) | Root build configuration | Build script |
-| [settings.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/settings.gradle.kts) | Multi-module settings | Settings |
+- **Registrar**：负责注册 bean 的组件
+- **Proxy Pattern**：用于创建动态代理的技术
+- **Dependency Injection**：用于提供依赖的模式
+- **Auto-configuration**：Spring Boot 的自动 bean 设置
+- **Bean Factory**：用于创建和管理 bean 的 Spring 组件
 
 ---
 
-## Cross-Language Comparisons
+## 关键文件参考
+
+### 核心注解
+
+| 文件 | 用途 | 关键类 |
+|------|---------|-------------|
+| [api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) | HTTP 客户端主注解 | `@CoApi` |
+| [api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) | 负载均衡注解 | `@LoadBalanced` |
+
+### Spring 集成
+
+| 文件 | 用途 | 关键类 |
+|------|---------|-------------|
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApi.kt) | 启用注解 | `@EnableCoApi` |
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) | Bean 注册 | `CoApiRegistrar` |
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) | 领域模型 | `CoApiDefinition` |
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) | 客户端模式配置 | `ClientMode` |
+
+### HTTP 客户端实现
+
+| 文件 | 用途 | 关键类 |
+|------|---------|-------------|
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) | WebClient 实现 | `WebClientFactoryBean` |
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) | RestClient 实现 | `RestClientFactoryBean` |
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) | 代理工厂 | `CoApiFactoryBean` |
+
+### 认证
+
+| 文件 | 用途 | 关键类 |
+|------|---------|-------------|
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt) | Bearer 令牌认证 | `BearerTokenFilter` |
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt) | 令牌提供程序接口 | `ExpirableTokenProvider` |
+| [spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt) | 缓存令牌提供程序 | `CachedExpirableTokenProvider` |
+
+### 配置
+
+| 文件 | 用途 | 关键类 |
+|------|---------|-------------|
+| [spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/AutoCoApiConfiguration.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/AutoCoApiConfiguration.kt) | Spring Boot 自动配置 | `AutoCoApiConfiguration` |
+| [build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/build.gradle.kts) | 根构建配置 | Build script |
+| [settings.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/settings.gradle.kts) | 多模块设置 | Settings |
+
+---
+
+## 跨语言对比
 
 ### CoApi vs OpenFeign
 
-#### Similarities
+#### 相似之处
 
 ```java
 // OpenFeign
@@ -1109,19 +1116,19 @@ public interface GitHubApiClient {
 }
 ```
 
-#### Differences
+#### 差异
 
-| Feature | OpenFeign | CoApi |
+| 特性 | OpenFeign | CoApi |
 |---------|-----------|-------|
-| **Programming Model** | Synchronous only | Reactive + Synchronous |
-| **Spring Version** | Spring 5/6 | Spring 6 only |
-| **HTTP Interface** | Custom implementation | Native Spring HTTP Interface |
-| **Load Balancing** | Via Ribbon/Spring Cloud LoadBalancer | Direct integration |
-| **Reactive Support** | Limited | Full Project Reactor support |
+| **编程模型** | 仅同步 | 响应式 + 同步 |
+| **Spring 版本** | Spring 5/6 | 仅 Spring 6 |
+| **HTTP Interface** | 自定义实现 | 原生 Spring HTTP Interface |
+| **负载均衡** | 通过 Ribbon/Spring Cloud LoadBalancer | 直接集成 |
+| **响应式支持** | 有限 | 完整 Project Reactor 支持 |
 
 ### CoApi vs Retrofit
 
-#### Similarities
+#### 相似之处
 
 ```kotlin
 // Retrofit
@@ -1139,19 +1146,19 @@ suspend fun getIssues(
 ): Flux<Issue>
 ```
 
-#### Differences
+#### 差异
 
-| Feature | Retrofit | CoApi |
+| 特性 | Retrofit | CoApi |
 |---------|----------|-------|
-| **Framework Integration** | Standalone library | Spring Framework integration |
-| **Dependency Injection** | Manual | Automatic via Spring DI |
-| **Configuration** | Builder pattern | Annotations + Auto-configuration |
-| **Reactive Support** | Via Coroutines | Native Spring reactive |
-| **Load Balancing** | Manual implementation | Built-in support |
+| **框架集成** | 独立库 | Spring Framework 集成 |
+| **依赖注入** | 手动 | 通过 Spring DI 自动 |
+| **配置** | 构建器模式 | 注解 + 自动配置 |
+| **响应式支持** | 通过协程 | 原生 Spring 响应式 |
+| **负载均衡** | 手动实现 | 内置支持 |
 
 ### CoApi vs WebClient/RestClient
 
-#### Direct Usage
+#### 直接使用
 
 ```kotlin
 // Direct WebClient
@@ -1179,10 +1186,10 @@ val issues = restClient.get()
     .block()
 ```
 
-#### CoApi Advantage
+#### CoApi 优势
 
 ```kotlin
-// CoApi - Zero boilerplate
+// CoApi - 零样板
 @CoApi(baseUrl = "https://api.github.com")
 interface GitHubApiClient {
     @GetExchange("repos/{owner}/{repo}/issues")
@@ -1194,28 +1201,28 @@ interface GitHubApiClient {
 val issues = gitHubApiClient.getIssues("Ahoo-Wang", "CoApi")
 ```
 
-### Feature Comparison Matrix
+### 功能对比矩阵
 
-| Feature | CoApi | OpenFeign | Retrofit | WebClient | RestClient |
+| 特性 | CoApi | OpenFeign | Retrofit | WebClient | RestClient |
 |---------|-------|-----------|----------|-----------|------------|
-| **Auto-configuration** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **Reactive Support** | ✅ | ❌ | ✅ | ✅ | ❌ |
-| **Synchronous Support** | ✅ | ✅ | ✅ | ❌ | ✅ |
-| **Type Safety** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Spring Integration** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Load Balancing** | ✅ | ✅ | ❌ | ✅ | ✅ |
-| **Built-in Auth** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **Error Handling** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Mocking Support** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Documentation** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **自动配置** | 是 | 是 | 否 | 否 | 否 |
+| **响应式支持** | 是 | 否 | 是 | 是 | 否 |
+| **同步支持** | 是 | 是 | 是 | 否 | 是 |
+| **类型安全** | 是 | 是 | 是 | 是 | 是 |
+| **Spring 集成** | 是 | 是 | 是 | 是 | 是 |
+| **负载均衡** | 是 | 是 | 否 | 是 | 是 |
+| **内置认证** | 是 | 是 | 否 | 否 | 否 |
+| **错误处理** | 是 | 是 | 是 | 是 | 是 |
+| **Mock 支持** | 是 | 是 | 是 | 是 | 是 |
+| **文档** | 是 | 是 | 是 | 是 | 是 |
 
 ---
 
-## Appendices
+## 附录
 
-### Appendix A: Configuration Properties
+### 附录 A：配置属性
 
-#### CoApi Properties
+#### CoApi 属性
 
 ```properties
 # Client mode configuration
@@ -1228,16 +1235,16 @@ github.url=https://api.github.com
 spring.cloud.loadbalancer.ribbon.enabled=false
 ```
 
-#### Property Reference
+#### 属性参考
 
-| Property | Default | Description |
+| 属性 | 默认值 | 描述 |
 |---------|---------|-------------|
-| `coapi.mode` | `AUTO` | Client mode: REACTIVE, SYNC, or AUTO |
-| `spring.cloud.loadbalancer.ribbon.enabled` | `false` | Disable Ribbon when using Spring Cloud LoadBalancer |
+| `coapi.mode` | `AUTO` | 客户端模式：REACTIVE、SYNC 或 AUTO |
+| `spring.cloud.loadbalancer.ribbon.enabled` | `false` | 使用 Spring Cloud LoadBalancer 时禁用 Ribbon |
 
-### Appendix B: Common Patterns
+### 附录 B：常见模式
 
-#### 1. API Contract Pattern
+#### 1. API 契约模式
 
 ```kotlin
 // Shared API contract
@@ -1261,20 +1268,20 @@ class TodoController : TodoApi {
 }
 ```
 
-#### 2. Authentication Pattern
+#### 2. 认证模式
 
 ```kotlin
 @CoApi(baseUrl = "https://api.github.com")
 class GitHubApiClient(
     private val tokenProvider: ExpirableTokenProvider
 ) {
-    // Bearer token is automatically added
+    // Bearer token 自动添加
     @GetExchange("user")
     fun getCurrentUser(): Mono<User> = Mono.just(User("test"))
 }
 ```
 
-#### 3. Load Balancing Pattern
+#### 3. 负载均衡模式
 
 ```kotlin
 @CoApi(serviceId = "user-service")
@@ -1288,11 +1295,11 @@ interface UserApiClient {
 }
 ```
 
-### Appendix C: Troubleshooting
+### 附录 C：故障排除
 
-#### Common Issues
+#### 常见问题
 
-1. **Bean Not Registered**
+1. **Bean 未注册**
    ```bash
    # Check @EnableCoApi annotation
    @EnableCoApi(clients = [GitHubApiClient::class])
@@ -1300,20 +1307,20 @@ interface UserApiClient {
    class Application
    ```
 
-2. **Client Mode Issues**
+2. **客户端模式问题**
    ```bash
    # Explicitly set client mode
    @CoApi(clientMode = ClientMode.REACTIVE)
    interface GitHubApiClient
    ```
 
-3. **Load Balancing Not Working**
+3. **负载均衡不工作**
    ```bash
    # Ensure Spring Cloud LoadBalancer dependency
    implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
    ```
 
-4. **Authentication Issues**
+4. **认证问题**
    ```bash
    # Check token provider configuration
    @Bean
@@ -1322,7 +1329,7 @@ interface UserApiClient {
    }
    ```
 
-#### Debug Mode
+#### 调试模式
 
 ```kotlin
 // Enable debug logging
@@ -1332,7 +1339,7 @@ logging.level.me.ahoo.coapi=DEBUG
 logging.level.org.springframework.web.reactive=DEBUG
 ```
 
-#### Performance Tuning
+#### 性能调优
 
 ```kotlin
 // WebClient performance configuration
@@ -1348,4 +1355,4 @@ fun webClient(): WebClient {
 
 ---
 
-This completes the CoApi Contributor Guide. The guide provides a comprehensive overview of the project, from language foundations to advanced features and best practices for contributing. Whether you're a new developer exploring the codebase or an experienced contributor, this guide should help you understand and work effectively with CoApi.
+以上就是 CoApi 贡献者指南的全部内容。本指南提供了项目的全面概述，从语言基础到高级功能和贡献最佳实践。无论你是探索代码库的新开发者还是有经验的贡献者，本指南都将帮助你理解和有效地使用 CoApi。
