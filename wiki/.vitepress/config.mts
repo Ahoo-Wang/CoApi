@@ -135,6 +135,9 @@ export default defineConfig({
   description: 'Zero-boilerplate HTTP client auto-configuration for Spring 6',
   ignoreDeadLinks: true,
   cleanUrls: true,
+  sitemap: {
+    hostname: 'https://coapi.ahoo.me'
+  },
   head: [
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
