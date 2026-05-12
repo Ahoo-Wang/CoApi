@@ -1,6 +1,6 @@
 # CoApi - HTTP Client that supports both reactive programming and synchronous programming models
 
-[中文文档](./README.zh-CN.md)
+> [中文文档](https://coapi.ahoo.me/zh/) | [English Document](https://coapi.ahoo.me/)
 
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://github.com/Ahoo-Wang/CoApi/blob/mvp/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/Ahoo-Wang/CoApi.svg)](https://github.com/Ahoo-Wang/CoApi/releases)
