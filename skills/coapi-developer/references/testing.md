@@ -17,8 +17,8 @@ Spring Boot auto-configuration.
 
 - Test framework: JUnit 5.
 - Mocking: MockK.
-- Assertions: `me.ahoo.test.asserts.assert`.
-- Do not use AssertJ `assertThat`.
+- Prefer `me.ahoo.test.asserts.assert` for value assertions.
+- For `ApplicationContextRunner` bean assertions, follow existing tests with `AssertionsForInterfaceTypes.assertThat(context)`.
 - Useful commands:
   - `./gradlew :spring:test`
   - `./gradlew :spring-boot-starter:test`
@@ -28,6 +28,7 @@ Import:
 
 ```kotlin
 import me.ahoo.test.asserts.assert
+import org.assertj.core.api.AssertionsForInterfaceTypes
 ```
 
 ## Definition Parsing Unit Test
@@ -52,21 +53,35 @@ interface MockServiceApi
 ## HTTP Client Factory Precedence Test
 
 When testing final base URL selection, assert that per-client configuration wins over the parsed
-definition URL.
+definition URL. Include the local factory and definition helpers from
+`spring/src/test/kotlin/me/ahoo/coapi/spring/client/IHttpClientFactoryBeanTest.kt`.
 
 ```kotlin
-@Test
-fun `getBaseUrl should return URL from properties when available`() {
-    val mockApplicationContext = mockk<ApplicationContext>()
-    val mockClientProperties = mockk<ClientProperties>()
+private val mockDefinition = CoApiDefinition(
+    name = "testClient",
+    apiType = Any::class.java,
+    baseUrl = "http://localhost:8080",
+    loadBalanced = false
+)
 
-    every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
-    every { mockClientProperties.getBaseUri("testClient") } returns "http://properties-url:9090"
+private class TestHttpClientFactoryBean(
+    override val definition: CoApiDefinition
+) : AbstractHttpClientFactoryBean()
 
-    val factoryBean = TestHttpClientFactoryBean(mockDefinition)
-    factoryBean.setApplicationContext(mockApplicationContext)
+class IHttpClientFactoryBeanTest {
+    @Test
+    fun `getBaseUrl should return URL from properties when available`() {
+        val mockApplicationContext = mockk<ApplicationContext>()
+        val mockClientProperties = mockk<ClientProperties>()
 
-    factoryBean.getBaseUrl().assert().isEqualTo("http://properties-url:9090")
+        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        every { mockClientProperties.getBaseUri("testClient") } returns "http://properties-url:9090"
+
+        val factoryBean = TestHttpClientFactoryBean(mockDefinition)
+        factoryBean.setApplicationContext(mockApplicationContext)
+
+        factoryBean.getBaseUrl().assert().isEqualTo("http://properties-url:9090")
+    }
 }
 ```
 
@@ -84,7 +99,7 @@ class CoApiContextTest {
             .withUserConfiguration(WebClientAutoConfiguration::class.java)
             .withUserConfiguration(EnableCoApiConfiguration::class.java)
             .run { context ->
-                context.assert()
+                AssertionsForInterfaceTypes.assertThat(context)
                     .hasSingleBean(ReactiveHttpExchangeAdapterFactory::class.java)
                     .hasSingleBean(GitHubApiClient::class.java)
             }

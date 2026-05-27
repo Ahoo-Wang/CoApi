@@ -44,7 +44,7 @@ targets.
 Key annotation fields:
 
 - `baseUrl`: Direct base URL, including property placeholders such as `${github.url}`.
-- `serviceId`: Service discovery ID. CoApi constructs `lb://<serviceId>`.
+- `serviceId`: Service discovery ID. CoApi first resolves it through the load-balanced URL path, then stores a normalized `http://<serviceId>` base URL with `loadBalanced=true`.
 - `name`: Optional logical client name for bean names and per-client configuration.
 
 Avoid setting both `baseUrl` and `serviceId` on the same client. Prefer `serviceId` for service
@@ -55,7 +55,8 @@ discovery and `baseUrl` for fixed external endpoints.
 CoApi resolves the target URL in two layers:
 
 1. `CoApiDefinition` resolves annotation data. `@CoApi(baseUrl = "...")` wins first; if it is blank,
-   `@CoApi(serviceId = "...")` becomes `lb://<serviceId>`; otherwise the definition URL is blank.
+   `@CoApi(serviceId = "...")` is resolved through `lb://<serviceId>`. `toCoApiDefinition()` then
+   normalizes `lb://...` to `http://...` and sets `loadBalanced=true`; otherwise the definition URL is blank.
 2. `AbstractHttpClientFactoryBean.getBaseUrl()` checks `coapi.clients.<name>.base-url` first. If that
    property is blank, it falls back to `CoApiDefinition.baseUrl`.
 
@@ -75,7 +76,8 @@ Use explicit mode when classpath inference is surprising or when tests need dete
 ## Load Balancing
 
 Load balancing is activated when the client uses `serviceId`, an `lb://` base URL, or explicit
-`@LoadBalanced`.
+`@LoadBalanced`. The parsed `CoApiDefinition.baseUrl` passed to client factories uses an `http://...`
+URL; load-balancer behavior comes from `loadBalanced=true` plus the matching filter or interceptor.
 
 Requirements:
 

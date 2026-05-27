@@ -36,9 +36,9 @@ synchronous `RestClient` proxies.
   - `@LoadBalanced` explicitly enables load-balanced client wiring.
   - `@EnableCoApi(clients = [...])` explicitly registers client interfaces.
 - Client mode: `coapi.mode` supports `AUTO`, `REACTIVE`, and `SYNC`.
-- Base URL resolution has two layers: `@CoApi(baseUrl)` wins over `serviceId` in the annotation definition, while `coapi.clients.<name>.base-url` overrides that definition at HTTP client factory time.
+- Base URL resolution has two layers: `@CoApi(baseUrl)` wins over `serviceId`; `serviceId`/`lb://` targets are normalized to `http://...` with `loadBalanced=true`; `coapi.clients.<name>.base-url` can override the parsed definition at HTTP client factory time.
 - Load balancing requires `spring-cloud-starter-loadbalancer` plus the matching reactive filter or sync interceptor when explicitly configured.
-- Tests in this repository must use `me.ahoo.test.asserts.assert`; do not use AssertJ `assertThat`.
+- Prefer `me.ahoo.test.asserts.assert` for value assertions. For `ApplicationContextRunner` bean assertions, mirror existing tests with `AssertionsForInterfaceTypes.assertThat(context)`.
 
 ## CoApi Boundaries
 

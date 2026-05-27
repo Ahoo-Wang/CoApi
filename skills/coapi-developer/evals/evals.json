@@ -28,7 +28,7 @@
     {
       "id": 5,
       "prompt": "Explain CoApi base URL precedence when @CoApi(baseUrl), @CoApi(serviceId), and coapi.clients.<name>.base-url are involved.",
-      "expected_output": "An explanation that separates annotation definition resolution from HTTP client factory resolution: @CoApi(baseUrl) wins over serviceId inside CoApiDefinition, serviceId becomes lb://<serviceId> when baseUrl is blank, and coapi.clients.<name>.base-url overrides the parsed definition when the HTTP client factory builds the client.",
+      "expected_output": "An explanation that separates annotation definition resolution from HTTP client factory resolution: @CoApi(baseUrl) wins over serviceId inside CoApiDefinition, serviceId is first resolved through lb://<serviceId> and then normalized to http://<serviceId> with loadBalanced=true, and coapi.clients.<name>.base-url overrides the parsed definition when the HTTP client factory builds the client.",
       "files": []
     }
   ]

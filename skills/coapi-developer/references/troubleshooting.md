@@ -57,7 +57,7 @@ Check:
 
 1. Placeholder properties such as `${github.url}` exist in the active environment.
 2. The client does not set both `baseUrl` and `serviceId`.
-3. `serviceId` is expected to become `lb://<serviceId>`.
+3. `serviceId` and `lb://...` targets are expected to appear as `http://...` in the parsed base URL, with `loadBalanced=true`.
 4. `coapi.clients.<name>.base-url` uses the correct client name and may override the annotation URL.
 5. Empty `@CoApi` clients have an external `base-url` configured.
 

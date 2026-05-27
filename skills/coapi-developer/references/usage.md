@@ -63,7 +63,9 @@ github:
 
 ## Service Discovery Client
 
-Use `serviceId` when the target is registered with service discovery. CoApi builds `lb://<serviceId>`.
+Use `serviceId` when the target is registered with service discovery. CoApi routes it through the
+load-balanced URL path, then the backing `WebClient` or `RestClient` receives a normalized
+`http://<serviceId>` base URL with `loadBalanced=true`.
 
 ```kotlin
 @CoApi(serviceId = "user-service")
@@ -86,7 +88,8 @@ implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 
 ## Load-Balanced URL Or Annotation
 
-Use an `lb://` URL when the service name belongs in configuration-like annotation data:
+Use an `lb://` URL when the service name belongs in configuration-like annotation data. During
+definition parsing, CoApi normalizes it to `http://<serviceId>` and marks the client load-balanced:
 
 ```kotlin
 @CoApi(baseUrl = "lb://order-service")
@@ -157,8 +160,8 @@ acceptable.
 
 ## Per-Client Base URL Override
 
-`coapi.clients.<name>.base-url` overrides the URL derived from `@CoApi(baseUrl)` or `serviceId` when
-the HTTP client factory builds the backing client.
+`coapi.clients.<name>.base-url` overrides the normalized URL derived from `@CoApi(baseUrl)`,
+`serviceId`, or `lb://...` when the HTTP client factory builds the backing client.
 
 ```yaml
 coapi:
