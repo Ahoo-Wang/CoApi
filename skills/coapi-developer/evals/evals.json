@@ -18,6 +18,18 @@
       "prompt": "I'm writing tests for my CoApi client that calls an external weather API. I want to use ApplicationContextRunner to verify the client bean is registered correctly, and also write a Spring Boot integration test that actually calls the API. Show me both test patterns using the project's testing conventions (fluent-assert, JUnit 5).",
       "expected_output": "Two test classes: one using ApplicationContextRunner for unit-level bean verification, one using @SpringBootTest for integration testing. Both should follow the project's conventions with fluent-assert (.assert()) and proper test structure.",
       "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "My CoApi client interface is annotated with @CoApi, but Spring fails at startup with NoSuchBeanDefinitionException for that interface. Give me a focused troubleshooting checklist.",
+      "expected_output": "A checklist that verifies the target is an interface, the interface is annotated or registered through @EnableCoApi, scanning or coapi.base-packages covers the package, the starter dependency is present, and external JAR clients are registered explicitly.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Explain CoApi base URL precedence when @CoApi(baseUrl), @CoApi(serviceId), and coapi.clients.<name>.base-url are involved.",
+      "expected_output": "An explanation that separates annotation definition resolution from HTTP client factory resolution: @CoApi(baseUrl) wins over serviceId inside CoApiDefinition, serviceId is first resolved through lb://<serviceId> and then normalized to http://<serviceId> with loadBalanced=true, and coapi.clients.<name>.base-url overrides the parsed definition when the HTTP client factory builds the client.",
+      "files": []
     }
   ]
 }

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "plugins": [
+    {
+      "name": "ahoo-coapi-skills",
+      "description": "CoApi skills for building and testing Spring HTTP Interface client proxies with reactive WebClient, synchronous RestClient, and Spring Cloud LoadBalancer support.",
+      "skills": {
+        "include": [
+          "*"
+        ],
+        "exclude": [
+          "*-workspace"
+        ]
+      },
+      "keywords": [
+        "coapi",
+        "spring",
+        "http-interface",
+        "webclient",
+        "restclient",
+        "load-balancer",
+        "reactive",
+        "kotlin"
+      ],
+      "category": "development",
+      "interface": {
+        "displayName": "Ahoo CoApi Skills",
+        "capabilities": [
+          "Skills"
+        ],
+        "defaultPrompt": "Help me build and test CoApi Spring HTTP Interface clients with reactive or synchronous mode."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      }
+    }
+  ]
+}
