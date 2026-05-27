@@ -1,0 +1,4 @@
+interface:
+  display_name: "CoApi Developer"
+  short_description: "Build Spring HTTP Interface clients"
+  default_prompt: "Use $coapi-developer to build a typed Spring HTTP Interface client with CoApi."
