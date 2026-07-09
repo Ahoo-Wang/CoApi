@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       vitepress-mermaid-renderer:
-        specifier: ^1.1.23
-        version: 1.1.23(mermaid@11.14.0)(vue@3.5.34)
+        specifier: ^1.1.27
+        version: 1.1.27(mermaid@11.14.0)(vue@3.5.34)
     devDependencies:
       medium-zoom:
         specifier: ^1.1.0
@@ -1209,8 +1209,8 @@ packages:
       terser:
         optional: true
 
-  vitepress-mermaid-renderer@1.1.23:
-    resolution: {integrity: sha512-yY2AP8dagi7k/tfkxkR2Ct++uPP7g4kV2zgWs7Q7UOEr1KeyWgGkHsJtdFMnBKJjVzRAdvvEu3wxD8zysBsWnQ==}
+  vitepress-mermaid-renderer@1.1.27:
+    resolution: {integrity: sha512-VFAV3lSlOhfCq11ythkan4YRwJWNH/XZ/XqbQ/FZp/EYeGZtxlHA/LQWfr8ZyMAurzLVtv1oc2eu1xISU+3XzA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       mermaid: ^11.0.0
@@ -2504,7 +2504,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  vitepress-mermaid-renderer@1.1.23(mermaid@11.14.0)(vue@3.5.34):
+  vitepress-mermaid-renderer@1.1.27(mermaid@11.14.0)(vue@3.5.34):
     dependencies:
       mermaid: 11.14.0
       vue: 3.5.34
