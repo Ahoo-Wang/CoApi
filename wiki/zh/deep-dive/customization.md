@@ -209,12 +209,38 @@ coapi:
             - bearerTokenFilter
 ```
 
+## 自定义 HttpExchangeAdapterFactory
+
+`HttpExchangeAdapterFactory` 决定如何把 HTTP 客户端 bean（WebClient 或 RestClient）转换为驱动接口代理的 `HttpExchangeAdapter`。你可以用自己的 bean 替换默认工厂——例如为适配器包装指标或链路追踪：
+
+```kotlin
+@Configuration(proxyBeanMethods = false)
+class MyCoApiConfiguration {
+    @Bean
+    fun customHttpExchangeAdapterFactory(): HttpExchangeAdapterFactory =
+        HttpExchangeAdapterFactory { beanFactory, httpClientName ->
+            val webClient = beanFactory.getBean(httpClientName, WebClient::class.java)
+            MetricsWebClientAdapter.wrap(WebClientAdapter.create(webClient))
+        }
+}
+```
+
+[CoApiFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) 中的解析顺序（自 v2.1.1 起）：
+
+| 场景 | 使用的工厂 |
+|----------|--------------|
+| 只有一个 `HttpExchangeAdapterFactory` bean | 该 bean |
+| 多个候选且其中一个标了 `@Primary` | `@Primary` bean |
+| 多个候选且无 primary | 按标准 bean 名 `CoApi.HttpExchangeAdapterFactory` 注册的 bean（注册器默认值） |
+
+以标准 bean 名注册自定义工厂可直接整体替换默认工厂；以其他名称注册的自定义工厂只有在它是唯一候选或标了 `@Primary` 时才会生效。在 v2.1.1 之前，多个非 primary 候选会在启动时抛出 `NoUniqueBeanDefinitionException`。
+
 ## YAML 配置参考
 
 | 属性 | 类型 | 默认 | 描述 |
 |----------|------|---------|-------------|
 | `coapi.clients.<name>.base-url` | String | `""` | 覆盖注解的 baseUrl |
-| `coapi.clients.<name>.load-balanced` | Boolean | `null` | 覆盖负载均衡 |
+| `coapi.clients.<name>.load-balanced` | Boolean | `null` | 覆盖负载均衡（`true` 启用 / `false` 禁用；未设置时回退注解） |
 | `coapi.clients.<name>.reactive.filter.names` | List | `[]` | 过滤器 bean 名称 |
 | `coapi.clients.<name>.reactive.filter.types` | List | `[]` | 过滤器类类型 |
 | `coapi.clients.<name>.sync.interceptor.names` | List | `[]` | 拦截器 bean 名称 |

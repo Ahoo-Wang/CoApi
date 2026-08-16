@@ -9,7 +9,7 @@ description: Deep dive into CoApi's client-side load balancing — annotation-dr
 
 In microservice architectures, services need to call other services without hardcoding hostnames. CoApi integrates with Spring Cloud LoadBalancer to provide client-side load balancing: the HTTP client itself selects which service instance to call. This eliminates the need for an external load balancer and gives the application direct control over instance selection, retries, and circuit breaking.
 
-CoApi provides three ways to opt into load balancing, all resolving to the same mechanism: a `LoadBalancedExchangeFilterFunction` (reactive) or `LoadBalancerInterceptor` (sync) is added to the HTTP client's filter/interceptor chain.
+CoApi provides three ways to opt into load balancing, all resolving to the same mechanism: a `LoadBalancedExchangeFilterFunction` (reactive) or a `BlockingLoadBalancerInterceptor` (sync) is added to the HTTP client's filter/interceptor chain.
 
 ## At a Glance
 
@@ -18,7 +18,7 @@ CoApi provides three ways to opt into load balancing, all resolving to the same 
 | Service ID | `@CoApi(serviceId = "svc")` | `http://svc` | Yes | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L46) |
 | LB Protocol | `@CoApi(baseUrl = "lb://svc")` | `http://svc` | Yes | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
 | Annotation | `@CoApi @LoadBalanced` | Empty | Yes | [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
-| Properties | `coapi.clients.<name>.load-balanced=true` | Per properties | Yes | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
+| Properties | `coapi.clients.<name>.load-balanced=true/false` | Per properties | `true`→Yes, `false`→No | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
 | Direct URL | `@CoApi(baseUrl = "http://...")` | As specified | No | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
 
 ## URL Resolution Flow
@@ -71,7 +71,7 @@ sequenceDiagram
     FB->>Props: getLoadBalancedFromProperties(name)
     alt Properties has load-balanced value
         Props-->>FB: non-null Boolean
-        FB->>FB: return true
+        FB->>FB: return configured value (true/false)
     else Properties has baseUrl
         FB->>Props: getBaseUrlFromProperties(name)
         Props-->>FB: non-blank URL
@@ -87,9 +87,13 @@ sequenceDiagram
 
 | Priority | Source | Effect |
 |----------|--------|--------|
-| 1 (highest) | `coapi.clients.<name>.load-balanced` | Override to `true` |
+| 1 (highest) | `coapi.clients.<name>.load-balanced` | Override to the configured value (`true` enables, `false` disables) |
 | 2 | `coapi.clients.<name>.base-url` (non-blank) | Forces non-load-balanced |
 | 3 (lowest) | `@CoApi` / `@LoadBalanced` annotation | Default from annotation |
+
+::: info
+Since v2.1.1, an explicit `load-balanced: false` is respected and disables load balancing — before v2.1.1 any configured value (including `false`) was treated as `true`. The `<name>` in `coapi.clients.<name>.*` is the `@CoApi` `name` attribute, or the interface simple name when no name is set.
+:::
 
 ## WebClient Load Balancing
 
@@ -106,7 +110,7 @@ sequenceDiagram
     FB->>FB: loadBalanced() → true
     FB->>Builder: customize(definition, builder)
     Builder->>Builder: builder.filters { ... }
-    Builder->>Builder: check: any existing LoadBalancedExchangeFilterFunction?
+    Builder->>Builder: check: any existing LB filter (LoadBalanced or Deferring)?
     alt Already present
         Builder->>Builder: skip
     else Not present
@@ -117,11 +121,11 @@ sequenceDiagram
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:30-43 -->
 
-The `LoadBalancedWebClientBuilderCustomizer` inner class ([WebClientFactoryBean.kt:34-43](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L34-L43)) checks for duplicates before adding, ensuring idempotency.
+The `LoadBalancedWebClientBuilderCustomizer` inner class ([WebClientFactoryBean.kt:34-43](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L34-L43)) checks for duplicates before adding, ensuring idempotency. The check recognizes both `LoadBalancedExchangeFilterFunction` and Spring Cloud's `DeferringLoadBalancerExchangeFilterFunction` (the default wiring on `@LoadBalanced WebClient.Builder`), so a builder that already carries load balancing is not double-wired.
 
 ## RestClient Load Balancing
 
-For the synchronous stack, [RestClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) adds `LoadBalancerInterceptor`:
+For the synchronous stack, [RestClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) adds a `BlockingLoadBalancerInterceptor`:
 
 ```mermaid
 sequenceDiagram
@@ -129,21 +133,23 @@ sequenceDiagram
     participant FB as RestClientFactoryBean
     participant CTX as ApplicationContext
     participant Builder as RestClient.Builder
-    participant LB as LoadBalancerInterceptor
+    participant LB as BlockingLoadBalancerInterceptor
 
     FB->>FB: loadBalanced() → true
     FB->>Builder: customize(definition, builder)
     Builder->>Builder: builder.requestInterceptors { ... }
-    Builder->>Builder: check: any existing load balancer interceptor?
+    Builder->>Builder: check: any existing LB interceptor (Blocking or Deferring)?
     alt Already present
         Builder->>Builder: skip
     else Not present
-        Builder->>CTX: getBean(LoadBalancerInterceptor)
+        Builder->>CTX: getBean(BlockingLoadBalancerInterceptor)
         CTX-->>LB: interceptor
         Builder->>Builder: interceptors.add(LB)
     end
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:30-43 -->
+
+The interceptor is resolved by the `BlockingLoadBalancerInterceptor` interface rather than the concrete `LoadBalancerInterceptor` class, so it works whether Spring Cloud registers the plain interceptor or the `RetryLoadBalancerInterceptor` (retry enabled). Like the reactive side, the dedup check recognizes Spring Cloud's `DeferringLoadBalancerInterceptor` installed on `@LoadBalanced RestClient.Builder`.
 
 ## Per-Client Filter & Interceptor Configuration
 

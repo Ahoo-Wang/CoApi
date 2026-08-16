@@ -26,7 +26,11 @@ CoApi's configuration architecture balances declarative convenience with program
 | Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
 | `coapi.clients.<name>.base-url` | `String` | `""` | Base URL for the client | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
-| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | Enable load balancing for the client | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | Override load balancing (`true` enables, `false` disables; unset falls back to the annotation) | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+
+::: info
+The `<name>` in `coapi.clients.<name>.*` is the `@CoApi` `name` attribute — or the interface simple name when no `name` is set. Setting a custom `name` on the annotation changes the configuration key.
+:::
 
 ### Reactive Client Properties
 
@@ -51,7 +55,7 @@ flowchart TD
     B -->|Has coapi.clients.<name>.base-url| C[Use Properties baseUrl]
     B -->|No properties baseUrl| D{Check @CoApi Annotation}
     D -->|Has baseUrl| E[Use Annotation baseUrl]
-    D -->|No annotation baseUrl| F[Throw Configuration Exception]
+    D -->|No annotation baseUrl| F[Empty baseUrl - client uses absolute URIs per request]
     
     A --> G{Check coapi.clients.<name>.load-balanced}
     G -->|Has property| H[Use Properties loadBalanced]
@@ -184,7 +188,7 @@ sequenceDiagram
         alt Has annotation
             A-->>F: Return baseUrl from annotation
         else No annotation
-            F-->>F: Throw ConfigurationException
+            F-->>F: Use empty baseUrl (client must use absolute URIs per request)
         end
     end
     

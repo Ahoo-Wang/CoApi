@@ -137,13 +137,9 @@ sequenceDiagram
     R->>F: Create FactoryBean
     F->>A: setApplicationContext()
     F->>A: getObject()
-    alt Reactive Mode
-        F->>A: getBean(ReactiveHttpExchangeAdapterFactory)
-        A->>F: Return factory
-    else Sync Mode
-        F->>A: getBean(SyncHttpExchangeAdapterFactory)
-        A->>F: Return factory
-    end
+    F->>A: resolve HttpExchangeAdapterFactory
+    note right of A: unique or @Primary candidate wins;<br/>otherwise the standard-name bean<br/>(mode-specific default registered at startup)
+    A->>F: Return factory
     F->>F: create(HttpExchangeAdapter)
     F->>F: build(HttpServiceProxyFactory)
     F->>F: createClient(apiType)

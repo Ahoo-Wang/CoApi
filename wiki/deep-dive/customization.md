@@ -209,12 +209,38 @@ coapi:
             - bearerTokenFilter
 ```
 
+## Custom HttpExchangeAdapterFactory
+
+`HttpExchangeAdapterFactory` decides how an HTTP client bean (WebClient or RestClient) is turned into the `HttpExchangeAdapter` that powers the interface proxy. You can replace the default factory with your own bean — for example to wrap adapters with metrics or tracing:
+
+```kotlin
+@Configuration(proxyBeanMethods = false)
+class MyCoApiConfiguration {
+    @Bean
+    fun customHttpExchangeAdapterFactory(): HttpExchangeAdapterFactory =
+        HttpExchangeAdapterFactory { beanFactory, httpClientName ->
+            val webClient = beanFactory.getBean(httpClientName, WebClient::class.java)
+            MetricsWebClientAdapter.wrap(WebClientAdapter.create(webClient))
+        }
+}
+```
+
+Resolution order in [CoApiFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) (since v2.1.1):
+
+| Scenario | Factory used |
+|----------|--------------|
+| Exactly one `HttpExchangeAdapterFactory` bean | That bean |
+| Multiple candidates, one marked `@Primary` | The `@Primary` bean |
+| Multiple candidates, none primary | The bean registered under the standard name `CoApi.HttpExchangeAdapterFactory` (the registrar default) |
+
+Registering a custom factory under the standard bean name replaces the default outright; a custom factory under any other name takes effect only when it is the single candidate or marked `@Primary`. Before v2.1.1, multiple non-primary candidates failed startup with `NoUniqueBeanDefinitionException`.
+
 ## YAML Configuration Reference
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `coapi.clients.<name>.base-url` | String | `""` | Override annotation's baseUrl |
-| `coapi.clients.<name>.load-balanced` | Boolean | `null` | Override load balancing |
+| `coapi.clients.<name>.load-balanced` | Boolean | `null` | Override load balancing (`true` enables, `false` disables; unset falls back to the annotation) |
 | `coapi.clients.<name>.reactive.filter.names` | List | `[]` | Filter bean names |
 | `coapi.clients.<name>.reactive.filter.types` | List | `[]` | Filter class types |
 | `coapi.clients.<name>.sync.interceptor.names` | List | `[]` | Interceptor bean names |

@@ -26,7 +26,11 @@ CoApi 的配置架构在声明式便利性和程序化控制之间取得平衡�
 | 属性 | 类型 | 默认 | 描述 | 来源 |
 |----------|------|---------|-------------|--------|
 | `coapi.clients.<name>.base-url` | `String` | `""` | 客户端的基础 URL | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
-| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | 为客户端启用负载均衡 | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | 覆盖负载均衡（`true` 启用 / `false` 禁用；未设置时回退注解） | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+
+::: info
+配置键 `coapi.clients.<name>.*` 中的 `<name>` 是 `@CoApi` 的 `name` 属性——未设置时为接口的简单类名。在注解上设置自定义 `name` 会改变配置键。
+:::
 
 ### 响应式客户端属性
 
@@ -51,7 +55,7 @@ flowchart TD
     B -->|Has coapi.clients.<name>.base-url| C[Use Properties baseUrl]
     B -->|No properties baseUrl| D{Check @CoApi Annotation}
     D -->|Has baseUrl| E[Use Annotation baseUrl]
-    D -->|No annotation baseUrl| F[Throw Configuration Exception]
+    D -->|No annotation baseUrl| F[Empty baseUrl - client uses absolute URIs per request]
 
     A --> G{Check coapi.clients.<name>.load-balanced}
     G -->|Has property| H[Use Properties loadBalanced]
@@ -184,7 +188,7 @@ sequenceDiagram
         alt Has annotation
             A-->>F: Return baseUrl from annotation
         else No annotation
-            F-->>F: Throw ConfigurationException
+            F-->>F: Use empty baseUrl (client must use absolute URIs per request)
         end
     end
 
