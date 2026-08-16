@@ -14,6 +14,7 @@
 package me.ahoo.coapi.spring.client.reactive
 
 import me.ahoo.coapi.spring.CoApiDefinition
+import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -31,7 +32,8 @@ class WebClientFactoryBean(definition: CoApiDefinition) :
         override fun customize(coApiDefinition: CoApiDefinition, builder: WebClient.Builder) {
             builder.filters {
                 val hasLoadBalancedFilter = it.any { filter ->
-                    filter is LoadBalancedExchangeFilterFunction
+                    filter is LoadBalancedExchangeFilterFunction ||
+                        filter is DeferringLoadBalancerExchangeFilterFunction<*>
                 }
                 if (!hasLoadBalancedFilter) {
                     val loadBalancedExchangeFilterFunction =

@@ -124,6 +124,21 @@ class IHttpClientFactoryBeanTest {
     }
 
     @Test
+    fun `loadBalanced should return false when properties explicitly set to false`() {
+        val mockApplicationContext = mockk<ApplicationContext>()
+        val mockClientProperties = mockk<ClientProperties>()
+
+        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        every { mockClientProperties.getLoadBalanced("testClient") } returns false
+
+        val factoryBean = TestHttpClientFactoryBean(mockDefinition)
+        factoryBean.setApplicationContext(mockApplicationContext)
+        val loadBalanced = factoryBean.loadBalanced()
+
+        loadBalanced.assert().isEqualTo(false)
+    }
+
+    @Test
     fun `loadBalanced should return false when properties URL is not blank`() {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()

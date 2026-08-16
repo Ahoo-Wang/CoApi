@@ -46,7 +46,7 @@ abstract class AbstractHttpClientFactoryBean : ApplicationContextAware {
     fun loadBalanced(): Boolean {
         val loadBalancedFromProperties = getLoadBalancedFromProperties()
         if (loadBalancedFromProperties != null) {
-            return true
+            return loadBalancedFromProperties
         }
         val baseUrlFromProperties = getBaseUrlFromProperties()
         if (baseUrlFromProperties.isNotBlank()) {

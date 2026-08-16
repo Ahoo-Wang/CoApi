@@ -101,6 +101,20 @@ class CoApiAutoConfigurationTest {
     }
 
     @Test
+    fun `loadBalanced property should override annotation and disable load balancing`() {
+        ApplicationContextRunner()
+            .withPropertyValues("coapi.clients.GitHubApi.load-balanced=false")
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .withUserConfiguration(ServiceApiOnlyConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasSingleBean(ServiceApiClient::class.java)
+                context.getBean<ServiceApiClient>()
+            }
+    }
+
+    @Test
     fun basePackages() {
         ApplicationContextRunner()
             .withPropertyValues("github.url=https://api.github.com")
@@ -177,3 +191,6 @@ class CoApiAutoConfigurationTest {
     ]
 )
 class EnableCoApiConfiguration
+
+@EnableCoApi(clients = [ServiceApiClient::class])
+class ServiceApiOnlyConfiguration
