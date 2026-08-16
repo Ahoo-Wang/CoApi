@@ -35,6 +35,13 @@ abstract class AbstractWebClientFactoryBean(override val definition: CoApiDefini
         return WebClient::class.java
     }
 
+    /**
+     * Build the WebClient for [definition].
+     *
+     * Requires the context to resolve exactly one [WebClient.Builder] bean by type.
+     * Applications registering multiple builders (e.g. a Spring Cloud `@LoadBalanced`
+     * builder alongside the default one) must mark one of them as primary.
+     */
     override fun getObject(): WebClient {
         val clientBuilder = appContext
             .getBean(WebClient.Builder::class.java)

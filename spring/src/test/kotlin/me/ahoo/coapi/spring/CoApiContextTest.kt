@@ -24,13 +24,21 @@ import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
 import me.ahoo.coapi.spring.client.reactive.WebClientBuilderCustomizer
 import me.ahoo.coapi.spring.client.sync.RestClientBuilderCustomizer
 import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
+import me.ahoo.test.asserts.assert
 import org.assertj.core.api.AssertionsForInterfaceTypes
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.BeanFactory
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration
 import org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.web.client.RestClient
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.support.WebClientAdapter
+import org.springframework.web.service.invoker.HttpExchangeAdapter
 
 class CoApiContextTest {
     private val loadBalancedExchangeFilterName =
@@ -68,6 +76,66 @@ class CoApiContextTest {
                 context.getBean(ServiceApiClient::class.java)
                 context.getBean(ServiceApiClientUseFilterBeanName::class.java)
                 context.getBean(ServiceApiClientUseFilterType::class.java)
+            }
+    }
+
+    @Test
+    fun `should start context when custom HttpExchangeAdapterFactory bean has a different bean name`() {
+        ApplicationContextRunner()
+            .withPropertyValues("github.url=https://api.github.com")
+            .withBean("customHttpExchangeAdapterFactory", HttpExchangeAdapterFactory::class.java, {
+                ReactiveHttpExchangeAdapterFactory()
+            })
+            .withBean("clientProperties", ClientProperties::class.java, {
+                MockClientProperties()
+            })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(EnableCoApiConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasSingleBean(GitHubApiClient::class.java)
+                context.getBean(GitHubApiClient::class.java)
+            }
+    }
+
+    @Test
+    fun `should use custom HttpExchangeAdapterFactory bean registered under standard bean name`() {
+        val customFactory = ReactiveHttpExchangeAdapterFactory()
+        ApplicationContextRunner()
+            .withPropertyValues("github.url=https://api.github.com")
+            .withBean(HttpExchangeAdapterFactory.BEAN_NAME, HttpExchangeAdapterFactory::class.java, { customFactory })
+            .withBean("clientProperties", ClientProperties::class.java, {
+                MockClientProperties()
+            })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(EnableCoApiConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasSingleBean(GitHubApiClient::class.java)
+                context.getBean(HttpExchangeAdapterFactory.BEAN_NAME).assert().isSameAs(customFactory)
+                context.getBean(GitHubApiClient::class.java)
+            }
+    }
+
+    @Test
+    fun `should use primary custom HttpExchangeAdapterFactory bean under non-standard bean name`() {
+        ApplicationContextRunner()
+            .withPropertyValues("github.url=https://api.github.com")
+            .withBean("clientProperties", ClientProperties::class.java, {
+                MockClientProperties()
+            })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(EnableCoApiConfiguration::class.java)
+            .withUserConfiguration(PrimaryCustomFactoryConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasSingleBean(GitHubApiClient::class.java)
+                context.getBean(GitHubApiClient::class.java)
+                val customFactory = context.getBean(
+                    "customHttpExchangeAdapterFactory",
+                    RecordingHttpExchangeAdapterFactory::class.java
+                )
+                customFactory.createdClientNames.assert().isNotEmpty()
             }
     }
 
@@ -114,6 +182,21 @@ class CoApiContextTest {
     ]
 )
 class EnableCoApiConfiguration
+
+@Configuration(proxyBeanMethods = false)
+class PrimaryCustomFactoryConfiguration {
+    @Bean
+    @Primary
+    fun customHttpExchangeAdapterFactory(): RecordingHttpExchangeAdapterFactory = RecordingHttpExchangeAdapterFactory()
+}
+
+class RecordingHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
+    val createdClientNames = mutableListOf<String>()
+    override fun create(beanFactory: BeanFactory, httpClientName: String): HttpExchangeAdapter {
+        createdClientNames.add(httpClientName)
+        return WebClientAdapter.create(beanFactory.getBean(httpClientName, WebClient::class.java))
+    }
+}
 
 data class MockClientProperties(
     val filter: Map<String, ClientProperties.FilterDefinition> = emptyMap(),
