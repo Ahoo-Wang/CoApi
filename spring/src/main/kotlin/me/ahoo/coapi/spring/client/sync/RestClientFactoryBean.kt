@@ -14,8 +14,8 @@
 package me.ahoo.coapi.spring.client.sync
 
 import me.ahoo.coapi.spring.CoApiDefinition
-import org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
+import org.springframework.cloud.client.loadbalancer.BlockingLoadBalancerInterceptor
+import org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor
 import org.springframework.web.client.RestClient
 
 class RestClientFactoryBean(definition: CoApiDefinition) : AbstractRestClientFactoryBean(definition) {
@@ -31,11 +31,11 @@ class RestClientFactoryBean(definition: CoApiDefinition) : AbstractRestClientFac
         override fun customize(coApiDefinition: CoApiDefinition, builder: RestClient.Builder) {
             builder.requestInterceptors {
                 val hasLoadBalancedFilter = it.any { filter ->
-                    filter is LoadBalancedExchangeFilterFunction
+                    filter is BlockingLoadBalancerInterceptor || filter is DeferringLoadBalancerInterceptor
                 }
                 if (!hasLoadBalancedFilter) {
                     val loadBalancerInterceptor =
-                        appContext.getBean(LoadBalancerInterceptor::class.java)
+                        appContext.getBean(BlockingLoadBalancerInterceptor::class.java)
                     it.add(loadBalancerInterceptor)
                 }
             }

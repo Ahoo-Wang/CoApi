@@ -18,13 +18,28 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.web.service.invoker.HttpServiceProxyFactory
 
+/**
+ * FactoryBean that creates the HTTP service proxy for a [CoApiDefinition].
+ *
+ * The [HttpExchangeAdapterFactory] is resolved like Spring's by-type lookup: the unique
+ * candidate wins, and among several candidates the `@Primary` one wins. Only when multiple
+ * non-primary candidates exist does the bean registered under the standard name
+ * [HttpExchangeAdapterFactory.BEAN_NAME] take precedence. Custom factories must be
+ * registered under that standard name or marked `@Primary` to take effect.
+ */
 class CoApiFactoryBean(
     private val coApiDefinition: CoApiDefinition
 ) : FactoryBean<Any>, ApplicationContextAware {
 
     private lateinit var applicationContext: ApplicationContext
     override fun getObject(): Any {
-        val httpExchangeAdapterFactory = applicationContext.getBean(HttpExchangeAdapterFactory::class.java)
+        val httpExchangeAdapterFactory = applicationContext
+            .getBeanProvider(HttpExchangeAdapterFactory::class.java)
+            .getIfUnique()
+            ?: applicationContext.getBean(
+                HttpExchangeAdapterFactory.BEAN_NAME,
+                HttpExchangeAdapterFactory::class.java
+            )
         val httpExchangeAdapter = httpExchangeAdapterFactory.create(
             beanFactory = applicationContext,
             httpClientName = coApiDefinition.httpClientBeanName

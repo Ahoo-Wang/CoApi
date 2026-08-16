@@ -27,6 +27,13 @@ abstract class AbstractRestClientFactoryBean(override val definition: CoApiDefin
 
     protected open val builderCustomizer: RestClientBuilderCustomizer = RestClientBuilderCustomizer.NoOp
 
+    /**
+     * Build the RestClient for [definition].
+     *
+     * Requires the context to resolve exactly one [RestClient.Builder] bean by type.
+     * Applications registering multiple builders (e.g. a Spring Cloud `@LoadBalanced`
+     * builder alongside the default one) must mark one of them as primary.
+     */
     override fun getObject(): RestClient {
         val clientBuilder = appContext
             .getBean<RestClient.Builder>()
