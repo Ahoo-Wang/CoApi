@@ -23,10 +23,8 @@ import me.ahoo.coapi.spring.ClientMode
 import me.ahoo.coapi.spring.EnableCoApi
 import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
 import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
+import me.ahoo.test.asserts.assert
 import org.assertj.core.api.AssertionsForInterfaceTypes
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.notNullValue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.getBean
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage
@@ -66,8 +64,8 @@ class CoApiAutoConfigurationTest {
                     .hasSingleBean(GitHubApiClient::class.java)
                     .hasSingleBean(ServiceApiClient::class.java)
                 val coApiProperties = context.getBean(CoApiProperties::class.java)
-                assertThat(coApiProperties.mode, equalTo(ClientMode.AUTO))
-                assertThat(coApiProperties.clients["ServiceApiClientUseFilterBeanName"], notNullValue())
+                coApiProperties.mode.assert().isEqualTo(ClientMode.AUTO)
+                coApiProperties.clients["ServiceApiClientUseFilterBeanName"].assert().isNotNull()
                 context.getBean<GitHubApiClient>()
                 context.getBean<ServiceApiClient>()
                 context.getBean<ServiceApiClientUseFilterBeanName>()
@@ -92,7 +90,7 @@ class CoApiAutoConfigurationTest {
                     .hasSingleBean(GitHubApiClient::class.java)
                     .hasSingleBean(ServiceApiClient::class.java)
                 val coApiProperties = context.getBean<CoApiProperties>()
-                assertThat(coApiProperties.mode, equalTo(ClientMode.SYNC))
+                coApiProperties.mode.assert().isEqualTo(ClientMode.SYNC)
                 context.getBean<GitHubApiClient>()
                 context.getBean<ServiceApiClient>()
                 context.getBean<ServiceApiClientUseFilterBeanName>()

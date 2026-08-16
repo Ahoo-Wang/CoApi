@@ -1,10 +1,10 @@
 package me.ahoo.coapi.spring.client.reactive.auth
 
 import io.mockk.mockk
+import io.mockk.verify
 import me.ahoo.coapi.spring.client.reactive.auth.BearerHeaderValueMapper.withBearerPrefix
 import me.ahoo.coapi.spring.client.reactive.auth.ExpirableToken.Companion.jwtToExpirableToken
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.equalTo
+import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -24,7 +24,7 @@ class BearerTokenFilterTest {
             .build()
         val jwtToken = JwtFixture.generateToken(Date())
         val nextException = ExchangeFunction { request ->
-            assertThat(request.headers().getFirst(HttpHeaders.AUTHORIZATION), equalTo(jwtToken.withBearerPrefix()))
+            request.headers().getFirst(HttpHeaders.AUTHORIZATION).assert().isEqualTo(jwtToken.withBearerPrefix())
             Mono.empty()
         }
         val tokenProvider = object : ExpirableTokenProvider {
@@ -56,5 +56,6 @@ class BearerTokenFilterTest {
         bearerTokenFilter.filter(clientRequest, nextException)
             .test()
             .verifyComplete()
+        verify(exactly = 0) { tokenProvider.getHeaderValue() }
     }
 }

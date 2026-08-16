@@ -30,7 +30,14 @@ enum class ClientMode {
 
         fun inferClientMode(getProperty: (propertyKey: String) -> String?): ClientMode {
             val propertyValue = getProperty(COAPI_CLIENT_MODE_PROPERTY) ?: AUTO.name
-            val mode = ClientMode.valueOf(propertyValue.uppercase())
+            val mode = try {
+                ClientMode.valueOf(propertyValue.uppercase())
+            } catch (e: IllegalArgumentException) {
+                throw IllegalArgumentException(
+                    "Invalid $COAPI_CLIENT_MODE_PROPERTY value: [$propertyValue]. Valid values are: ${entries.joinToString()}.",
+                    e
+                )
+            }
             if (mode == AUTO) {
                 return INFERRED_MODE_BASED_ON_CLASS
             }

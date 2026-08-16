@@ -103,13 +103,15 @@ data class CoApiDefinition(
          */
         @Suppress("ReturnCount")
         fun CoApi.resolveBaseUrl(environment: Environment): String {
-            // If the base URL is not blank, resolve placeholders and return it
+            // If the base URL is not blank, resolve placeholders and return it.
+            // Unresolvable placeholders fail fast at startup instead of leaking a literal
+            // `${...}` into the client base URL (its `{...}` would be treated as a URI template variable).
             if (baseUrl.isNotBlank()) {
-                return environment.resolvePlaceholders(baseUrl)
+                return environment.resolveRequiredPlaceholders(baseUrl)
             }
             if (serviceId.isNotBlank()) {
                 // Otherwise, construct a load balanced URL using the service ID
-                return LB_PROTOCOL_PREFIX + environment.resolvePlaceholders(serviceId)
+                return LB_PROTOCOL_PREFIX + environment.resolveRequiredPlaceholders(serviceId)
             }
             return ""
         }

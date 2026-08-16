@@ -25,8 +25,15 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val c
     }
 
     fun register(coApiDefinitions: Set<CoApiDefinition>) {
-        coApiDefinitions.forEach {
-            register(it)
+        coApiDefinitions.groupBy { it.name }.forEach { (name, definitions) ->
+            if (definitions.size > 1) {
+                throw IllegalStateException(
+                    "Duplicate CoApi name [$name]: ${definitions.map { it.apiType.name }}. " +
+                        "The client name is derived from @CoApi.name (or the interface simple name) " +
+                        "- make the names unique."
+                )
+            }
+            register(definitions.first())
         }
     }
 
