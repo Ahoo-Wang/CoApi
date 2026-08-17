@@ -1,0 +1,39 @@
+name: Wiki Test
+
+on:
+  pull_request:
+    paths:
+      - 'wiki/**'
+      - '.github/workflows/wiki-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wiki-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wiki
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.22.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.19.0
+          cache: pnpm
+          cache-dependency-path: wiki/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build with VitePress
+        run: pnpm build
