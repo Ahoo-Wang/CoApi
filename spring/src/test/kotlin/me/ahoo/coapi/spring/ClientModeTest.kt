@@ -1,6 +1,7 @@
 package me.ahoo.coapi.spring
 
 import me.ahoo.test.asserts.assert
+import me.ahoo.test.asserts.assertThrownBy
 import org.junit.jupiter.api.Test
 
 class ClientModeTest {
@@ -23,16 +24,10 @@ class ClientModeTest {
 
     @Test
     fun inferClientModeIfInvalid() {
-        val thrown = requireNotNull(
-            try {
-                ClientMode.inferClientMode { "FOO" }
-                null
-            } catch (e: IllegalArgumentException) {
-                e
-            }
-        )
-        thrown.message.assert().contains("FOO")
-        thrown.message.assert().contains("REACTIVE, SYNC, AUTO")
-        thrown.cause.assert().isInstanceOf(IllegalArgumentException::class.java)
+        assertThrownBy<IllegalArgumentException> {
+            ClientMode.inferClientMode { "FOO" }
+        }.hasMessageContaining("FOO")
+            .hasMessageContaining("REACTIVE, SYNC, AUTO")
+            .hasCauseInstanceOf(IllegalArgumentException::class.java)
     }
 }

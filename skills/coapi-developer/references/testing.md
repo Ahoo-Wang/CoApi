@@ -149,35 +149,28 @@ fun `should mock CoApi client`() {
 
 ## Known Testing Pitfalls
 
-Two fluent-assert quirks confirmed against this repository — prefer the try/catch pattern for
-exception assertions:
+Two fluent-assert facts confirmed against this repository:
 
-1. `assertThrownBy<T> { ... }.hasMessageContaining(...)` (chained) misreports failures: when the
-   message fragment is wrong, the error reads "Expected T to be thrown, but was: T" with an
-   instance-of diagnostic, even though the type check passed. Root cause (fluent-assert-core
-   `Throwable.kt`): `assertThrownBy` eagerly pins `.describedAs { "Expected ... to be thrown, but
-   was: $throwable" }` and `.overridingErrorMessage(shouldBeInstance(...))` on the returned
-   `ThrowableAssert`, and both stick to every chained assertion. When you see this error, suspect
-   your message fragment first. The non-chained `assertThrownBy<T> { ... }` form is unaffected
-   (reported upstream: https://github.com/Ahoo-Wang/FluentAssert/issues/98).
+1. **fluent-assert < 1.1.0 only**: chained assertions after `assertThrownBy` were misreported as
+   type-check failures ("Expected T to be thrown, but was: T") because `assertThrownBy` pinned a
+   sticky `describedAs` + `overridingErrorMessage` on the returned assert. Fixed in v1.1.0
+   ([Ahoo-Wang/FluentAssert#99](https://github.com/Ahoo-Wang/FluentAssert/pull/99)); on 1.1.0+ the
+   chained form below is the preferred style. On older versions, use the non-chained
+   `assertThrownBy<T> { ... }` form or a try/catch, and suspect the message fragment when you see
+   the phantom type error.
 2. `assert(thrown)` in function-call form is ambiguous with the Kotlin stdlib `kotlin.assert(Boolean)`
    — overload resolution picks the stdlib function and fails to compile ("Boolean was expected").
+   Version-independent; use `assertThrownBy` or assert on `thrown.message`/`thrown.cause` instead.
 
-Reliable pattern for exception assertions with message and cause pinning:
+Preferred exception-assertion pattern on fluent-assert 1.1.0+:
 
 ```kotlin
 @Test
 fun shouldThrow() {
-    val thrown = requireNotNull(
-        try {
-            callUnderTest()
-            null
-        } catch (e: IllegalStateException) {
-            e
-        }
-    )
-    thrown.message.assert().contains("expected fragment")
-    thrown.cause.assert().isInstanceOf(IllegalArgumentException::class.java)
+    assertThrownBy<IllegalStateException> {
+        callUnderTest()
+    }.hasMessageContaining("expected fragment")
+        .hasCauseInstanceOf(IllegalArgumentException::class.java)
 }
 ```
 
