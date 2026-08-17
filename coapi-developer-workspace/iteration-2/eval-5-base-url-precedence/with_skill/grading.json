@@ -1,0 +1,37 @@
+{
+  "eval_id": 5,
+  "eval_name": "base-url-precedence",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "Separates annotation definition resolution from HTTP client factory resolution",
+      "passed": true,
+      "evidence": "Two-layer structure: Layer 1 CoApiDefinition parsing, Layer 2 AbstractHttpClientFactoryBean build time"
+    },
+    {
+      "text": "@CoApi(baseUrl) wins over serviceId inside CoApiDefinition",
+      "passed": true,
+      "evidence": "Layer 1 item 1: non-blank baseUrl means serviceId is ignored entirely"
+    },
+    {
+      "text": "serviceId resolved through lb://<serviceId> then normalized to http://<serviceId> with loadBalanced=true",
+      "passed": true,
+      "evidence": "Layer 1 item 2 states the lb:// treatment and normalization verbatim"
+    },
+    {
+      "text": "coapi.clients.<name>.base-url overrides the parsed definition at factory time",
+      "passed": true,
+      "evidence": "Layer 2: non-blank base-url overrides everything; explicit note that it does not rewrite CoApiDefinition"
+    },
+    {
+      "text": "Bonus: load-balanced three-state layering (property -> base-url forces off -> annotation)",
+      "passed": true,
+      "evidence": "Load-balanced interplay section matches AbstractHttpClientFactoryBean.loadBalanced() precedence exactly"
+    },
+    {
+      "text": "Bonus: placeholder fail-fast with ${name:default} fallback (v2.2.0)",
+      "passed": true,
+      "evidence": "Layer 1 item 1 mentions resolveRequiredPlaceholders startup failure and inline default"
+    }
+  ]
+}

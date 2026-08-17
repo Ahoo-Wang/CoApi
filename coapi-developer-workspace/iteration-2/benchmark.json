@@ -1,0 +1,37 @@
+{
+  "skill_name": "coapi-developer",
+  "iteration": 2,
+  "timestamp": "2026-08-17T06:00:00Z",
+  "context": "Validation of the v2.1.1/v2.2.0 skill alignment; with_skill configuration only",
+  "configurations": [
+    {
+      "name": "with_skill",
+      "label": "With Skill",
+      "total_assertions": 18,
+      "passed": 18,
+      "failed": 0,
+      "pass_rate": 1.0,
+      "total_duration_seconds": 135.7,
+      "evals": [
+        {
+          "eval_id": 4,
+          "name": "troubleshooting",
+          "passed": 6,
+          "failed": 0
+        },
+        {
+          "eval_id": 5,
+          "name": "base-url-precedence",
+          "passed": 6,
+          "failed": 0
+        },
+        {
+          "eval_id": 6,
+          "name": "duplicate-name",
+          "passed": 6,
+          "failed": 0
+        }
+      ]
+    }
+  ]
+}

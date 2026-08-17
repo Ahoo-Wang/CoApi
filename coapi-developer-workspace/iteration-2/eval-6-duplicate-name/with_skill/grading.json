@@ -1,0 +1,37 @@
+{
+  "eval_id": 6,
+  "eval_name": "duplicate-name",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "Client names (@CoApi name attribute, or interface simple name when unset) must be unique since v2.2.0",
+      "passed": true,
+      "evidence": "States v2.2.0 fail-fast and both derivation rules, citing CoApiDefinition.resolveClientName"
+    },
+    {
+      "text": "Before v2.2.0 the later duplicate was silently ignored",
+      "passed": true,
+      "evidence": "Explains warn-log 'already exists - Ignore' skip and why the upgrade surfaced the latent conflict"
+    },
+    {
+      "text": "Remediation: distinct @CoApi(name = ...) on one interface",
+      "passed": true,
+      "evidence": "Fix option 1 with code example"
+    },
+    {
+      "text": "Remediation: renaming one interface",
+      "passed": true,
+      "evidence": "Fix option 2"
+    },
+    {
+      "text": "Remediation: removing the dead interface",
+      "passed": true,
+      "evidence": "Fix option 3"
+    },
+    {
+      "text": "Bonus: notes the config key must follow the renamed client",
+      "passed": true,
+      "evidence": "Caveat: coapi.clients.UserClient.* keys must be updated to the new name"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "eval_id": 4,
+  "eval_name": "troubleshooting",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "Verifies the target is an interface",
+      "passed": true,
+      "evidence": "Section 1 explains ApiClientScanner only accepts interfaces; a class is silently ignored"
+    },
+    {
+      "text": "Interface annotated or registered through @EnableCoApi",
+      "passed": true,
+      "evidence": "Section 2 Option A shows @EnableCoApi(clients = [...]) explicit registration"
+    },
+    {
+      "text": "Scanning or coapi.base-packages covers the package",
+      "passed": true,
+      "evidence": "Section 2 lists auto-configuration packages plus coapi.base-packages with Option B yaml"
+    },
+    {
+      "text": "Starter dependency is present",
+      "passed": true,
+      "evidence": "Section 3 requires me.ahoo.coapi:coapi-spring-boot-starter, not just the api module; also checks auto-configuration exclusion"
+    },
+    {
+      "text": "External JAR clients registered explicitly",
+      "passed": true,
+      "evidence": "Section 2: 'different package tree or a separate JAR' -> @EnableCoApi(clients = [...])"
+    },
+    {
+      "text": "Distinguishes the v2.2.0 duplicate-name startup failure from a missing bean",
+      "passed": true,
+      "evidence": "Section 5: IllegalStateException Duplicate CoApi name is a different problem (name collision, v2.2.0+), with distinct-name fix"
+    }
+  ]
+}
