@@ -24,7 +24,9 @@ data class ExpirableToken(val token: String, val expireAt: Long) {
         private val jwtParser = JWT()
         fun String.jwtToExpirableToken(): ExpirableToken {
             val decodedJWT = jwtParser.decodeJwt(this)
-            val expiresAt = checkNotNull(decodedJWT.expiresAt)
+            val expiresAt = checkNotNull(decodedJWT.expiresAt) {
+                "JWT token has no exp claim - required for expirable tokens."
+            }
             return ExpirableToken(this, expiresAt.time)
         }
     }

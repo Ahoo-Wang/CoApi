@@ -1,8 +1,7 @@
 package me.ahoo.coapi.spring.client.reactive.auth
 
 import me.ahoo.coapi.spring.client.reactive.auth.ExpirableToken.Companion.jwtToExpirableToken
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.equalTo
+import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 import reactor.kotlin.test.test
@@ -17,23 +16,23 @@ class CachedExpirableTokenProviderTest {
             .test()
             .consumeNextWith {
                 // 仅当缓存当前已填充时才会评估
-                assertThat(it, equalTo(MockBearerTokenProvider.expiredToken))
+                it.assert().isEqualTo(MockBearerTokenProvider.expiredToken)
             }.verifyComplete()
 
         cachedExpirableTokenProvider.getToken()
             .test()
             .consumeNextWith {
-                assertThat(it, equalTo(MockBearerTokenProvider.notExpiredToken))
+                it.assert().isEqualTo(MockBearerTokenProvider.notExpiredToken)
             }.verifyComplete()
         cachedExpirableTokenProvider.getToken()
             .test()
             .consumeNextWith {
-                assertThat(it, equalTo(MockBearerTokenProvider.notExpiredToken))
+                it.assert().isEqualTo(MockBearerTokenProvider.notExpiredToken)
             }.verifyComplete()
         cachedExpirableTokenProvider.getToken()
             .test()
             .consumeNextWith {
-                assertThat(it, equalTo(MockBearerTokenProvider.notExpiredToken))
+                it.assert().isEqualTo(MockBearerTokenProvider.notExpiredToken)
             }.verifyComplete()
     }
 

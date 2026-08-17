@@ -50,6 +50,28 @@ class CoApiDefinitionTest {
         coApiDefinition.loadBalanced.assert().isTrue()
         coApiDefinition.baseUrl.assert().isEmpty()
     }
+
+    @Test
+    fun toCoApiDefinitionIfPlaceholderUnresolved() {
+        val thrown = try {
+            UnresolvedPlaceholderApi::class.java.toCoApiDefinition(MockEnvironment())
+            null
+        } catch (e: IllegalArgumentException) {
+            e
+        }
+        requireNotNull(thrown).message.assert().contains("missing.url")
+    }
+
+    @Test
+    fun toCoApiDefinitionIfServiceIdPlaceholderUnresolved() {
+        val thrown = try {
+            UnresolvedServiceIdApi::class.java.toCoApiDefinition(MockEnvironment())
+            null
+        } catch (e: IllegalArgumentException) {
+            e
+        }
+        requireNotNull(thrown).message.assert().contains("missing.service-id")
+    }
 }
 
 @CoApi(baseUrl = "lb://order-service")
@@ -61,3 +83,9 @@ interface MockServiceApi
 @CoApi
 @LoadBalanced
 interface MockEmptyApi
+
+@CoApi(baseUrl = "\${missing.url}")
+interface UnresolvedPlaceholderApi
+
+@CoApi(serviceId = "\${missing.service-id}")
+interface UnresolvedServiceIdApi

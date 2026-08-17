@@ -25,4 +25,8 @@ object JwtFixture {
             .withExpiresAt(expiresAt)
         return accessTokenBuilder.sign(ALGORITHM)
     }
+
+    fun generateTokenWithoutExpiresAt(): String {
+        return JWT.create().sign(ALGORITHM)
+    }
 }

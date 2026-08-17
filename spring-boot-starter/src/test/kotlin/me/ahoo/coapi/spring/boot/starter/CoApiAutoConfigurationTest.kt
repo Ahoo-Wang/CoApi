@@ -20,13 +20,12 @@ import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterBeanName
 import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterType
 import me.ahoo.coapi.example.provider.client.TodoClient
 import me.ahoo.coapi.spring.ClientMode
+import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.EnableCoApi
 import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
 import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
+import me.ahoo.test.asserts.assert
 import org.assertj.core.api.AssertionsForInterfaceTypes
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.notNullValue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.getBean
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage
@@ -66,8 +65,8 @@ class CoApiAutoConfigurationTest {
                     .hasSingleBean(GitHubApiClient::class.java)
                     .hasSingleBean(ServiceApiClient::class.java)
                 val coApiProperties = context.getBean(CoApiProperties::class.java)
-                assertThat(coApiProperties.mode, equalTo(ClientMode.AUTO))
-                assertThat(coApiProperties.clients["ServiceApiClientUseFilterBeanName"], notNullValue())
+                coApiProperties.mode.assert().isEqualTo(ClientMode.AUTO)
+                coApiProperties.clients["ServiceApiClientUseFilterBeanName"].assert().isNotNull()
                 context.getBean<GitHubApiClient>()
                 context.getBean<ServiceApiClient>()
                 context.getBean<ServiceApiClientUseFilterBeanName>()
@@ -92,7 +91,7 @@ class CoApiAutoConfigurationTest {
                     .hasSingleBean(GitHubApiClient::class.java)
                     .hasSingleBean(ServiceApiClient::class.java)
                 val coApiProperties = context.getBean<CoApiProperties>()
-                assertThat(coApiProperties.mode, equalTo(ClientMode.SYNC))
+                coApiProperties.mode.assert().isEqualTo(ClientMode.SYNC)
                 context.getBean<GitHubApiClient>()
                 context.getBean<ServiceApiClient>()
                 context.getBean<ServiceApiClientUseFilterBeanName>()
@@ -111,6 +110,29 @@ class CoApiAutoConfigurationTest {
                 AssertionsForInterfaceTypes.assertThat(context)
                     .hasSingleBean(ServiceApiClient::class.java)
                 context.getBean<ServiceApiClient>()
+            }
+    }
+
+    @Test
+    fun `duplicate name across scan and definition bean should fail startup`() {
+        ApplicationContextRunner()
+            .withPropertyValues("github.url=https://api.github.com")
+            .withPropertyValues("coapi.base-packages=me.ahoo.coapi.example.consumer.client")
+            .withBean("conflictingDefinition", CoApiDefinition::class.java, {
+                CoApiDefinition(
+                    name = "GitHubApi",
+                    apiType = Any::class.java,
+                    baseUrl = "http://conflict",
+                    loadBalanced = false
+                )
+            })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .run { context ->
+                val failure = requireNotNull(context.startupFailure)
+                failure.toString().assert().contains("Duplicate CoApi name [GitHubApi]")
+                failure.toString().assert().contains(ServiceApiClient::class.java.name)
+                failure.toString().assert().contains(Any::class.java.name)
             }
     }
 

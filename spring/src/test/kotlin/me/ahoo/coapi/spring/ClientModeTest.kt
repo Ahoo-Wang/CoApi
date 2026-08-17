@@ -20,4 +20,19 @@ class ClientModeTest {
         }
         mode.assert().isEqualTo(ClientMode.SYNC)
     }
+
+    @Test
+    fun inferClientModeIfInvalid() {
+        val thrown = requireNotNull(
+            try {
+                ClientMode.inferClientMode { "FOO" }
+                null
+            } catch (e: IllegalArgumentException) {
+                e
+            }
+        )
+        thrown.message.assert().contains("FOO")
+        thrown.message.assert().contains("REACTIVE, SYNC, AUTO")
+        thrown.cause.assert().isInstanceOf(IllegalArgumentException::class.java)
+    }
 }
