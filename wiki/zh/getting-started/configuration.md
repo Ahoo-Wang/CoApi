@@ -30,6 +30,8 @@ CoApi 的配置架构在声明式便利性和程序化控制之间取得平衡�
 
 ::: info
 配置键 `coapi.clients.<name>.*` 中的 `<name>` 是 `@CoApi` 的 `name` 属性——未设置时为接口的简单类名。在注解上设置自定义 `name` 会改变配置键。
+
+自 v2.2.0 起，`@CoApi` `baseUrl`/`serviceId` 中的 `${...}` 占位符必须在当前环境中可解析：无法解析的占位符（且无 `${name:default}` 兜底）会在启动期抛出 `Could not resolve placeholder ...`，而不是把字面量 `${...}` 泄入客户端 baseUrl 并在运行期破坏请求。同名客户端冲突同样会在启动期报错并列出冲突类型。
 :::
 
 ### 响应式客户端属性

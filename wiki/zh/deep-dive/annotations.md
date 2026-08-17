@@ -120,6 +120,10 @@ graph TD
     S --> T[End]
 ```
 
+::: info
+自 v2.2.0 起，`baseUrl`/`serviceId` 中的占位符使用 `resolveRequiredPlaceholders` 解析：无法解析的 `${...}`（属性未定义且无 `${name:default}` 兜底）会在启动期抛出 `Could not resolve placeholder ...`，而不是把字面量 `${...}` 泄入客户端 baseUrl——其中的 `{...}` 会被当作 URI 模板变量，错误推迟到请求期才暴露。
+:::
+
 ## 类层次结构与关系
 
 注解系统创建了一个清晰的组件层次结构，各组件协同工作以提供服务客户端功能：
@@ -146,7 +150,7 @@ classDiagram
     }
     
     class Environment {
-        +String resolvePlaceholders(String)
+        +String resolveRequiredPlaceholders(String)
     }
     
     class Class {
@@ -180,9 +184,9 @@ sequenceDiagram
         C->>C: resolveBaseUrl(environment)
 
         alt baseUrl isNotBlank
-            C->>E: resolvePlaceholders(baseUrl)
+            C->>E: resolveRequiredPlaceholders(baseUrl)
         else serviceId isNotBlank
-            C->>E: resolvePlaceholders(serviceId)
+            C->>E: resolveRequiredPlaceholders(serviceId)
             C->>C: construct lb:// + serviceId
         else both blank
             C->>C: return empty string
@@ -268,6 +272,8 @@ graph LR
     G --> I[HttpClient Bean]
     H --> J[CoApi Bean]
 ```
+
+客户端名称必须唯一：该名称同时也是 `coapi.clients.<name>.*` 配置的键。自 v2.2.0 起，两个 `@CoApi` 接口解析到同一名称（自定义 `name` 相同，或不同包下的接口简单类名相同）会在启动期抛出 `IllegalStateException` 并列出冲突类型——在 v2.2.0 之前，后注册的定义会被静默忽略。通过设置唯一的 `@CoApi(name = "...")` 解决冲突。
 
 ## 最佳实践
 

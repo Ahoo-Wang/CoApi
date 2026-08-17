@@ -244,14 +244,16 @@ data class ExpirableToken(val token: String, val expireAt: Long) {
         private val jwtParser = JWT()
         fun String.jwtToExpirableToken(): ExpirableToken {
             val decodedJWT = jwtParser.decodeJwt(this)
-            val expiresAt = checkNotNull(decodedJWT.expiresAt)
+            val expiresAt = checkNotNull(decodedJWT.expiresAt) {
+                "JWT token has no exp claim - required for expirable tokens."
+            }
             return ExpirableToken(this, expiresAt.time)
         }
     }
 }
 ```
 
-The companion object provides a convenient extension function to convert JWT strings to `ExpirableToken` instances by decoding the JWT and extracting the expiration timestamp.
+The companion object provides a convenient extension function to convert JWT strings to `ExpirableToken` instances by decoding the JWT and extracting the expiration timestamp. The `exp` claim is required: since v2.2.0, a JWT without it fails with "JWT token has no exp claim - required for expirable tokens." (previously a bare `Required value was null.`). Note that JWT `exp` is a Unix timestamp in seconds, so the millisecond precision of the original `Date` is truncated.
 
 ### CachedExpirableTokenProvider
 

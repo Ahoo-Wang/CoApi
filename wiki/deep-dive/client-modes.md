@@ -277,26 +277,19 @@ class SyncHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
 CoApi supports comprehensive configuration through properties:
 
 ```properties
-# Client mode configuration (auto, reactive, sync)
+# Client mode (AUTO, REACTIVE, SYNC); since v2.2.0 an invalid value fails
+# startup with the offending value and the valid options listed
 coapi.mode=auto
 
-# Base URL for all HTTP requests
-coapi.client.base-url=https://api.example.com
+# Enable/disable CoApi auto-configuration
+coapi.enabled=true
 
-# Timeout configuration
-coapi.client.timeout=30s
-coapi.client.read-timeout=60s
-coapi.client.connect-timeout=10s
+# Extra packages to scan for @CoApi interfaces (comma-separated or indexed)
+coapi.base-packages=com.example.clients
 
-# Retry configuration
-coapi.client.retries=3
-coapi.client.retry-backoff=exponential
-coapi.client.retry-backoff-initial=100ms
-coapi.client.retry-backoff-max=2s
-
-# Load balancer configuration
-coapi.client.load-balancer.enabled=true
-coapi.client.load-balancer.strategy=round-robin
+# Per-client overrides - see the Configuration Reference for the full set
+coapi.clients.MyApiClient.base-url=https://api.example.com
+coapi.clients.MyApiClient.load-balanced=false
 ```
 
 ## Feature Variants

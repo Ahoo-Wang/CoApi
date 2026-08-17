@@ -244,14 +244,16 @@ data class ExpirableToken(val token: String, val expireAt: Long) {
         private val jwtParser = JWT()
         fun String.jwtToExpirableToken(): ExpirableToken {
             val decodedJWT = jwtParser.decodeJwt(this)
-            val expiresAt = checkNotNull(decodedJWT.expiresAt)
+            val expiresAt = checkNotNull(decodedJWT.expiresAt) {
+                "JWT token has no exp claim - required for expirable tokens."
+            }
             return ExpirableToken(this, expiresAt.time)
         }
     }
 }
 ```
 
-伴生对象提供了一个便捷的扩展函数，通过解码 JWT 并提取过期时间戳，将 JWT 字符串转换为 `ExpirableToken` 实例。
+伴生对象提供了一个便捷的扩展函数，通过解码 JWT 并提取过期时间戳，将 JWT 字符串转换为 `ExpirableToken` 实例。`exp` claim 是必需的：自 v2.2.0 起，缺少 `exp` 的 JWT 会报 "JWT token has no exp claim - required for expirable tokens."（此前是无上下文的 `Required value was null.`）。另外注意 JWT 的 `exp` 是秒级 Unix 时间戳，原始 `Date` 的毫秒精度会被截断。
 
 ### CachedExpirableTokenProvider
 

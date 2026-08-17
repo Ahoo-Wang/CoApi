@@ -120,6 +120,10 @@ graph TD
     S --> T[End]
 ```
 
+::: info
+Since v2.2.0, placeholders in `baseUrl`/`serviceId` are resolved with `resolveRequiredPlaceholders`: an unresolvable `${...}` (no property, no `${name:default}` fallback) fails at startup with `Could not resolve placeholder ...` instead of leaking the literal `${...}` into the client base URL, where `{...}` would be parsed as a URI template variable and only fail at request time.
+:::
+
 ## Class Hierarchy and Relationships
 
 The annotation system creates a clear hierarchy of components that work together to provide service client functionality:
@@ -146,7 +150,7 @@ classDiagram
     }
     
     class Environment {
-        +String resolvePlaceholders(String)
+        +String resolveRequiredPlaceholders(String)
     }
     
     class Class {
@@ -180,9 +184,9 @@ sequenceDiagram
         C->>C: resolveBaseUrl(environment)
 
         alt baseUrl isNotBlank
-            C->>E: resolvePlaceholders(baseUrl)
+            C->>E: resolveRequiredPlaceholders(baseUrl)
         else serviceId isNotBlank
-            C->>E: resolvePlaceholders(serviceId)
+            C->>E: resolveRequiredPlaceholders(serviceId)
             C->>C: construct lb:// + serviceId
         else both blank
             C->>C: return empty string
@@ -268,6 +272,8 @@ graph LR
     G --> I[HttpClient Bean]
     H --> J[CoApi Bean]
 ```
+
+Client names must be unique: the name is also the key for `coapi.clients.<name>.*` configuration. Since v2.2.0, registering two `@CoApi` interfaces that resolve to the same name (identical custom `name`, or identical interface simple names in different packages) fails at startup with an `IllegalStateException` listing the conflicting types — before v2.2.0 the later definition was silently ignored. Assign a unique `@CoApi(name = "...")` to resolve the conflict.
 
 ## Best Practices
 

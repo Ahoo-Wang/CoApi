@@ -30,6 +30,8 @@ CoApi's configuration architecture balances declarative convenience with program
 
 ::: info
 The `<name>` in `coapi.clients.<name>.*` is the `@CoApi` `name` attribute — or the interface simple name when no `name` is set. Setting a custom `name` on the annotation changes the configuration key.
+
+Since v2.2.0, `${...}` placeholders in `@CoApi` `baseUrl`/`serviceId` must resolve in the active environment: an unresolvable placeholder (without a `${name:default}` fallback) fails startup with `Could not resolve placeholder ...` instead of leaking a literal `${...}` into the client base URL and breaking requests at runtime. Duplicate client names also fail startup with the conflicting types listed.
 :::
 
 ### Reactive Client Properties

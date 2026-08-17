@@ -138,7 +138,7 @@ graph TD
     I --> K["Interface Only Filter"]
 ```
 
-注册器将自动扫描的接口定义与任何显式注册的 `CoApiDefinition` Bean 结合在一起。
+注册器将自动扫描的接口定义与任何显式注册的 `CoApiDefinition` Bean 结合在一起。自 v2.2.0 起，合并集合内的名称冲突（例如注册的定义与扫描到的同名接口冲突）会在启动期抛出 `IllegalStateException` 并列出冲突类型。
 
 ```kotlin
 private fun getScanBasePackages(): Set<String> {

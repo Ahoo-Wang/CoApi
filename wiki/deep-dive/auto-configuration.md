@@ -138,7 +138,7 @@ graph TD
     I --> K["Interface Only Filter"]
 ```
 
-The registrar combines automatically scanned interface definitions with any explicitly registered `CoApiDefinition` beans.
+The registrar combines automatically scanned interface definitions with any explicitly registered `CoApiDefinition` beans. Since v2.2.0, name conflicts within the merged set (e.g. a registered definition colliding with a scanned interface of the same client name) fail startup with an `IllegalStateException` listing the conflicting types.
 
 ```kotlin
 private fun getScanBasePackages(): Set<String> {

@@ -277,26 +277,19 @@ class SyncHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
 CoApi 通过属性支持全面配置：
 
 ```properties
-# Client mode configuration (auto, reactive, sync)
+# 客户端模式（AUTO、REACTIVE、SYNC）；自 v2.2.0 起，非法值会在启动期报错，
+# 消息中包含非法值与合法选项列表
 coapi.mode=auto
 
-# Base URL for all HTTP requests
-coapi.client.base-url=https://api.example.com
+# 启用/禁用 CoApi 自动配置
+coapi.enabled=true
 
-# Timeout configuration
-coapi.client.timeout=30s
-coapi.client.read-timeout=60s
-coapi.client.connect-timeout=10s
+# 额外扫描 @CoApi 接口的包（逗号分隔或索引形式）
+coapi.base-packages=com.example.clients
 
-# Retry configuration
-coapi.client.retries=3
-coapi.client.retry-backoff=exponential
-coapi.client.retry-backoff-initial=100ms
-coapi.client.retry-backoff-max=2s
-
-# Load balancer configuration
-coapi.client.load-balancer.enabled=true
-coapi.client.load-balancer.strategy=round-robin
+# 每客户端覆盖配置 - 完整属性见配置参考页
+coapi.clients.MyApiClient.base-url=https://api.example.com
+coapi.clients.MyApiClient.load-balanced=false
 ```
 
 ## 特性变体
