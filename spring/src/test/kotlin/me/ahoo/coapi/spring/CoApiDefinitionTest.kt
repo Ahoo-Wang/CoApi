@@ -53,16 +53,24 @@ class CoApiDefinitionTest {
 
     @Test
     fun toCoApiDefinitionIfPlaceholderUnresolved() {
-        assertThrownBy<IllegalArgumentException> {
+        val thrown = try {
             UnresolvedPlaceholderApi::class.java.toCoApiDefinition(MockEnvironment())
+            null
+        } catch (e: IllegalArgumentException) {
+            e
         }
+        requireNotNull(thrown).message.assert().contains("missing.url")
     }
 
     @Test
     fun toCoApiDefinitionIfServiceIdPlaceholderUnresolved() {
-        assertThrownBy<IllegalArgumentException> {
+        val thrown = try {
             UnresolvedServiceIdApi::class.java.toCoApiDefinition(MockEnvironment())
+            null
+        } catch (e: IllegalArgumentException) {
+            e
         }
+        requireNotNull(thrown).message.assert().contains("missing.service-id")
     }
 }
 

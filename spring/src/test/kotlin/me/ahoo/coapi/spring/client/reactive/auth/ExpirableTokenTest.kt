@@ -23,8 +23,9 @@ class ExpirableTokenTest {
     @Test
     fun jwtToExpirableToken() {
         val expiresAt = Date(System.currentTimeMillis() + 60_000)
-        val expirableToken = JwtFixture.generateToken(expiresAt).jwtToExpirableToken()
-        expirableToken.token.assert().isNotNull()
+        val token = JwtFixture.generateToken(expiresAt)
+        val expirableToken = token.jwtToExpirableToken()
+        expirableToken.token.assert().isEqualTo(token)
         // JWT exp claim is a Unix timestamp in seconds
         expirableToken.expireAt.assert().isEqualTo(expiresAt.toInstant().epochSecond * 1000)
     }

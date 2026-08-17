@@ -20,6 +20,7 @@ import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterBeanName
 import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterType
 import me.ahoo.coapi.example.provider.client.TodoClient
 import me.ahoo.coapi.spring.ClientMode
+import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.EnableCoApi
 import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
 import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
@@ -109,6 +110,29 @@ class CoApiAutoConfigurationTest {
                 AssertionsForInterfaceTypes.assertThat(context)
                     .hasSingleBean(ServiceApiClient::class.java)
                 context.getBean<ServiceApiClient>()
+            }
+    }
+
+    @Test
+    fun `duplicate name across scan and definition bean should fail startup`() {
+        ApplicationContextRunner()
+            .withPropertyValues("github.url=https://api.github.com")
+            .withPropertyValues("coapi.base-packages=me.ahoo.coapi.example.consumer.client")
+            .withBean("conflictingDefinition", CoApiDefinition::class.java, {
+                CoApiDefinition(
+                    name = "GitHubApi",
+                    apiType = Any::class.java,
+                    baseUrl = "http://conflict",
+                    loadBalanced = false
+                )
+            })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .run { context ->
+                val failure = requireNotNull(context.startupFailure)
+                failure.toString().assert().contains("Duplicate CoApi name [GitHubApi]")
+                failure.toString().assert().contains(ServiceApiClient::class.java.name)
+                failure.toString().assert().contains(Any::class.java.name)
             }
     }
 
