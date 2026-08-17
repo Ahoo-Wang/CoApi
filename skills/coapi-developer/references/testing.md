@@ -152,13 +152,16 @@ fun `should mock CoApi client`() {
 Two fluent-assert quirks confirmed against this repository — prefer the try/catch pattern for
 exception assertions:
 
-1. `assertThrownBy<T> { ... }.hasMessageContaining(...)` (chained) can fail the *type* check with
-   "Expected T to be thrown, but was: T" even when the type matches. The non-chained
-   `assertThrownBy<T> { ... }` form works. Root cause is not fully understood; treat chaining as
-   unreliable here.
-2. `assert(...)` is ambiguous with the Kotlin stdlib `kotlin.assert(Boolean)` when applied to a
-   caught exception — overload resolution picks the stdlib function and fails to compile
-   ("Boolean was expected"). Do not write `assert(thrown)`.
+1. `assertThrownBy<T> { ... }.hasMessageContaining(...)` (chained) misreports failures: when the
+   message fragment is wrong, the error reads "Expected T to be thrown, but was: T" with an
+   instance-of diagnostic, even though the type check passed. Root cause (fluent-assert-core
+   `Throwable.kt`): `assertThrownBy` eagerly pins `.describedAs { "Expected ... to be thrown, but
+   was: $throwable" }` and `.overridingErrorMessage(shouldBeInstance(...))` on the returned
+   `ThrowableAssert`, and both stick to every chained assertion. When you see this error, suspect
+   your message fragment first. The non-chained `assertThrownBy<T> { ... }` form is unaffected and
+   worth reporting upstream to fluent-assert.
+2. `assert(thrown)` in function-call form is ambiguous with the Kotlin stdlib `kotlin.assert(Boolean)`
+   — overload resolution picks the stdlib function and fails to compile ("Boolean was expected").
 
 Reliable pattern for exception assertions with message and cause pinning:
 

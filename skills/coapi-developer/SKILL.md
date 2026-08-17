@@ -39,7 +39,7 @@ synchronous `RestClient` proxies.
 - Base URL resolution has two layers: `@CoApi(baseUrl)` wins over `serviceId`; `serviceId`/`lb://` targets are normalized to `http://...` with `loadBalanced=true`; `coapi.clients.<name>.base-url` can override the parsed definition at HTTP client factory time.
 - Placeholders in `baseUrl`/`serviceId` must resolve in the active environment (v2.2.0): an unresolvable `${...}` fails startup with `Could not resolve placeholder ...`. Use `${name:default}` for an inline fallback.
 - Client names must be unique (v2.2.0): the name defaults to the interface simple name; two clients resolving to the same name fail startup with the conflicting types listed. The name is also the key for `coapi.clients.<name>.*`.
-- `coapi.clients.<name>.load-balanced` is a real three-state override: `true` enables, `false` disables, unset falls back to the annotation (v2.1.1 fixed `false` being treated as `true`).
+- `coapi.clients.<name>.load-balanced` is a real three-state override: `true` enables, `false` disables, unset falls back to the annotation unless a non-blank `base-url` override forces it off (v2.1.1 fixed `false` being treated as `true`).
 - Load balancing requires `spring-cloud-starter-loadbalancer`; CoApi resolves the sync interceptor by the `BlockingLoadBalancerInterceptor` interface, which also works when Spring Cloud retry is enabled.
 - Prefer `me.ahoo.test.asserts.assert` for value assertions. For `ApplicationContextRunner` bean assertions, mirror existing tests with `AssertionsForInterfaceTypes.assertThat(context)`.
 

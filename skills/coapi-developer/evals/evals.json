@@ -34,7 +34,7 @@
     {
       "id": 6,
       "prompt": "After upgrading CoApi my app fails at startup with: IllegalStateException: Duplicate CoApi name [UserClient] followed by two interface names. What caused this and how do I fix it?",
-      "expected_output": "An explanation that client names (@CoApi name attribute, or the interface simple name when unset) must be unique since v2.2.0, that before v2.2.0 the later duplicate was silently ignored, and remediation via a distinct @CoApi(name = ...) on one interface or removing the dead interface.",
+      "expected_output": "An explanation that client names (@CoApi name attribute, or the interface simple name when unset) must be unique since v2.2.0, that before v2.2.0 the later duplicate was silently ignored, and remediation via a distinct @CoApi(name = ...) on one interface, renaming one interface, or removing the dead interface.",
       "files": []
     }
   ]
