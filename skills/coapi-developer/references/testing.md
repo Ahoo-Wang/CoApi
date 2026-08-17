@@ -11,6 +11,7 @@ Spring Boot auto-configuration.
 - [ApplicationContextRunner Test](#applicationcontextrunner-test)
 - [Spring Boot Integration Test](#spring-boot-integration-test)
 - [MockK Client Test](#mockk-client-test)
+- [Known Testing Pitfalls](#known-testing-pitfalls)
 - [Coverage Checklist](#coverage-checklist)
 
 ## Repository Conventions
@@ -146,6 +147,40 @@ fun `should mock CoApi client`() {
 }
 ```
 
+## Known Testing Pitfalls
+
+Two fluent-assert quirks confirmed against this repository — prefer the try/catch pattern for
+exception assertions:
+
+1. `assertThrownBy<T> { ... }.hasMessageContaining(...)` (chained) can fail the *type* check with
+   "Expected T to be thrown, but was: T" even when the type matches. The non-chained
+   `assertThrownBy<T> { ... }` form works. Root cause is not fully understood; treat chaining as
+   unreliable here.
+2. `assert(...)` is ambiguous with the Kotlin stdlib `kotlin.assert(Boolean)` when applied to a
+   caught exception — overload resolution picks the stdlib function and fails to compile
+   ("Boolean was expected"). Do not write `assert(thrown)`.
+
+Reliable pattern for exception assertions with message and cause pinning:
+
+```kotlin
+@Test
+fun shouldThrow() {
+    val thrown = requireNotNull(
+        try {
+            callUnderTest()
+            null
+        } catch (e: IllegalStateException) {
+            e
+        }
+    )
+    thrown.message.assert().contains("expected fragment")
+    thrown.cause.assert().isInstanceOf(IllegalArgumentException::class.java)
+}
+```
+
+For "must not be called" expectations, use `verify(exactly = 0) { mock.call() }` (see
+`BearerTokenFilterTest.filter_ContainsKey`).
+
 ## Coverage Checklist
 
 For behavior changes, cover the smallest relevant layer:
@@ -155,3 +190,10 @@ For behavior changes, cover the smallest relevant layer:
 - Reactive vs sync mode selection: focused tests for `ClientMode` or adapter factory registration.
 - Starter auto-configuration: `spring-boot-starter` tests.
 - Example behavior: example module tests only when the public workflow changes.
+- Property semantics (e.g. `load-balanced=false`): unit test the factory bean decision first, then
+  one starter-module `ApplicationContextRunner` test with the real property string to cover the full
+  binding chain — the key is the client *name* (`@CoApi` `name` or simple name), not the interface
+  FQN.
+- Startup-failure behaviors (duplicate names, unresolvable placeholders): assert the context
+  `startupFailure` in an `ApplicationContextRunner` test; pin the error message so the right
+  failure is being caught.

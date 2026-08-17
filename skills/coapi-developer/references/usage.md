@@ -14,6 +14,7 @@ load-balanced examples.
 - [Config-Resolved Client](#config-resolved-client)
 - [Client Mode](#client-mode)
 - [Per-Client Base URL Override](#per-client-base-url-override)
+- [Per-Client Load-Balanced Override](#per-client-load-balanced-override)
 - [Per-Client Load-Balancer Wiring](#per-client-load-balancer-wiring)
 - [Explicit Registration](#explicit-registration)
 - [Dynamic URI](#dynamic-uri)
@@ -60,6 +61,10 @@ data class Issue(val url: String)
 github:
   url: https://api.github.com
 ```
+
+Since v2.2.0 the placeholder must resolve in the active environment — startup fails with
+`Could not resolve placeholder 'github.url'` otherwise. Use `${name:default}` for an inline
+fallback when a sensible default exists.
 
 ## Service Discovery Client
 
@@ -148,6 +153,9 @@ coapi:
       base-url: https://api.example.com
 ```
 
+The configuration key is the client name: the `@CoApi(name = "...")` attribute when set, otherwise
+the interface simple name. Setting a custom `name` changes the key.
+
 ## Client Mode
 
 ```yaml
@@ -168,6 +176,21 @@ coapi:
   clients:
     GitHubApiClient:
       base-url: https://api.github.com
+```
+
+## Per-Client Load-Balanced Override
+
+`coapi.clients.<name>.load-balanced` is a three-state override: `true` forces load-balanced wiring,
+`false` forces a direct connection (disable load balancing for a `serviceId`/`lb://` client in a
+specific environment), and unset falls back to the annotation. A non-blank `base-url` property also
+forces non-load-balanced wiring.
+
+```yaml
+coapi:
+  clients:
+    UserClient:
+      load-balanced: false
+      base-url: http://user-service.prod.internal:8080
 ```
 
 ## Per-Client Load-Balancer Wiring
@@ -201,6 +224,10 @@ Use `@EnableCoApi` when auto-scanning does not cover the client package.
 @SpringBootApplication
 class ConsumerApplication
 ```
+
+Client names must be unique across the application (v2.2.0): two interfaces that resolve to the
+same name — identical custom `name`, or identical simple names in different packages — fail startup
+with the conflicting types listed. Assign distinct `@CoApi(name = "...")` when simple names collide.
 
 ## Dynamic URI
 
