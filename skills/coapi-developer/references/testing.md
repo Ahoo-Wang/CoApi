@@ -158,8 +158,8 @@ exception assertions:
    `Throwable.kt`): `assertThrownBy` eagerly pins `.describedAs { "Expected ... to be thrown, but
    was: $throwable" }` and `.overridingErrorMessage(shouldBeInstance(...))` on the returned
    `ThrowableAssert`, and both stick to every chained assertion. When you see this error, suspect
-   your message fragment first. The non-chained `assertThrownBy<T> { ... }` form is unaffected and
-   worth reporting upstream to fluent-assert.
+   your message fragment first. The non-chained `assertThrownBy<T> { ... }` form is unaffected
+   (reported upstream: https://github.com/Ahoo-Wang/FluentAssert/issues/98).
 2. `assert(thrown)` in function-call form is ambiguous with the Kotlin stdlib `kotlin.assert(Boolean)`
    — overload resolution picks the stdlib function and fails to compile ("Boolean was expected").
 
