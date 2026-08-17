@@ -19,6 +19,12 @@
       "description": "Group Kotlin-related updates into a single PR",
       "matchPackagePatterns": ["^org\\.jetbrains\\.kotlin"],
       "groupName": "kotlin"
+    },
+    {
+      "description": "esbuild >=0.26 errors on vite 6 legacy build targets (see #265); stay on 0.25.x until VitePress 2 / vite 7",
+      "matchFileNames": ["wiki/**"],
+      "matchPackageNames": ["esbuild"],
+      "allowedVersions": "^0.25"
     }
   ]
 }
