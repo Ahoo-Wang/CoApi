@@ -1,6 +1,6 @@
 # CoApi
 
-> Zero-boilerplate HTTP client auto-configuration for Spring 6 HTTP Interface clients. Supports both reactive (WebClient) and synchronous (RestClient) programming models with optional client-side load balancing.
+> Zero-boilerplate HTTP client auto-configuration for Spring HTTP Interface clients (Spring Boot 4.x / Spring Framework 7.x). Supports both reactive (WebClient) and synchronous (RestClient) programming models with optional client-side load balancing.
 
 ## Onboarding
 
