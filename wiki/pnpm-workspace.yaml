@@ -6,4 +6,4 @@ overrides:
   postcss: ^8.5.26
   nanoid: ^6.0.1
   mermaid: ^11.16.1
-  dompurify: ^3.4.13
+  dompurify: ^3.4.14
