@@ -3,7 +3,7 @@ allowBuilds:
 overrides:
   vite: ^8.2.2
   esbuild: ^0.25.12
-  postcss: ^8.5.26
+  postcss: ^8.5.28
   nanoid: ^6.0.1
   mermaid: ^11.17.2
   dompurify: ^3.4.14
