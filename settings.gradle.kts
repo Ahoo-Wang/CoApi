@@ -11,6 +11,15 @@
  * limitations under the License.
  */
 
+pluginManagement {
+    repositories {
+        // Maven Central first: the Gradle Plugin Portal intermittently fails to serve
+        // Central-hosted artifacts (e.g. kotlin-gradle-plugins-bom), which broke CI.
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
