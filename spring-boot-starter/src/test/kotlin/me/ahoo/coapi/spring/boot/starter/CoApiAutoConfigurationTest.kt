@@ -22,20 +22,26 @@ import me.ahoo.coapi.example.provider.client.TodoClient
 import me.ahoo.coapi.spring.ClientMode
 import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.EnableCoApi
+import me.ahoo.coapi.spring.boot.definitions.InstanceDefinitionConfiguration
+import me.ahoo.coapi.spring.boot.definitions.StaticDefinitionConfiguration
 import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
 import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
 import me.ahoo.test.asserts.assert
 import org.assertj.core.api.AssertionsForInterfaceTypes
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.getBean
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
+import org.springframework.boot.test.system.CapturedOutput
+import org.springframework.boot.test.system.OutputCaptureExtension
 import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration
 import org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
 
+@ExtendWith(OutputCaptureExtension::class)
 class CoApiAutoConfigurationTest {
     private val filterNamePropertyK = "coapi.clients.ServiceApiClientUseFilterBeanName.reactive.filter.names"
     private val filterNameProperty = "$filterNamePropertyK=loadBalancerExchangeFilterFunction"
@@ -134,6 +140,41 @@ class CoApiAutoConfigurationTest {
                 failure.toString().assert().contains(ServiceApiClient::class.java.name)
                 failure.toString().assert().contains(Any::class.java.name)
             }
+    }
+
+    @Test
+    fun `static CoApiDefinition bean method should not initialize its configuration early`(output: CapturedOutput) {
+        ApplicationContextRunner()
+            .withPropertyValues("static.url=http://static-definition")
+            .withUserConfiguration(StaticDefinitionConfiguration::class.java)
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasNotFailed()
+                    .hasBean("StaticDefinition.CoApi")
+                val configuration = context.getBean<StaticDefinitionConfiguration>()
+                // Field injection only happens when the configuration is created after bean post-processing
+                configuration.url.assert().isEqualTo("http://static-definition")
+                context.getBean<CoApiDefinition>().baseUrl.assert().isEqualTo("http://static-definition")
+            }
+        output.out.assert().doesNotContain("is declared by a non-static @Bean method")
+        output.out.assert().doesNotContain("created too early")
+    }
+
+    @Test
+    fun `instance CoApiDefinition bean method should still register but warn`(output: CapturedOutput) {
+        ApplicationContextRunner()
+            .withUserConfiguration(InstanceDefinitionConfiguration::class.java)
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .hasNotFailed()
+                    .hasBean("InstanceDefinition.CoApi")
+            }
+        output.out.assert()
+            .contains("CoApiDefinition bean [instanceDefinition] is declared by a non-static @Bean method")
     }
 
     @Test
