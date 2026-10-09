@@ -13,7 +13,7 @@
       - any-glob-to-any-file: "example/**"
 "area: build":
   - changed-files:
-      - any-glob-to-any-file: ["*.gradle.kts", "**/*.gradle.kts", "gradle/**", "bom/**", "dependencies/**", "config/**"]
+      - any-glob-to-any-file: ["*.gradle.kts", "**/*.gradle.kts", "gradle.properties", "gradle/**", "bom/**", "dependencies/**", "config/**"]
 "area: ci":
   - changed-files:
       - any-glob-to-any-file: ".github/**"

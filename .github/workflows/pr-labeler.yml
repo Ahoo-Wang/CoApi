@@ -65,6 +65,7 @@ jobs:
             const byType = {
               feat: 'enhancement', fix: 'bug', docs: 'documentation', refactor: 'refactor',
               perf: 'performance', test: 'test', build: 'build', ci: 'ci', chore: 'chore',
+              style: 'chore', revert: 'revert', release: 'release',
             };
             const labels = [byType[match[1]], match[3] ? 'breaking-change' : undefined].filter(Boolean);
             if (labels.length === 0) return;
