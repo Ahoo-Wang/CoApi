@@ -48,13 +48,13 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val c
                         "- make the names unique."
                 )
             }
-        registerHttpExchangeAdapterFactory()
         coApiDefinitions.forEach {
             register(it)
         }
     }
 
     fun register(coApiDefinition: CoApiDefinition) {
+        registerHttpExchangeAdapterFactory()
         val (clientKind, clientFactoryBeanClass) = if (isSync) {
             "RestClient" to RestClientFactoryBean::class.java
         } else {

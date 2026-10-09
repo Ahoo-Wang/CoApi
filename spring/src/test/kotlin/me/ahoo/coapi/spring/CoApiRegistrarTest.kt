@@ -13,9 +13,7 @@
 
 package me.ahoo.coapi.spring
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import me.ahoo.test.asserts.assertThrownBy
@@ -25,9 +23,10 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry
 class CoApiRegistrarTest {
 
     private fun mockRegistry(): BeanDefinitionRegistry {
+        val registered = mutableSetOf<String>()
         val registry = mockk<BeanDefinitionRegistry>()
-        every { registry.containsBeanDefinition(any<String>()) } returns false
-        every { registry.registerBeanDefinition(any(), any()) } just Runs
+        every { registry.containsBeanDefinition(any<String>()) } answers { firstArg<String>() in registered }
+        every { registry.registerBeanDefinition(any(), any()) } answers { registered += firstArg<String>() }
         return registry
     }
 
@@ -67,5 +66,15 @@ class CoApiRegistrarTest {
 
         verify(exactly = 0) { registry.registerBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME, any()) }
         verify(exactly = 2) { registry.registerBeanDefinition(any(), any()) }
+    }
+
+    @Test
+    fun registerSingleDefinitionShouldAlsoRegisterHttpExchangeAdapterFactory() {
+        val registry = mockRegistry()
+        val registrar = CoApiRegistrar(registry, ClientMode.REACTIVE)
+
+        registrar.register(CoApiDefinition("ApiA", Any::class.java, "http://a", false))
+
+        verify(exactly = 1) { registry.registerBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME, any()) }
     }
 }

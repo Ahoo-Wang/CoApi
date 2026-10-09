@@ -89,12 +89,12 @@ data class CoApiDefinition(
         /**
          * Whether this URL uses the load-balanced `lb://` scheme.
          */
-        fun String.isLoadBalancedUrl(): Boolean = startsWith(LB_PROTOCOL_PREFIX)
+        internal fun String.isLoadBalancedUrl(): Boolean = startsWith(LB_PROTOCOL_PREFIX)
 
         /**
          * Rewrites the load-balanced `lb://` scheme to `http://`; any other URL is returned unchanged.
          */
-        fun String.toHttpUrl(): String {
+        internal fun String.toHttpUrl(): String {
             if (!isLoadBalancedUrl()) {
                 return this
             }
