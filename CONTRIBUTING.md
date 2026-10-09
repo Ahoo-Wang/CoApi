@@ -10,12 +10,14 @@ Thanks for helping improve CoApi! This guide describes how changes flow from an 
 
 ## Branching and pull requests
 
-- `main` is always releasable. Work on a short-lived branch named `<type>/<topic>`, e.g. `fix/token-refresh-margin`.
+- `main` is always releasable and protected: it changes only through pull requests that pass the required CI checks.
+- Work on a short-lived branch named `<type>/<topic>`, e.g. `fix/token-refresh-margin`.
 - Open a pull request against `main` and link the issue (`Closes #123`).
 - **The PR title becomes the commit on `main`** (PRs are squash-merged), so it must follow
   [Conventional Commits](https://www.conventionalcommits.org/): `feat(starter): ...`, `fix: ...`, `docs: ...`.
   Mark breaking changes with `!`, e.g. `feat!: ...`. CI checks the title and labels the PR from its type and changed paths.
 - Keep a PR focused on one change; split refactoring from behavior changes.
+- Every PR gets an automated AI code review; address or answer its comments before merging.
 
 ## Local build
 
@@ -53,7 +55,7 @@ Every PR must pass:
 
 CoApi follows [Semantic Versioning](https://semver.org/): breaking changes bump the major version, features the minor, fixes the patch.
 
-1. Bump `version` in `gradle.properties` in a `release: vX.Y.Z` commit on `main`.
+1. Open a pull request titled `release: vX.Y.Z` that bumps `version` in `gradle.properties`, and merge it once CI passes.
 2. Create the GitHub release `vX.Y.Z` with release notes (upgrading notes first).
 3. The release triggers publishing to Maven Central and GitHub Packages.
 
