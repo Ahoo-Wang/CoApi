@@ -37,3 +37,6 @@ Thumbs.db
 *.log
 .env
 .env.*
+
+# Skill eval workspaces (skill-creator output; regenerate from skills/*/evals)
+*-workspace/

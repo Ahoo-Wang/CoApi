@@ -12,9 +12,6 @@
   "semanticCommitScope": "deps",
   "commitMessageTopic": "{{depName}}",
   "rangeStrategy": "bump",
-  "ignorePaths": [
-    "coapi-developer-workspace/"
-  ],
   "lockFileMaintenance": {
     "enabled": false
   },
