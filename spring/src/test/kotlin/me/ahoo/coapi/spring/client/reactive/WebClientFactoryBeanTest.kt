@@ -16,63 +16,48 @@ package me.ahoo.coapi.spring.client.reactive
 import io.mockk.every
 import io.mockk.mockk
 import me.ahoo.coapi.spring.CoApiDefinition
-import me.ahoo.coapi.spring.client.ClientProperties
-import me.ahoo.coapi.spring.client.stubClientProperties
 import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.BeanFactory
 import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
-import org.springframework.context.ApplicationContext
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 
 class WebClientFactoryBeanTest {
 
-    private val mockDefinition = CoApiDefinition(
+    private val definition = CoApiDefinition(
         name = "testClient",
         apiType = Any::class.java,
         baseUrl = "http://localhost:8080",
         loadBalanced = true
     )
 
-    @Test
-    fun `customize should not add duplicate load balancer filter when deferring filter already present`() {
-        val mockApplicationContext = mockk<ApplicationContext>()
-        val mockClientProperties = mockk<ClientProperties>()
-        mockApplicationContext.stubClientProperties(mockClientProperties)
-        every { mockClientProperties.getLoadBalanced("testClient") } returns true
-
-        val existingFilter = mockk<DeferringLoadBalancerExchangeFilterFunction<ExchangeFilterFunction>>()
-        val builder = WebClient.builder().filter(existingFilter)
-
-        val factoryBean = WebClientFactoryBean(mockDefinition)
-        factoryBean.setApplicationContext(mockApplicationContext)
-        factoryBean.LoadBalancedWebClientBuilderCustomizer().customize(mockDefinition, builder)
-
+    private fun WebClient.Builder.filters(): List<ExchangeFilterFunction> {
         var filters: List<ExchangeFilterFunction> = emptyList()
-        builder.filters { filters = it }
-        filters.size.assert().isEqualTo(1)
-        filters.first().assert().isSameAs(existingFilter)
+        filters { filters = it.toList() }
+        return filters
     }
 
     @Test
-    fun `customize should add single load balancer filter when none present`() {
-        val mockApplicationContext = mockk<ApplicationContext>()
-        val mockClientProperties = mockk<ClientProperties>()
-        val loadBalancedFilter = mockk<LoadBalancedExchangeFilterFunction>()
-        mockApplicationContext.stubClientProperties(mockClientProperties)
-        every { mockClientProperties.getLoadBalanced("testClient") } returns true
-        every { mockApplicationContext.getBean(LoadBalancedExchangeFilterFunction::class.java) } returns loadBalancedFilter
+    fun `should not add duplicate load balancer filter when deferring filter already present`() {
+        val existingFilter = mockk<DeferringLoadBalancerExchangeFilterFunction<ExchangeFilterFunction>>()
+        val builder = WebClient.builder().filter(existingFilter)
 
+        LoadBalancedWebClientBuilderCustomizer(mockk()).customize(definition, builder)
+
+        builder.filters().assert().containsExactly(existingFilter)
+    }
+
+    @Test
+    fun `should add single load balancer filter when none present`() {
+        val loadBalancedFilter = mockk<LoadBalancedExchangeFilterFunction>()
+        val beanFactory = mockk<BeanFactory>()
+        every { beanFactory.getBean(LoadBalancedExchangeFilterFunction::class.java) } returns loadBalancedFilter
         val builder = WebClient.builder()
 
-        val factoryBean = WebClientFactoryBean(mockDefinition)
-        factoryBean.setApplicationContext(mockApplicationContext)
-        factoryBean.LoadBalancedWebClientBuilderCustomizer().customize(mockDefinition, builder)
+        LoadBalancedWebClientBuilderCustomizer(beanFactory).customize(definition, builder)
 
-        var filters: List<ExchangeFilterFunction> = emptyList()
-        builder.filters { filters = it }
-        filters.size.assert().isEqualTo(1)
-        filters.first().assert().isSameAs(loadBalancedFilter)
+        builder.filters().assert().containsExactly(loadBalancedFilter)
     }
 }

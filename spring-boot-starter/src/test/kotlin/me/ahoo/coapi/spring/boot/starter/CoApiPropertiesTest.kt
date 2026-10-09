@@ -13,9 +13,11 @@
 
 package me.ahoo.coapi.spring.boot.starter
 
-import me.ahoo.coapi.spring.client.ClientProperties
+import me.ahoo.coapi.spring.client.ComponentDefinition
 import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 
 class CoApiPropertiesTest {
 
@@ -69,7 +71,7 @@ class CoApiPropertiesTest {
             clients = mutableMapOf(
                 "test" to ClientDefinition(
                     reactive = ReactiveClientDefinition(
-                        filter = ClientProperties.FilterDefinition(
+                        filter = ComponentDefinition(
                             listOf("test")
                         )
                     )
@@ -101,7 +103,7 @@ class CoApiPropertiesTest {
     @Test
     fun setReactiveClientDefinition() {
         val properties = ReactiveClientDefinition()
-        val filter = ClientProperties.FilterDefinition()
+        val filter = ComponentDefinition<ExchangeFilterFunction>()
         properties.filter = filter
         properties.filter.assert().isSameAs(filter)
     }
@@ -109,7 +111,7 @@ class CoApiPropertiesTest {
     @Test
     fun setSyncClientDefinition() {
         val properties = SyncClientDefinition()
-        val interceptor = ClientProperties.InterceptorDefinition()
+        val interceptor = ComponentDefinition<ClientHttpRequestInterceptor>()
         properties.interceptor = interceptor
         properties.interceptor.assert().isSameAs(interceptor)
     }

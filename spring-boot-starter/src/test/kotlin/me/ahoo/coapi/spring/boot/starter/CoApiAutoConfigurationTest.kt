@@ -25,6 +25,7 @@ import me.ahoo.coapi.spring.EnableCoApi
 import me.ahoo.coapi.spring.boot.definitions.InstanceDefinitionConfiguration
 import me.ahoo.coapi.spring.boot.definitions.StaticDefinitionConfiguration
 import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
+import me.ahoo.coapi.spring.client.reactive.WebClientFactoryBean
 import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
 import me.ahoo.test.asserts.assert
 import org.assertj.core.api.AssertionsForInterfaceTypes
@@ -158,23 +159,43 @@ class CoApiAutoConfigurationTest {
                 configuration.url.assert().isEqualTo("http://static-definition")
                 context.getBean<CoApiDefinition>().baseUrl.assert().isEqualTo("http://static-definition")
             }
-        output.out.assert().doesNotContain("is declared by a non-static @Bean method")
         output.out.assert().doesNotContain("created too early")
     }
 
     @Test
-    fun `instance CoApiDefinition bean method should still register but warn`(output: CapturedOutput) {
+    fun `instance CoApiDefinition bean method should fail startup`() {
         ApplicationContextRunner()
             .withUserConfiguration(InstanceDefinitionConfiguration::class.java)
             .withUserConfiguration(WebClientAutoConfiguration::class.java)
             .withUserConfiguration(CoApiAutoConfiguration::class.java)
             .run { context ->
-                AssertionsForInterfaceTypes.assertThat(context)
-                    .hasNotFailed()
-                    .hasBean("InstanceDefinition.CoApi")
+                val failure = requireNotNull(context.startupFailure)
+                failure.toString().assert()
+                    .contains("CoApiDefinition bean [instanceDefinition] is declared by a non-static @Bean method")
             }
-        output.out.assert()
-            .contains("CoApiDefinition bean [instanceDefinition] is declared by a non-static @Bean method")
+    }
+
+    @Test
+    fun `placeholders and lb scheme in CoApiDefinition beans should be resolved`() {
+        ApplicationContextRunner()
+            .withPropertyValues("order.service-id=order-service")
+            .withBean("placeholderDefinition", CoApiDefinition::class.java, {
+                CoApiDefinition(
+                    name = "PlaceholderDefinition",
+                    apiType = ServiceApiClient::class.java,
+                    baseUrl = "lb://\${order.service-id}",
+                    loadBalanced = false
+                )
+            })
+            .withBean("loadBalancerExchangeFilterFunction", LoadBalancedExchangeFilterFunction::class.java, { mockk() })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context).hasNotFailed()
+                val factoryBean = context.getBean<WebClientFactoryBean>("&PlaceholderDefinition.HttpClient")
+                factoryBean.definition.baseUrl.assert().isEqualTo("http://order-service")
+                factoryBean.definition.loadBalanced.assert().isTrue()
+            }
     }
 
     @Test

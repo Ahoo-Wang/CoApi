@@ -14,74 +14,58 @@
 package me.ahoo.coapi.spring.client
 
 import me.ahoo.coapi.spring.CoApiDefinition
-import me.ahoo.coapi.spring.CoApiDefinition.Companion.isLoadBalancedUrl
-import me.ahoo.coapi.spring.CoApiDefinition.Companion.toHttpUrl
+import org.springframework.beans.factory.FactoryBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
+import org.springframework.util.ClassUtils
 
 /**
- * Base class for the per-[CoApiDefinition] HTTP client factory beans.
+ * Shared plumbing of the per-[CoApiDefinition] HTTP client factory beans.
  *
- * Owns the single rule for resolving the effective endpoint, where configuration
- * ([ClientProperties]) overrides the annotation ([definition]):
- * - `base-url`: the configured value wins over the annotation; an `lb://` scheme is
- *   rewritten to `http://` and implies load balancing, just like on the annotation.
- * - `load-balanced`: an explicit configured value always wins; otherwise it follows
- *   the configured `base-url` when one is set, else the annotation.
+ * The clients are built from the *effective* definition ([ClientProperties] overrides applied), which is
+ * also what every [HttpClientBuilderCustomizer] receives. Extend clients through customizer beans,
+ * not by subclassing the factory beans.
  */
-abstract class AbstractHttpClientFactoryBean : ApplicationContextAware {
-    abstract val definition: CoApiDefinition
+abstract class AbstractHttpClientFactoryBean<Client : Any>(
+    val definition: CoApiDefinition
+) : FactoryBean<Client>, ApplicationContextAware {
 
-    lateinit var appContext: ApplicationContext
-
-    /**
-     * [ClientProperties] is optional: plain `@EnableCoApi` setups without Spring Boot
-     * have no properties bean, in which case the annotation alone defines the client.
-     */
-    protected val clientProperties: ClientProperties by lazy {
-        appContext.getBeanProvider(ClientProperties::class.java).getIfAvailable { ClientProperties.Empty }
-    }
+    protected lateinit var appContext: ApplicationContext
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.appContext = applicationContext
     }
 
-    fun getBaseUrlFromProperties(): String {
-        return clientProperties.getBaseUri(definition.name)
+    /**
+     * [definition] with the optional [ClientProperties] overrides applied.
+     */
+    fun effectiveDefinition(): CoApiDefinition {
+        return optionalBean(ClientProperties::class.java, ClientProperties.Empty).resolve(definition)
     }
 
-    fun getLoadBalancedFromProperties(): Boolean? {
-        return clientProperties.getLoadBalanced(definition.name)
-    }
-
-    fun getBaseUrl(): String {
-        return getBaseUrlFromProperties().ifBlank {
-            definition.baseUrl
-        }.toHttpUrl()
-    }
-
-    @Suppress("ReturnCount")
-    fun loadBalanced(): Boolean {
-        val loadBalancedFromProperties = getLoadBalancedFromProperties()
-        if (loadBalancedFromProperties != null) {
-            return loadBalancedFromProperties
-        }
-        val baseUrlFromProperties = getBaseUrlFromProperties()
-        if (baseUrlFromProperties.isNotBlank()) {
-            return baseUrlFromProperties.isLoadBalancedUrl()
-        }
-        return definition.loadBalanced
+    protected fun <T : Any> optionalBean(type: Class<T>, fallback: T): T {
+        return appContext.getBeanProvider(type).getIfAvailable { fallback }
     }
 
     /**
-     * Resolves the configured components by bean name first, then by bean type,
-     * preserving the configured order.
+     * Resolves the referenced components by bean name first, then by bean type, preserving the configured order.
      */
-    protected fun <T : Any> resolveBeans(
-        componentType: Class<T>,
-        names: List<String>,
-        types: List<Class<out T>>
-    ): List<T> {
-        return names.map { appContext.getBean(it, componentType) } + types.map { appContext.getBean(it) }
+    protected fun <T : Any> resolveComponents(type: Class<T>, components: ComponentDefinition<T>): List<T> {
+        return components.names.map { appContext.getBean(it, type) } + components.types.map { appContext.getBean(it) }
+    }
+
+    protected fun <C : HttpClientBuilderCustomizer<*>> customizers(type: Class<C>): List<C> {
+        return appContext.getBeanProvider(type).orderedStream().toList()
+    }
+
+    /**
+     * Fails fast with an actionable message instead of a `NoClassDefFoundError` deep inside client creation.
+     */
+    protected fun requireLoadBalancerSupport(effectiveDefinition: CoApiDefinition, loadBalancerClassName: String) {
+        check(ClassUtils.isPresent(loadBalancerClassName, appContext.classLoader)) {
+            "CoApi [${effectiveDefinition.name}] is load balanced, but Spring Cloud LoadBalancer is not on the classpath. " +
+                "Add `spring-cloud-starter-loadbalancer`, or disable it via " +
+                "`coapi.clients.${effectiveDefinition.name}.load-balanced=false`."
+        }
     }
 }

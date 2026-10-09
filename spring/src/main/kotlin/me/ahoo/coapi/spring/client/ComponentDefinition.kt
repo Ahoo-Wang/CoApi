@@ -13,16 +13,11 @@
 
 package me.ahoo.coapi.spring.client
 
-import io.mockk.every
-import io.mockk.mockk
-import org.springframework.beans.factory.ObjectProvider
-import org.springframework.context.ApplicationContext
-
 /**
- * Stubs the optional [ClientProperties] lookup of [AbstractHttpClientFactoryBean].
+ * References client components (filters, interceptors) as beans: by bean name and/or by bean type.
+ * They are applied in that order: all [names], then all [types].
  */
-fun ApplicationContext.stubClientProperties(clientProperties: ClientProperties) {
-    val provider = mockk<ObjectProvider<ClientProperties>>()
-    every { provider.getIfAvailable(any()) } returns clientProperties
-    every { getBeanProvider(ClientProperties::class.java) } returns provider
-}
+data class ComponentDefinition<T : Any>(
+    val names: List<String> = emptyList(),
+    val types: List<Class<out T>> = emptyList()
+)

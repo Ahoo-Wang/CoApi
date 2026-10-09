@@ -16,84 +16,59 @@ package me.ahoo.coapi.spring.client.sync
 import io.mockk.every
 import io.mockk.mockk
 import me.ahoo.coapi.spring.CoApiDefinition
-import me.ahoo.coapi.spring.client.ClientProperties
-import me.ahoo.coapi.spring.client.stubClientProperties
 import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.BeanFactory
 import org.springframework.cloud.client.loadbalancer.BlockingLoadBalancerInterceptor
 import org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor
 import org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor
-import org.springframework.context.ApplicationContext
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 
 class RestClientFactoryBeanTest {
 
-    private val mockDefinition = CoApiDefinition(
+    private val definition = CoApiDefinition(
         name = "testClient",
         apiType = Any::class.java,
         baseUrl = "http://localhost:8080",
         loadBalanced = true
     )
 
-    @Test
-    fun `customize should not add duplicate load balancer interceptor when already present`() {
-        val mockApplicationContext = mockk<ApplicationContext>()
-        val mockClientProperties = mockk<ClientProperties>()
-        mockApplicationContext.stubClientProperties(mockClientProperties)
-        every { mockClientProperties.getLoadBalanced("testClient") } returns true
+    private fun RestClient.Builder.interceptors(): List<ClientHttpRequestInterceptor> {
+        var interceptors: List<ClientHttpRequestInterceptor> = emptyList()
+        requestInterceptors { interceptors = it.toList() }
+        return interceptors
+    }
 
+    @Test
+    fun `should not add duplicate load balancer interceptor when already present`() {
         val existingInterceptor = mockk<LoadBalancerInterceptor>()
         val builder = RestClient.builder().requestInterceptor(existingInterceptor)
 
-        val factoryBean = RestClientFactoryBean(mockDefinition)
-        factoryBean.setApplicationContext(mockApplicationContext)
-        factoryBean.LoadBalancedRestClientBuilderCustomizer().customize(mockDefinition, builder)
+        LoadBalancedRestClientBuilderCustomizer(mockk()).customize(definition, builder)
 
-        var interceptors: List<ClientHttpRequestInterceptor> = emptyList()
-        builder.requestInterceptors { interceptors = it }
-        interceptors.size.assert().isEqualTo(1)
-        interceptors.first().assert().isSameAs(existingInterceptor)
+        builder.interceptors().assert().containsExactly(existingInterceptor)
     }
 
     @Test
-    fun `customize should not add duplicate load balancer interceptor when deferring interceptor already present`() {
-        val mockApplicationContext = mockk<ApplicationContext>()
-        val mockClientProperties = mockk<ClientProperties>()
-        mockApplicationContext.stubClientProperties(mockClientProperties)
-        every { mockClientProperties.getLoadBalanced("testClient") } returns true
-
+    fun `should not add duplicate load balancer interceptor when deferring interceptor already present`() {
         val existingInterceptor = mockk<DeferringLoadBalancerInterceptor>()
         val builder = RestClient.builder().requestInterceptor(existingInterceptor)
 
-        val factoryBean = RestClientFactoryBean(mockDefinition)
-        factoryBean.setApplicationContext(mockApplicationContext)
-        factoryBean.LoadBalancedRestClientBuilderCustomizer().customize(mockDefinition, builder)
+        LoadBalancedRestClientBuilderCustomizer(mockk()).customize(definition, builder)
 
-        var interceptors: List<ClientHttpRequestInterceptor> = emptyList()
-        builder.requestInterceptors { interceptors = it }
-        interceptors.size.assert().isEqualTo(1)
-        interceptors.first().assert().isSameAs(existingInterceptor)
+        builder.interceptors().assert().containsExactly(existingInterceptor)
     }
 
     @Test
-    fun `customize should add single load balancer interceptor when none present`() {
-        val mockApplicationContext = mockk<ApplicationContext>()
-        val mockClientProperties = mockk<ClientProperties>()
+    fun `should add single load balancer interceptor when none present`() {
         val loadBalancerInterceptor = mockk<BlockingLoadBalancerInterceptor>()
-        mockApplicationContext.stubClientProperties(mockClientProperties)
-        every { mockClientProperties.getLoadBalanced("testClient") } returns true
-        every { mockApplicationContext.getBean(BlockingLoadBalancerInterceptor::class.java) } returns loadBalancerInterceptor
-
+        val beanFactory = mockk<BeanFactory>()
+        every { beanFactory.getBean(BlockingLoadBalancerInterceptor::class.java) } returns loadBalancerInterceptor
         val builder = RestClient.builder()
 
-        val factoryBean = RestClientFactoryBean(mockDefinition)
-        factoryBean.setApplicationContext(mockApplicationContext)
-        factoryBean.LoadBalancedRestClientBuilderCustomizer().customize(mockDefinition, builder)
+        LoadBalancedRestClientBuilderCustomizer(beanFactory).customize(definition, builder)
 
-        var interceptors: List<ClientHttpRequestInterceptor> = emptyList()
-        builder.requestInterceptors { interceptors = it }
-        interceptors.size.assert().isEqualTo(1)
-        interceptors.first().assert().isSameAs(loadBalancerInterceptor)
+        builder.interceptors().assert().containsExactly(loadBalancerInterceptor)
     }
 }

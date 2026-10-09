@@ -14,31 +14,42 @@
 package me.ahoo.coapi.spring.client.sync
 
 import me.ahoo.coapi.spring.CoApiDefinition
-import org.springframework.cloud.client.loadbalancer.BlockingLoadBalancerInterceptor
-import org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor
+import me.ahoo.coapi.spring.client.AbstractHttpClientFactoryBean
+import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 
-class RestClientFactoryBean(definition: CoApiDefinition) : AbstractRestClientFactoryBean(definition) {
+/**
+ * Builds the [RestClient] of a [CoApiDefinition], in this order:
+ * base URL → configured interceptors ([SyncClientProperties]) → load balancer (if load balanced)
+ * → [RestClientBuilderCustomizer] beans (ordered).
+ *
+ * Requires the context to resolve exactly one [RestClient.Builder] bean by type. Applications
+ * registering multiple builders (e.g. a Spring Cloud `@LoadBalanced` builder alongside the default
+ * one) must mark one of them as primary.
+ */
+class RestClientFactoryBean(definition: CoApiDefinition) : AbstractHttpClientFactoryBean<RestClient>(definition) {
 
-    override val builderCustomizer: RestClientBuilderCustomizer by lazy {
-        if (!loadBalanced()) {
-            return@lazy RestClientBuilderCustomizer.NoOp
+    override fun getObject(): RestClient {
+        val effectiveDefinition = effectiveDefinition()
+        val builder = appContext.getBean(RestClient.Builder::class.java)
+        builder.baseUrl(effectiveDefinition.baseUrl)
+        val interceptors = optionalBean(SyncClientProperties::class.java, SyncClientProperties.Empty)
+            .getInterceptor(effectiveDefinition.name)
+        builder.requestInterceptors {
+            it.addAll(resolveComponents(ClientHttpRequestInterceptor::class.java, interceptors))
         }
-        return@lazy LoadBalancedRestClientBuilderCustomizer()
+        if (effectiveDefinition.loadBalanced) {
+            requireLoadBalancerSupport(
+                effectiveDefinition,
+                LoadBalancedRestClientBuilderCustomizer.INTERCEPTOR_CLASS_NAME
+            )
+            LoadBalancedRestClientBuilderCustomizer(appContext).customize(effectiveDefinition, builder)
+        }
+        customizers(RestClientBuilderCustomizer::class.java).forEach { it.customize(effectiveDefinition, builder) }
+        return builder.build()
     }
 
-    inner class LoadBalancedRestClientBuilderCustomizer : RestClientBuilderCustomizer {
-        override fun customize(coApiDefinition: CoApiDefinition, builder: RestClient.Builder) {
-            builder.requestInterceptors {
-                val hasLoadBalancedFilter = it.any { filter ->
-                    filter is BlockingLoadBalancerInterceptor || filter is DeferringLoadBalancerInterceptor
-                }
-                if (!hasLoadBalancedFilter) {
-                    val loadBalancerInterceptor =
-                        appContext.getBean(BlockingLoadBalancerInterceptor::class.java)
-                    it.add(loadBalancerInterceptor)
-                }
-            }
-        }
+    override fun getObjectType(): Class<*> {
+        return RestClient::class.java
     }
 }

@@ -13,19 +13,35 @@
 
 package me.ahoo.coapi.spring.client
 
-import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
+import me.ahoo.coapi.spring.CoApiDefinition
 
 /**
- * Per-client configuration that overrides what the `@CoApi` annotation declares,
- * keyed by [me.ahoo.coapi.spring.CoApiDefinition.name].
+ * Per-client endpoint overrides of what the `@CoApi` annotation declares, keyed by [CoApiDefinition.name].
+ *
+ * Mode-specific settings live in [me.ahoo.coapi.spring.client.reactive.ReactiveClientProperties] and
+ * [me.ahoo.coapi.spring.client.sync.SyncClientProperties]. Every one of these beans is optional.
  */
 interface ClientProperties {
 
+    /**
+     * The configured base URL, or blank when not configured.
+     */
     fun getBaseUri(coApiName: String): String
+
+    /**
+     * The configured load-balancing flag, or `null` when not configured.
+     */
     fun getLoadBalanced(coApiName: String): Boolean?
-    fun getFilter(coApiName: String): FilterDefinition
-    fun getInterceptor(coApiName: String): InterceptorDefinition
+
+    /**
+     * Applies these overrides to [definition], see [CoApiDefinition.withOverrides].
+     */
+    fun resolve(definition: CoApiDefinition): CoApiDefinition {
+        return definition.withOverrides(
+            baseUrl = getBaseUri(definition.name),
+            loadBalanced = getLoadBalanced(definition.name)
+        )
+    }
 
     /**
      * No overrides: every client is defined by its annotation alone.
@@ -33,17 +49,5 @@ interface ClientProperties {
     object Empty : ClientProperties {
         override fun getBaseUri(coApiName: String): String = ""
         override fun getLoadBalanced(coApiName: String): Boolean? = null
-        override fun getFilter(coApiName: String): FilterDefinition = FilterDefinition()
-        override fun getInterceptor(coApiName: String): InterceptorDefinition = InterceptorDefinition()
     }
-
-    data class FilterDefinition(
-        val names: List<String> = emptyList(),
-        val types: List<Class<out ExchangeFilterFunction>> = emptyList()
-    )
-
-    data class InterceptorDefinition(
-        val names: List<String> = emptyList(),
-        val types: List<Class<out ClientHttpRequestInterceptor>> = emptyList()
-    )
 }
