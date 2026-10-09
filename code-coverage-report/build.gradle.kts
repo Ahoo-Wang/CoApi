@@ -33,6 +33,32 @@ reporting {
     }
 }
 
+val codeCoverageReport = tasks.named<JacocoReport>("codeCoverageReport")
+
+/**
+ * Fails the build when aggregated coverage drops below the floor. The floor sits a few points
+ * under the current coverage (line ~98%, branch ~92%) so real regressions fail, not noise.
+ */
+val codeCoverageVerification by tasks.registering(JacocoCoverageVerification::class) {
+    group = "verification"
+    description = "Verifies aggregated code coverage against the minimum line and branch ratios."
+    executionData.from(codeCoverageReport.map { it.executionData })
+    classDirectories.from(codeCoverageReport.map { it.classDirectories })
+    sourceDirectories.from(codeCoverageReport.map { it.sourceDirectories })
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                minimum = "0.95".toBigDecimal()
+            }
+            limit {
+                counter = "BRANCH"
+                minimum = "0.90".toBigDecimal()
+            }
+        }
+    }
+}
+
 tasks.check {
-    dependsOn(tasks.named<JacocoReport>("codeCoverageReport"))
+    dependsOn(codeCoverageReport, codeCoverageVerification)
 }
