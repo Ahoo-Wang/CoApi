@@ -80,6 +80,20 @@ class CoApiContextTest {
     }
 
     @Test
+    fun `should create CoApi bean without a ClientProperties bean`() {
+        ApplicationContextRunner()
+            .withPropertyValues("github.url=https://api.github.com")
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(EnableCoApiConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context)
+                    .doesNotHaveBean(ClientProperties::class.java)
+                    .hasSingleBean(GitHubApiClient::class.java)
+                context.getBean(GitHubApiClient::class.java)
+            }
+    }
+
+    @Test
     fun `should start context when custom HttpExchangeAdapterFactory bean has a different bean name`() {
         ApplicationContextRunner()
             .withPropertyValues("github.url=https://api.github.com")

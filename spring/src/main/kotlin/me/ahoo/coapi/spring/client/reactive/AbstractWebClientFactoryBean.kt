@@ -15,7 +15,6 @@ package me.ahoo.coapi.spring.client.reactive
 
 import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.client.AbstractHttpClientFactoryBean
-import me.ahoo.coapi.spring.client.ClientProperties
 import org.springframework.beans.factory.FactoryBean
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
@@ -45,12 +44,12 @@ abstract class AbstractWebClientFactoryBean(override val definition: CoApiDefini
     override fun getObject(): WebClient {
         val clientBuilder = appContext
             .getBean(WebClient.Builder::class.java)
-        val clientProperties = appContext.getBean(ClientProperties::class.java)
-        val baseUrl = getBaseUrl()
-        clientBuilder.baseUrl(baseUrl)
+        clientBuilder.baseUrl(getBaseUrl())
         val filterDefinition = clientProperties.getFilter(definition.name)
         clientBuilder.filters {
-            filterDefinition.initFilters(it)
+            it.addAll(
+                resolveBeans(ExchangeFilterFunction::class.java, filterDefinition.names, filterDefinition.types)
+            )
         }
         builderCustomizer.customize(definition, clientBuilder)
         appContext.getBeanProvider(WebClientBuilderCustomizer::class.java)
@@ -59,16 +58,5 @@ abstract class AbstractWebClientFactoryBean(override val definition: CoApiDefini
                 customizer.customize(definition, clientBuilder)
             }
         return clientBuilder.build()
-    }
-
-    private fun ClientProperties.FilterDefinition.initFilters(filters: MutableList<ExchangeFilterFunction>) {
-        names.forEach { filterName ->
-            val filter = appContext.getBean(filterName, ExchangeFilterFunction::class.java)
-            filters.add(filter)
-        }
-        types.forEach { filterType ->
-            val filter = appContext.getBean(filterType)
-            filters.add(filter)
-        }
     }
 }

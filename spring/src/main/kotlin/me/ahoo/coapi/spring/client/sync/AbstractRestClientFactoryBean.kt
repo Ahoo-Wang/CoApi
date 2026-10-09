@@ -15,7 +15,6 @@ package me.ahoo.coapi.spring.client.sync
 
 import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.client.AbstractHttpClientFactoryBean
-import me.ahoo.coapi.spring.client.ClientProperties
 import org.springframework.beans.factory.FactoryBean
 import org.springframework.beans.factory.getBean
 import org.springframework.http.client.ClientHttpRequestInterceptor
@@ -37,13 +36,16 @@ abstract class AbstractRestClientFactoryBean(override val definition: CoApiDefin
     override fun getObject(): RestClient {
         val clientBuilder = appContext
             .getBean<RestClient.Builder>()
-        val clientProperties = appContext.getBean<ClientProperties>()
-        val baseUrl = getBaseUrl()
-        clientBuilder.baseUrl(baseUrl)
-
+        clientBuilder.baseUrl(getBaseUrl())
         val interceptorDefinition = clientProperties.getInterceptor(definition.name)
         clientBuilder.requestInterceptors {
-            interceptorDefinition.initInterceptors(it)
+            it.addAll(
+                resolveBeans(
+                    ClientHttpRequestInterceptor::class.java,
+                    interceptorDefinition.names,
+                    interceptorDefinition.types
+                )
+            )
         }
         builderCustomizer.customize(definition, clientBuilder)
         appContext.getBeanProvider(RestClientBuilderCustomizer::class.java)
@@ -52,19 +54,6 @@ abstract class AbstractRestClientFactoryBean(override val definition: CoApiDefin
                 customizer.customize(definition, clientBuilder)
             }
         return clientBuilder.build()
-    }
-
-    private fun ClientProperties.InterceptorDefinition.initInterceptors(
-        interceptors: MutableList<ClientHttpRequestInterceptor>,
-    ) {
-        names.forEach { filterName ->
-            val filter = appContext.getBean(filterName, ClientHttpRequestInterceptor::class.java)
-            interceptors.add(filter)
-        }
-        types.forEach { filterType ->
-            val filter = appContext.getBean(filterType)
-            interceptors.add(filter)
-        }
     }
 
     override fun getObjectType(): Class<*> {

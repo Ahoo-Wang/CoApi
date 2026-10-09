@@ -14,17 +14,18 @@
 package me.ahoo.coapi.spring
 
 import me.ahoo.coapi.spring.ClientMode.Companion.inferClientMode
-import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
-import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.BeanFactoryAware
-import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.context.EnvironmentAware
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar
 import org.springframework.core.env.Environment
 import org.springframework.core.type.AnnotationMetadata
 
+/**
+ * Template for CoApi registrars: subclasses only decide *which* [CoApiDefinition]s to register,
+ * [CoApiRegistrar] decides *how* they are registered for the inferred [ClientMode].
+ */
 abstract class AbstractCoApiRegistrar : ImportBeanDefinitionRegistrar, EnvironmentAware, BeanFactoryAware {
 
     protected lateinit var env: Environment
@@ -43,22 +44,7 @@ abstract class AbstractCoApiRegistrar : ImportBeanDefinitionRegistrar, Environme
         val clientMode = inferClientMode {
             env.getProperty(it)
         }
-        registerHttpExchangeAdapterFactory(clientMode, registry)
-        val coApiRegistrar = CoApiRegistrar(registry, clientMode)
         val apiDefinitions = getCoApiDefinitions(importingClassMetadata)
-        coApiRegistrar.register(apiDefinitions)
-    }
-
-    private fun registerHttpExchangeAdapterFactory(clientMode: ClientMode, registry: BeanDefinitionRegistry) {
-        if (registry.containsBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME)) {
-            return
-        }
-        val httpExchangeAdapterFactoryClass = if (clientMode == ClientMode.SYNC) {
-            SyncHttpExchangeAdapterFactory::class.java
-        } else {
-            ReactiveHttpExchangeAdapterFactory::class.java
-        }
-        val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(httpExchangeAdapterFactoryClass)
-        registry.registerBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME, beanDefinitionBuilder.beanDefinition)
+        CoApiRegistrar(registry, clientMode).register(apiDefinitions)
     }
 }

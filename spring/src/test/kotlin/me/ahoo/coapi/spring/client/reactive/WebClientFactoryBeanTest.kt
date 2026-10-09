@@ -17,6 +17,7 @@ import io.mockk.every
 import io.mockk.mockk
 import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.client.ClientProperties
+import me.ahoo.coapi.spring.client.stubClientProperties
 import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
 import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction
@@ -38,7 +39,7 @@ class WebClientFactoryBeanTest {
     fun `customize should not add duplicate load balancer filter when deferring filter already present`() {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns true
 
         val existingFilter = mockk<DeferringLoadBalancerExchangeFilterFunction<ExchangeFilterFunction>>()
@@ -59,7 +60,7 @@ class WebClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
         val loadBalancedFilter = mockk<LoadBalancedExchangeFilterFunction>()
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns true
         every { mockApplicationContext.getBean(LoadBalancedExchangeFilterFunction::class.java) } returns loadBalancedFilter
 

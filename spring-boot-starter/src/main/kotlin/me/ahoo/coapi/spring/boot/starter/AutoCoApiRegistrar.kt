@@ -20,6 +20,8 @@ import me.ahoo.coapi.spring.CoApiDefinition.Companion.toCoApiDefinition
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition
 import org.springframework.beans.factory.getBeanProvider
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages
+import org.springframework.boot.context.properties.bind.Bindable
+import org.springframework.boot.context.properties.bind.Binder
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
 import org.springframework.core.env.Environment
 import org.springframework.core.type.AnnotationMetadata
@@ -27,22 +29,18 @@ import org.springframework.core.type.filter.AnnotationTypeFilter
 
 class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
 
+    /**
+     * Binds `coapi.base-packages` in either form (comma-separated or indexed list) with Boot's
+     * relaxed binding. The registrar runs before [CoApiProperties] is bound, hence the direct binding.
+     */
     private fun getCoApiBasePackages(): Set<String> {
-        val basePackages = env.getProperty(CoApiProperties.COAPI_BASE_PACKAGES)
-        if (basePackages?.isNotBlank() == true) {
-            return basePackages.split(",").toSet()
-        }
-        var currentIndex = 0
-        buildSet {
-            while (true) {
-                val basePackage = env.getProperty("${CoApiProperties.COAPI_BASE_PACKAGES}[$currentIndex]")
-                if (basePackage.isNullOrBlank()) {
-                    return this
-                }
-                add(basePackage)
-                currentIndex++
-            }
-        }
+        return Binder.get(env)
+            .bind(CoApiProperties.COAPI_BASE_PACKAGES, Bindable.listOf(String::class.java))
+            .orElse(null)
+            .orEmpty()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .toSet()
     }
 
     private fun getScanBasePackages(): Set<String> {

@@ -14,15 +14,26 @@
 package me.ahoo.coapi.spring
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
 import me.ahoo.coapi.spring.client.reactive.WebClientFactoryBean
 import me.ahoo.coapi.spring.client.sync.RestClientFactoryBean
+import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 
+/**
+ * Registers the bean definitions that back a set of [CoApiDefinition]s for a [ClientMode]:
+ * the shared [HttpExchangeAdapterFactory], and per definition an HTTP client bean
+ * (`WebClient` or `RestClient`) plus the CoApi proxy bean.
+ *
+ * Bean definitions that already exist are kept, so applications can override any of them.
+ */
 class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val clientMode: ClientMode) {
     companion object {
         private val log = KotlinLogging.logger {}
     }
+
+    private val isSync: Boolean = clientMode == ClientMode.SYNC
 
     fun register(coApiDefinitions: Set<CoApiDefinition>) {
         coApiDefinitions
@@ -43,58 +54,47 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val c
     }
 
     fun register(coApiDefinition: CoApiDefinition) {
-        if (clientMode == ClientMode.SYNC) {
-            registerRestClient(registry, coApiDefinition)
+        registerHttpExchangeAdapterFactory()
+        val (clientKind, clientFactoryBeanClass) = if (isSync) {
+            "RestClient" to RestClientFactoryBean::class.java
         } else {
-            registerWebClient(registry, coApiDefinition)
+            "WebClient" to WebClientFactoryBean::class.java
         }
-        registerApiClient(registry, coApiDefinition)
+        registerIfAbsent(clientKind, coApiDefinition.httpClientBeanName, clientFactoryBeanClass, coApiDefinition)
+        registerIfAbsent("CoApi", coApiDefinition.coApiBeanName, CoApiFactoryBean::class.java, coApiDefinition)
     }
 
-    private fun registerRestClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {
-        log.info {
-            "Register RestClient [${coApiDefinition.httpClientBeanName}]."
+    private fun registerHttpExchangeAdapterFactory() {
+        if (registry.containsBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME)) {
+            return
         }
-        if (registry.containsBeanDefinition(coApiDefinition.httpClientBeanName)) {
+        val httpExchangeAdapterFactoryClass = if (isSync) {
+            SyncHttpExchangeAdapterFactory::class.java
+        } else {
+            ReactiveHttpExchangeAdapterFactory::class.java
+        }
+        val beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(httpExchangeAdapterFactoryClass).beanDefinition
+        registry.registerBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME, beanDefinition)
+    }
+
+    private fun registerIfAbsent(
+        kind: String,
+        beanName: String,
+        factoryBeanClass: Class<*>,
+        coApiDefinition: CoApiDefinition
+    ) {
+        log.info {
+            "Register $kind [$beanName]."
+        }
+        if (registry.containsBeanDefinition(beanName)) {
             log.warn {
-                "RestClient [${coApiDefinition.httpClientBeanName}] already exists - Ignore."
+                "$kind [$beanName] already exists - Ignore."
             }
             return
         }
-        val clientFactoryBeanClass = RestClientFactoryBean::class.java
-        val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clientFactoryBeanClass)
-        beanDefinitionBuilder.addConstructorArgValue(coApiDefinition)
-        registry.registerBeanDefinition(coApiDefinition.httpClientBeanName, beanDefinitionBuilder.beanDefinition)
-    }
-
-    private fun registerWebClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {
-        log.info {
-            "Register WebClient [${coApiDefinition.httpClientBeanName}]."
-        }
-        if (registry.containsBeanDefinition(coApiDefinition.httpClientBeanName)) {
-            log.warn {
-                "WebClient [${coApiDefinition.httpClientBeanName}] already exists - Ignore."
-            }
-            return
-        }
-        val clientFactoryBeanClass = WebClientFactoryBean::class.java
-        val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clientFactoryBeanClass)
-        beanDefinitionBuilder.addConstructorArgValue(coApiDefinition)
-        registry.registerBeanDefinition(coApiDefinition.httpClientBeanName, beanDefinitionBuilder.beanDefinition)
-    }
-
-    private fun registerApiClient(registry: BeanDefinitionRegistry, coApiDefinition: CoApiDefinition) {
-        log.info {
-            "Register CoApi [${coApiDefinition.coApiBeanName}]."
-        }
-        if (registry.containsBeanDefinition(coApiDefinition.coApiBeanName)) {
-            log.warn {
-                "CoApi [${coApiDefinition.coApiBeanName}] already exists - Ignore."
-            }
-            return
-        }
-        val beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(CoApiFactoryBean::class.java)
-        beanDefinitionBuilder.addConstructorArgValue(coApiDefinition)
-        registry.registerBeanDefinition(coApiDefinition.coApiBeanName, beanDefinitionBuilder.beanDefinition)
+        val beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(factoryBeanClass)
+            .addConstructorArgValue(coApiDefinition)
+            .beanDefinition
+        registry.registerBeanDefinition(beanName, beanDefinition)
     }
 }
