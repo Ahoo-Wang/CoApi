@@ -22,37 +22,51 @@ env:
 
 jobs:
   spring-test:
-    name: Spring Test
+    name: Spring Test (JDK ${{ matrix.java }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Compiled for Java 17; tested on every supported LTS.
+        java: [ '17', '21', '25' ]
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v7
 
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v6
         with:
-          java-version: '17'
+          java-version: |
+            ${{ matrix.java }}
+            17
           distribution: 'temurin'
           server-id: github
           settings-path: ${{ github.workspace }}
 
       - name: Test Spring
-        run: ./gradlew spring:clean spring:check --stacktrace
+        run: ./gradlew spring:clean spring:check -PtestJavaVersion=${{ matrix.java }} --stacktrace
 
   spring-boot-starter-test:
-    name: Spring Boot Starter Test
+    name: Spring Boot Starter Test (JDK ${{ matrix.java }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Compiled for Java 17; tested on every supported LTS.
+        java: [ '17', '21', '25' ]
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v7
 
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v6
         with:
-          java-version: '17'
+          java-version: |
+            ${{ matrix.java }}
+            17
           distribution: 'temurin'
           server-id: github
           settings-path: ${{ github.workspace }}
 
-      - name: Test Spring-Boot-Stater
-        run: ./gradlew spring-boot-starter:clean spring-boot-starter:check --stacktrace
+      - name: Test Spring Boot Starter
+        run: ./gradlew spring-boot-starter:clean spring-boot-starter:check -PtestJavaVersion=${{ matrix.java }} --stacktrace
