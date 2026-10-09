@@ -1,0 +1,25 @@
+# https://editorconfig.org
+# Base formatting shared by all editors. Kotlin style rules are enforced by detekt (ktlint formatting rules),
+# so ktlint-specific keys and max_line_length are deliberately not set here.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{kt,kts,java}]
+indent_size = 4
+
+[*.{yml,yaml,json,toml,js,mjs,ts,mts,vue,css,html}]
+indent_size = 2
+
+[*.md]
+# Two trailing spaces are a Markdown hard line break
+trim_trailing_whitespace = false
+
+[*.bat]
+end_of_line = crlf
