@@ -16,6 +16,16 @@ package me.ahoo.coapi.spring
 enum class ClientMode {
     REACTIVE, SYNC, AUTO;
 
+    /**
+     * The concrete mode to run with: [AUTO] is resolved from the classpath, other modes as-is.
+     */
+    fun resolve(): ClientMode {
+        if (this == AUTO) {
+            return INFERRED_MODE_BASED_ON_CLASS
+        }
+        return this
+    }
+
     companion object {
         const val COAPI_CLIENT_MODE_PROPERTY = "coapi.mode"
         private const val REACTIVE_WEB_APPLICATION_CLASS = "org.springframework.web.reactive.HandlerResult"
@@ -38,10 +48,7 @@ enum class ClientMode {
                     e
                 )
             }
-            if (mode == AUTO) {
-                return INFERRED_MODE_BASED_ON_CLASS
-            }
-            return mode
+            return mode.resolve()
         }
     }
 }

@@ -87,9 +87,9 @@ data class CoApiDefinition(
         }
 
         /**
-         * Whether this URL uses the load-balanced `lb://` scheme.
+         * Whether this URL uses the load-balanced `lb://` scheme (case-insensitive, as URI schemes are).
          */
-        internal fun String.isLoadBalancedUrl(): Boolean = startsWith(LB_PROTOCOL_PREFIX)
+        internal fun String.isLoadBalancedUrl(): Boolean = startsWith(LB_PROTOCOL_PREFIX, ignoreCase = true)
 
         /**
          * Rewrites the load-balanced `lb://` scheme to `http://`; any other URL is returned unchanged.

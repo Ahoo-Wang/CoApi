@@ -16,6 +16,7 @@ package me.ahoo.coapi.spring
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import me.ahoo.coapi.spring.client.reactive.WebClientFactoryBean
 import me.ahoo.test.asserts.assertThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
@@ -76,5 +77,21 @@ class CoApiRegistrarTest {
         registrar.register(CoApiDefinition("ApiA", Any::class.java, "http://a", false))
 
         verify(exactly = 1) { registry.registerBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME, any()) }
+    }
+
+    @Test
+    fun registerWithAutoModeShouldUseClasspathInferredClient() {
+        val registry = mockRegistry()
+        val registrar = CoApiRegistrar(registry, ClientMode.AUTO)
+
+        registrar.register(CoApiDefinition("ApiA", Any::class.java, "http://a", false))
+
+        // WebFlux is on the test classpath, so AUTO resolves to REACTIVE
+        verify(exactly = 1) {
+            registry.registerBeanDefinition(
+                "ApiA.HttpClient",
+                match { it.beanClassName == WebClientFactoryBean::class.java.name }
+            )
+        }
     }
 }
