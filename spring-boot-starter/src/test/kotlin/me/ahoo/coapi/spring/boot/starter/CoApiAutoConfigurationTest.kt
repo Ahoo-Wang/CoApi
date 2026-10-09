@@ -199,6 +199,33 @@ class CoApiAutoConfigurationTest {
     }
 
     @Test
+    fun `scanned CoApi interfaces should be loaded with the bean class loader`() {
+        // e.g. Spring Boot DevTools' RestartClassLoader: loading with CoApi's own class loader would
+        // produce proxy types that do not match the application's injection points.
+        val beanClassLoader = RecordingClassLoader(javaClass.classLoader)
+        ApplicationContextRunner()
+            .withClassLoader(beanClassLoader)
+            .withPropertyValues("github.url=https://api.github.com")
+            .withPropertyValues("coapi.base-packages=me.ahoo.coapi.example.consumer.client")
+            .withBean("loadBalancerExchangeFilterFunction", LoadBalancedExchangeFilterFunction::class.java, { mockk() })
+            .withUserConfiguration(WebClientAutoConfiguration::class.java)
+            .withUserConfiguration(CoApiAutoConfiguration::class.java)
+            .run { context ->
+                AssertionsForInterfaceTypes.assertThat(context).hasNotFailed()
+                beanClassLoader.loadedClassNames.assert().contains(GitHubApiClient::class.java.name)
+            }
+    }
+
+    private class RecordingClassLoader(parent: ClassLoader) : ClassLoader(parent) {
+        val loadedClassNames: MutableSet<String> = java.util.concurrent.ConcurrentHashMap.newKeySet()
+
+        override fun loadClass(name: String, resolve: Boolean): Class<*> {
+            loadedClassNames += name
+            return super.loadClass(name, resolve)
+        }
+    }
+
+    @Test
     fun basePackages() {
         ApplicationContextRunner()
             .withPropertyValues("github.url=https://api.github.com")
