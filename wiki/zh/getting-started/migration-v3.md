@@ -83,6 +83,7 @@ class OrderApiConfiguration {
 ## 新增的快速失败检查
 
 - 被判定为负载均衡、但 classpath 上没有 Spring Cloud LoadBalancer 的客户端，会抛出指明客户端和解决办法的异常，而不是 `NoClassDefFoundError`。
+- `CoApiDefinition` Bean 的 `baseUrl` 中的 `${...}` 占位符现在会被解析，且必须能在当前环境中解析（与 v2.2.0 起 `@CoApi` 注解的行为一致），无法解析时启动失败。定义 Bean 的 `lb://` `baseUrl` 现在同样会启用负载均衡。
 
 ## 相关页面
 

@@ -83,6 +83,7 @@ class OrderApiConfiguration {
 ## New fail-fast checks
 
 - A client that resolves to load balanced without Spring Cloud LoadBalancer on the classpath fails with a message naming the client and the fix, instead of a `NoClassDefFoundError`.
+- `${...}` placeholders in a `CoApiDefinition` bean's `baseUrl` are now resolved and must resolve in the active environment, as on the `@CoApi` annotation since v2.2.0; an unresolvable one fails startup. An `lb://` `baseUrl` now also enables load balancing for definition beans.
 
 ## Related Pages
 
