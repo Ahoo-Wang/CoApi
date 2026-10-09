@@ -14,8 +14,6 @@
 name: Example Test
 on:
   pull_request:
-    paths-ignore:
-      - 'documentation/**'
 env:
   CI: GITHUB_ACTIONS
 

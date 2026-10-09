@@ -14,9 +14,6 @@
 name: Integration Test
 on:
   pull_request:
-    paths-ignore:
-      - 'documentation/**'
-      - 'example/**'
 env:
   CI: GITHUB_ACTIONS
 
