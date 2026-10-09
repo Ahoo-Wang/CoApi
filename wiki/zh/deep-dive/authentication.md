@@ -238,7 +238,11 @@ class BearerTokenFilter(tokenProvider: ExpirableTokenProvider) :
 ```kotlin
 data class ExpirableToken(val token: String, val expireAt: Long) {
     val isExpired: Boolean
-        get() = System.currentTimeMillis() > expireAt
+        get() = expiresWithin(Duration.ZERO)
+
+    fun expiresWithin(margin: Duration): Boolean {
+        return System.currentTimeMillis() + margin.toMillis() > expireAt
+    }
 
     companion object {
         private val jwtParser = JWT()
@@ -257,15 +261,15 @@ data class ExpirableToken(val token: String, val expireAt: Long) {
 
 ### CachedExpirableTokenProvider
 
-`CachedExpirableTokenProvider` 使用 Project Reactor 的 `Mono.cacheInvalidateIf` 操作符实现响应式缓存。这提供了线程安全的缓存，当令牌过期时自动失效。
+`CachedExpirableTokenProvider` 使用 Project Reactor 的 `Mono.cacheInvalidateIf` 操作符实现线程安全的响应式缓存：一旦缓存的令牌将在 `refreshBeforeExpiry`（默认 60 秒，与 Spring Security OAuth2 客户端的时钟偏差默认值相同）内过期，就重新获取令牌。
 
 ```kotlin
-class CachedExpirableTokenProvider(tokenProvider: ExpirableTokenProvider) : ExpirableTokenProvider {
+class CachedExpirableTokenProvider @JvmOverloads constructor(
+    tokenProvider: ExpirableTokenProvider,
+    private val refreshBeforeExpiry: Duration = DEFAULT_REFRESH_BEFORE_EXPIRY // 60s
+) : ExpirableTokenProvider {
     private val tokenCache: Mono<ExpirableToken> = tokenProvider.getToken()
-        .cacheInvalidateIf {
-            log.debug { "CacheInvalidateIf - isExpired:${it.isExpired}" }
-            it.isExpired
-        }
+        .cacheInvalidateIf { it.expiresWithin(refreshBeforeExpiry) }
 
     override fun getToken(): Mono<ExpirableToken> {
         return tokenCache
@@ -273,7 +277,7 @@ class CachedExpirableTokenProvider(tokenProvider: ExpirableTokenProvider) : Expi
 }
 ```
 
-缓存在令牌过期时自动失效并刷新令牌，确保始终使用有效令牌，无需手动干预。
+提前刷新（自 v3.1.0 起）可以避免一个即将过期的令牌因请求延迟或时钟偏差而在途中失效、被服务端拒绝。v3.1.0 之前只有在令牌已经过期后才会刷新。整个有效期短于刷新提前量的令牌每次使用时都会重新获取；对这类令牌请传入更小的 `refreshBeforeExpiry`。
 
 ## 配置示例
 

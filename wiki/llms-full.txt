@@ -2913,7 +2913,11 @@ The `ExpirableToken` data class wraps a token string with its expiration timesta
 ```kotlin
 data class ExpirableToken(val token: String, val expireAt: Long) {
     val isExpired: Boolean
-        get() = System.currentTimeMillis() > expireAt
+        get() = expiresWithin(Duration.ZERO)
+
+    fun expiresWithin(margin: Duration): Boolean {
+        return System.currentTimeMillis() + margin.toMillis() > expireAt
+    }
 
     companion object {
         private val jwtParser = JWT()
@@ -2932,15 +2936,15 @@ The companion object provides a convenient extension function to convert JWT str
 
 ### CachedExpirableTokenProvider
 
-The `CachedExpirableTokenProvider` implements reactive caching using Project Reactor's `Mono.cacheInvalidateIf` operator. This provides thread-safe caching with automatic invalidation when tokens expire.
+The `CachedExpirableTokenProvider` implements reactive caching using Project Reactor's `Mono.cacheInvalidateIf` operator: thread-safe caching that fetches a new token once the cached one expires within `refreshBeforeExpiry` (default 60 seconds, the same as Spring Security's OAuth2 client clock skew).
 
 ```kotlin
-class CachedExpirableTokenProvider(tokenProvider: ExpirableTokenProvider) : ExpirableTokenProvider {
+class CachedExpirableTokenProvider @JvmOverloads constructor(
+    tokenProvider: ExpirableTokenProvider,
+    private val refreshBeforeExpiry: Duration = DEFAULT_REFRESH_BEFORE_EXPIRY // 60s
+) : ExpirableTokenProvider {
     private val tokenCache: Mono<ExpirableToken> = tokenProvider.getToken()
-        .cacheInvalidateIf {
-            log.debug { "CacheInvalidateIf - isExpired:${it.isExpired}" }
-            it.isExpired
-        }
+        .cacheInvalidateIf { it.expiresWithin(refreshBeforeExpiry) }
 
     override fun getToken(): Mono<ExpirableToken> {
         return tokenCache
@@ -2948,7 +2952,7 @@ class CachedExpirableTokenProvider(tokenProvider: ExpirableTokenProvider) : Expi
 }
 ```
 
-The cache automatically invalidates and refreshes tokens when they expire, ensuring that always-valid tokens are used without manual intervention.
+Refreshing early (since v3.1.0) keeps a token that is about to expire from being sent and rejected in flight because of request latency or clock skew. Before v3.1.0 the token was only refreshed after it had expired. Tokens whose whole lifetime is shorter than the margin are fetched on every use; pass a smaller `refreshBeforeExpiry` for such tokens.
 
 ## Configuration Examples
 

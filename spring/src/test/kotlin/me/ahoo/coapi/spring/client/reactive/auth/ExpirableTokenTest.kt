@@ -16,6 +16,7 @@ package me.ahoo.coapi.spring.client.reactive.auth
 import me.ahoo.coapi.spring.client.reactive.auth.ExpirableToken.Companion.jwtToExpirableToken
 import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.util.Date
 
 class ExpirableTokenTest {
@@ -40,5 +41,13 @@ class ExpirableTokenTest {
         }
         val message = requireNotNull(thrown).message
         message.assert().contains("exp")
+    }
+
+    @Test
+    fun expiresWithin() {
+        val token = ExpirableToken("token", System.currentTimeMillis() + Duration.ofSeconds(30).toMillis())
+        token.isExpired.assert().isFalse()
+        token.expiresWithin(Duration.ofSeconds(10)).assert().isFalse()
+        token.expiresWithin(Duration.ofSeconds(60)).assert().isTrue()
     }
 }
