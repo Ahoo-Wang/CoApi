@@ -26,7 +26,7 @@ coapi:
       reactive:
         filter:
           names:
-            -loadBalancerExchangeFilterFunction
+            - loadBalancerExchangeFilterFunction
     ServiceApiClientUseFilterType:
       reactive:
         filter:
