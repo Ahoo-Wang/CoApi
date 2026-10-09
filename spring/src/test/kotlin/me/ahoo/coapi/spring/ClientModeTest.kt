@@ -30,4 +30,15 @@ class ClientModeTest {
             .hasMessageContaining("REACTIVE, SYNC, AUTO")
             .hasCauseInstanceOf(IllegalArgumentException::class.java)
     }
+
+    @Test
+    fun resolveAutoShouldInferFromClasspath() {
+        ClientMode.AUTO.resolve().assert().isEqualTo(ClientMode.REACTIVE)
+    }
+
+    @Test
+    fun resolveConcreteModeShouldReturnItself() {
+        ClientMode.SYNC.resolve().assert().isEqualTo(ClientMode.SYNC)
+        ClientMode.REACTIVE.resolve().assert().isEqualTo(ClientMode.REACTIVE)
+    }
 }

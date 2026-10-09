@@ -33,7 +33,7 @@ class CoApiRegistrar(private val registry: BeanDefinitionRegistry, private val c
         private val log = KotlinLogging.logger {}
     }
 
-    private val isSync: Boolean = clientMode == ClientMode.SYNC
+    private val isSync: Boolean = clientMode.resolve() == ClientMode.SYNC
 
     fun register(coApiDefinitions: Set<CoApiDefinition>) {
         coApiDefinitions

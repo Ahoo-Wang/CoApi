@@ -38,6 +38,13 @@ class CoApiDefinitionTest {
     }
 
     @Test
+    fun toCoApiDefinitionIfUpperCaseLBScheme() {
+        val coApiDefinition = UpperCaseLBMockApi::class.java.toCoApiDefinition(MockEnvironment())
+        coApiDefinition.loadBalanced.assert().isTrue()
+        coApiDefinition.baseUrl.assert().isEqualTo("http://order-service")
+    }
+
+    @Test
     fun toCoApiDefinitionIfServiceApi() {
         val coApiDefinition = MockServiceApi::class.java.toCoApiDefinition(MockEnvironment())
         coApiDefinition.loadBalanced.assert().isTrue()
@@ -68,6 +75,9 @@ class CoApiDefinitionTest {
 
 @CoApi(baseUrl = "lb://order-service")
 interface LBMockApi
+
+@CoApi(baseUrl = "LB://order-service")
+interface UpperCaseLBMockApi
 
 @CoApi(serviceId = "order-service")
 interface MockServiceApi
