@@ -15,6 +15,7 @@
 - [Installation & Setup](getting-started/installation.md) — Gradle/Maven dependencies, module structure
 - [Quick Start](getting-started/quick-start.md) — Define your first HTTP client in 4 steps
 - [Configuration Reference](getting-started/configuration.md) — All YAML properties and resolution order
+- [Migrating to 3.0](getting-started/migration-v3.md) — Breaking SPI changes in 3.0.0 and how to migrate from 2.x
 
 ## Deep Dive
 

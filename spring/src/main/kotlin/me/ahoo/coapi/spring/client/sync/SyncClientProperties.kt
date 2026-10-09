@@ -11,16 +11,20 @@
  * limitations under the License.
  */
 
-package me.ahoo.coapi.spring.client
+package me.ahoo.coapi.spring.client.sync
 
-import me.ahoo.coapi.spring.CoApiDefinition
+import me.ahoo.coapi.spring.client.ComponentDefinition
+import org.springframework.http.client.ClientHttpRequestInterceptor
 
 /**
- * Customizes the HTTP client builder of each CoApi client, after CoApi applied the base URL,
- * the configured filters/interceptors and load balancing.
- *
- * [customize] receives the *effective* definition: `coapi.clients.<name>.*` overrides are already applied.
+ * Per-client [ClientHttpRequestInterceptor]s for synchronous (`RestClient`) clients, keyed by CoApi name.
  */
-fun interface HttpClientBuilderCustomizer<Builder> {
-    fun customize(coApiDefinition: CoApiDefinition, builder: Builder)
+fun interface SyncClientProperties {
+
+    fun getInterceptor(coApiName: String): ComponentDefinition<ClientHttpRequestInterceptor>
+
+    object Empty : SyncClientProperties {
+        override fun getInterceptor(coApiName: String): ComponentDefinition<ClientHttpRequestInterceptor> =
+            ComponentDefinition()
+    }
 }

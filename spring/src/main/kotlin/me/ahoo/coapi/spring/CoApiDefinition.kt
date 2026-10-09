@@ -72,18 +72,12 @@ data class CoApiDefinition(
             val coApi = getAnnotation(CoApi::class.java)
                 ?: throw IllegalArgumentException("The class must be annotated by @CoApi.")
 
-            // Resolve the base URL from the CoApi annotation
-            val resolvedBaseUrl = coApi.resolveBaseUrl(environment)
-
-            // Load balanced either explicitly via @LoadBalanced or implicitly via the `lb://` scheme
-            val loadBalanced = isAnnotationPresent(LoadBalanced::class.java) || resolvedBaseUrl.isLoadBalancedUrl()
-
             return CoApiDefinition(
                 name = resolveClientName(coApi),
                 apiType = this,
-                baseUrl = resolvedBaseUrl.toHttpUrl(),
-                loadBalanced = loadBalanced
-            )
+                baseUrl = coApi.resolveBaseUrl(environment),
+                loadBalanced = isAnnotationPresent(LoadBalanced::class.java)
+            ).normalize()
         }
 
         /**
@@ -134,6 +128,40 @@ data class CoApiDefinition(
             // Otherwise, use the simple name of the class
             return simpleName
         }
+    }
+
+    /**
+     * Resolves placeholders in [baseUrl] against [environment], then [normalize]s.
+     * Used for definitions that are not parsed from the annotation, e.g. `CoApiDefinition` beans.
+     */
+    fun resolvePlaceholders(environment: Environment): CoApiDefinition {
+        return copy(baseUrl = environment.resolveRequiredPlaceholders(baseUrl)).normalize()
+    }
+
+    /**
+     * Canonical form: an `lb://` [baseUrl] is rewritten to `http://` and implies [loadBalanced].
+     */
+    fun normalize(): CoApiDefinition {
+        return copy(
+            baseUrl = baseUrl.toHttpUrl(),
+            loadBalanced = loadBalanced || baseUrl.isLoadBalancedUrl()
+        )
+    }
+
+    /**
+     * The effective definition after configuration overrides:
+     * - [baseUrl]: a non-blank override wins; an `lb://` scheme is rewritten to `http://` and implies load balancing.
+     * - [loadBalanced]: a non-null override always wins; otherwise it follows an overridden base URL, else this definition.
+     */
+    fun withOverrides(baseUrl: String, loadBalanced: Boolean?): CoApiDefinition {
+        if (baseUrl.isBlank()) {
+            val normalized = normalize()
+            return normalized.copy(loadBalanced = loadBalanced ?: normalized.loadBalanced)
+        }
+        return copy(
+            baseUrl = baseUrl.toHttpUrl(),
+            loadBalanced = loadBalanced ?: baseUrl.isLoadBalancedUrl()
+        )
     }
 
     /**

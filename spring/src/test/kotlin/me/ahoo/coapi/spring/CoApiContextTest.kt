@@ -20,9 +20,12 @@ import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterBeanName
 import me.ahoo.coapi.example.consumer.client.ServiceApiClientUseFilterType
 import me.ahoo.coapi.example.provider.client.TodoClient
 import me.ahoo.coapi.spring.client.ClientProperties
+import me.ahoo.coapi.spring.client.ComponentDefinition
+import me.ahoo.coapi.spring.client.reactive.ReactiveClientProperties
 import me.ahoo.coapi.spring.client.reactive.ReactiveHttpExchangeAdapterFactory
 import me.ahoo.coapi.spring.client.reactive.WebClientBuilderCustomizer
 import me.ahoo.coapi.spring.client.sync.RestClientBuilderCustomizer
+import me.ahoo.coapi.spring.client.sync.SyncClientProperties
 import me.ahoo.coapi.spring.client.sync.SyncHttpExchangeAdapterFactory
 import me.ahoo.test.asserts.assert
 import org.assertj.core.api.AssertionsForInterfaceTypes
@@ -35,20 +38,22 @@ import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchan
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.support.WebClientAdapter
 import org.springframework.web.service.invoker.HttpExchangeAdapter
 
 class CoApiContextTest {
     private val loadBalancedExchangeFilterName =
-        ClientProperties.FilterDefinition(names = listOf("loadBalancerExchangeFilterFunction"))
+        ComponentDefinition<ExchangeFilterFunction>(names = listOf("loadBalancerExchangeFilterFunction"))
     private val loadBalancedExchangeFilterType =
-        ClientProperties.FilterDefinition(types = listOf(LoadBalancedExchangeFilterFunction::class.java))
+        ComponentDefinition<ExchangeFilterFunction>(types = listOf(LoadBalancedExchangeFilterFunction::class.java))
     private val loadBalancedExchangeInterceptorName =
-        ClientProperties.InterceptorDefinition(names = listOf("loadBalancerInterceptor"))
+        ComponentDefinition<ClientHttpRequestInterceptor>(names = listOf("loadBalancerInterceptor"))
     private val loadBalancedExchangeInterceptorType =
-        ClientProperties.InterceptorDefinition(types = listOf(LoadBalancerInterceptor::class.java))
+        ComponentDefinition<ClientHttpRequestInterceptor>(types = listOf(LoadBalancerInterceptor::class.java))
 
     @Test
     fun `should create Reactive CoApi bean`() {
@@ -213,9 +218,9 @@ class RecordingHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
 }
 
 data class MockClientProperties(
-    val filter: Map<String, ClientProperties.FilterDefinition> = emptyMap(),
-    val interceptor: Map<String, ClientProperties.InterceptorDefinition> = emptyMap(),
-) : ClientProperties {
+    val filter: Map<String, ComponentDefinition<ExchangeFilterFunction>> = emptyMap(),
+    val interceptor: Map<String, ComponentDefinition<ClientHttpRequestInterceptor>> = emptyMap(),
+) : ClientProperties, ReactiveClientProperties, SyncClientProperties {
     override fun getBaseUri(coApiName: String): String {
         return ""
     }
@@ -224,11 +229,11 @@ data class MockClientProperties(
         return null
     }
 
-    override fun getFilter(coApiName: String): ClientProperties.FilterDefinition {
-        return filter[coApiName] ?: ClientProperties.FilterDefinition()
+    override fun getFilter(coApiName: String): ComponentDefinition<ExchangeFilterFunction> {
+        return filter[coApiName] ?: ComponentDefinition()
     }
 
-    override fun getInterceptor(coApiName: String): ClientProperties.InterceptorDefinition {
-        return interceptor[coApiName] ?: ClientProperties.InterceptorDefinition()
+    override fun getInterceptor(coApiName: String): ComponentDefinition<ClientHttpRequestInterceptor> {
+        return interceptor[coApiName] ?: ComponentDefinition()
     }
 }

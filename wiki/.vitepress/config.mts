@@ -26,7 +26,8 @@ const sidebarEn = {
         { text: 'What is CoApi?', link: '/getting-started/overview' },
         { text: 'Installation & Setup', link: '/getting-started/installation' },
         { text: 'Quick Start', link: '/getting-started/quick-start' },
-        { text: 'Configuration Reference', link: '/getting-started/configuration' }
+        { text: 'Configuration Reference', link: '/getting-started/configuration' },
+        { text: 'Migrating to 3.0', link: '/getting-started/migration-v3' }
       ]
     }
   ],
@@ -73,7 +74,8 @@ const sidebarZh = {
         { text: '什么是 CoApi？', link: '/zh/getting-started/overview' },
         { text: '安装与配置', link: '/zh/getting-started/installation' },
         { text: '快速入门', link: '/zh/getting-started/quick-start' },
-        { text: '配置参考', link: '/zh/getting-started/configuration' }
+        { text: '配置参考', link: '/zh/getting-started/configuration' },
+        { text: '迁移到 3.0', link: '/zh/getting-started/migration-v3' }
       ]
     }
   ],
@@ -110,7 +112,8 @@ const sidebarZh = {
         { text: '什么是 CoApi？', link: '/zh/getting-started/overview' },
         { text: '安装与配置', link: '/zh/getting-started/installation' },
         { text: '快速入门', link: '/zh/getting-started/quick-start' },
-        { text: '配置参考', link: '/zh/getting-started/configuration' }
+        { text: '配置参考', link: '/zh/getting-started/configuration' },
+        { text: '迁移到 3.0', link: '/zh/getting-started/migration-v3' }
       ]
     },
     {

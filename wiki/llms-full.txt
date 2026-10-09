@@ -123,12 +123,12 @@ CoApi fills this gap with annotation-driven, zero-boilerplate auto-configuration
 
 | Component | Responsibility | Key File | Source |
 |-----------|----------------|----------|--------|
-| `@CoApi` | Marks interfaces as HTTP clients, provides `baseUrl`/`serviceId`/`name` | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) | [api/src/main/kotlin/.../CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
-| `@LoadBalanced` | Marks interface for client-side load balancing | [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) | [api/src/main/kotlin/.../LoadBalanced.kt:17](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
-| `CoApiDefinition` | Parsed metadata: name, apiType, baseUrl, loadBalanced | [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) | [spring/src/main/kotlin/.../CoApiDefinition.kt:24](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L24) |
-| `CoApiRegistrar` | Registers WebClient/RestClient + proxy beans per interface | [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) | [spring/src/main/kotlin/.../CoApiRegistrar.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22) |
-| `CoApiFactoryBean` | Creates JDK proxy via `HttpServiceProxyFactory` | [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) | [spring/src/main/kotlin/.../CoApiFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21) |
-| `CoApiAutoConfiguration` | Boot auto-configuration entry point | [CoApiAutoConfiguration.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt) | [spring-boot-starter/.../CoApiAutoConfiguration.kt:24](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt#L24) |
+| `@CoApi` | Marks interfaces as HTTP clients, provides `baseUrl`/`serviceId`/`name` | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| `@LoadBalanced` | Marks interface for client-side load balancing | [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) | [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
+| `CoApiDefinition` | Parsed metadata: name, apiType, baseUrl, loadBalanced | [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) | [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L24) |
+| `CoApiRegistrar` | Registers WebClient/RestClient + proxy beans per interface | [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) | [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22) |
+| `CoApiFactoryBean` | Creates JDK proxy via `HttpServiceProxyFactory` | [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) | [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21) |
+| `CoApiAutoConfiguration` | Boot auto-configuration entry point | [CoApiAutoConfiguration.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt) | [CoApiAutoConfiguration.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt#L24) |
 
 ## Why CoApi?
 
@@ -156,7 +156,7 @@ graph LR
         C[EnableCoApiRegistrar]
     end
     subgraph "3. Register"
-        D[WebClient / RestClient Bean]
+        D["WebClient / RestClient Bean"]
         E[Proxy Bean]
     end
     subgraph "4. Use"
@@ -172,12 +172,6 @@ graph LR
     D --> E
     E --> F
 
-    style A fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style B fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style C fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style D fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style E fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style F fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
 ```
 <!-- Sources: api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt:38, spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt:22, spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt:30 -->
 
@@ -211,18 +205,13 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[Application Starts] --> B{coapi.mode property?}
-    B -->|REACTIVE| C[WebClient + WebClientAdapter]
-    B -->|SYNC| D[RestClient + RestClientAdapter]
+    A[Application Starts] --> B{"coapi.mode property?"}
+    B -->|REACTIVE| C["WebClient + WebClientAdapter"]
+    B -->|SYNC| D["RestClient + RestClientAdapter"]
     B -->|AUTO or unset| E{org.springframework.web.reactive.HandlerResult on classpath?}
     E -->|Yes| C
     E -->|No| D
 
-    style A fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style B fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style C fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style D fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style E fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt:16-39, spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt:42-50 -->
 
@@ -256,14 +245,6 @@ graph BT
     CONS --> STARTER
     SYNC --> STARTER
 
-    style API fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style SPRING fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style STARTER fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style BOM fill:#161b22,stroke:#30363d,color:#8b949e
-    style DEPS fill:#161b22,stroke:#30363d,color:#8b949e
-    style PROV fill:#161b22,stroke:#30363d,color:#8b949e
-    style CONS fill:#161b22,stroke:#30363d,color:#8b949e
-    style SYNC fill:#161b22,stroke:#30363d,color:#8b949e
 ```
 <!-- Sources: settings.gradle.kts:26-45, bom/build.gradle.kts:14-23, dependencies/build.gradle.kts:14-23 -->
 
@@ -360,17 +341,6 @@ graph TD
         K[JWT Security] --> H
     end
     
-    style A fill:#2d333b
-    style B fill:#2d333b
-    style C fill:#2d333b
-    style D fill:#2d333b
-    style E fill:#2d333b
-    style F fill:#2d333b
-    style G fill:#2d333b
-    style H fill:#2d333b
-    style I fill:#2d333b
-    style J fill:#2d333b
-    style K fill:#2d333b
 ```
 
 ## Dependency Management
@@ -423,14 +393,6 @@ graph LR
         H[Kotlin Logging] --> C
     end
     
-    style A fill:#2d333b
-    style B fill:#2d333b
-    style C fill:#2d333b
-    style D fill:#2d333b
-    style E fill:#2d333b
-    style F fill:#2d333b
-    style G fill:#2d333b
-    style H fill:#2d333b
 ```
 
 ## Installation Instructions
@@ -540,7 +502,7 @@ graph TD
     end
     
     subgraph "Integration"
-        C1[@EnableCoApi Annotation]
+        C1["@EnableCoApi Annotation"]
         C2[Property Configuration]
         C3[Interface Definition]
     end
@@ -551,24 +513,6 @@ graph TD
         D3[Load Testing]
     end
     
-    style A fill:#2d333b
-    style B fill:#2d333b
-    style C fill:#2d333b
-    style D fill:#2d333b
-    style E fill:#2d333b
-    style F fill:#2d333b
-    style A1 fill:#2d333b
-    style A2 fill:#2d333b
-    style A3 fill:#2d333b
-    style B1 fill:#2d333b
-    style B2 fill:#2d333b
-    style B3 fill:#2d333b
-    style C1 fill:#2d333b
-    style C2 fill:#2d333b
-    style C3 fill:#2d333b
-    style D1 fill:#2d333b
-    style D2 fill:#2d333b
-    style D3 fill:#2d333b
 ```
 
 ## Configuration Examples
@@ -703,10 +647,10 @@ CoApi reduces HTTP client setup to its essence: define a Java or Kotlin interfac
 
 | Step | What | Key File | Source |
 |------|------|----------|--------|
-| 1. Add dependency | `coapi-spring-boot-starter` | [spring-boot-starter/build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts) | [spring-boot-starter/build.gradle.kts:29](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts#L29) |
-| 2. Define interface | `@CoApi` + `@GetExchange` | [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) | [example/.../GitHubApiClient.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt#L21) |
-| 3. Configure URL | `application.yaml` | [application.yaml](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml) | [example/.../application.yaml:3](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml#L3) |
-| 4. Inject & use | Constructor injection | [GithubController.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt) | [example/.../GithubController.kt:32](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt#L32) |
+| 1. Add dependency | `coapi-spring-boot-starter` | [spring-boot-starter/build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts) | [build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts#L29) |
+| 2. Define interface | `@CoApi` + `@GetExchange` | [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) | [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt#L21) |
+| 3. Configure URL | `application.yaml` | [application.yaml](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml) | [application.yaml](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml#L3) |
+| 4. Inject & use | Constructor injection | [GithubController.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt) | [GithubController.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt#L32) |
 
 ## Step 1: Add Dependency
 
@@ -784,23 +728,15 @@ class GithubController(private val gitHubApiClient: GitHubApiClient) {
 
 ```mermaid
 flowchart TD
-    A[Add coapi-spring-boot-starter] --> B[Define @CoApi interface]
-    B --> C[Configure URL in YAML]
-    C --> D{Spring Boot?}
-    D -->|Yes| E[Auto-discovery via AutoCoApiRegistrar]
-    D -->|No| F["@EnableCoApi(clients=[...])"]
-    E --> G[CoApiRegistrar registers beans]
+    A["Add coapi-spring-boot-starter"] --> B["Define CoApi interface"]
+    B --> C["Configure URL in YAML"]
+    C --> D{"Spring Boot?"}
+    D -->|Yes| E["Auto-discovery via AutoCoApiRegistrar"]
+    D -->|No| F["EnableCoApi(clients=[...])"]
+    E --> G["CoApiRegistrar registers beans"]
     F --> G
-    G --> H[Inject interface and call methods]
+    G --> H["Inject interface and call methods"]
 
-    style A fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style B fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style C fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style D fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style E fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style F fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style G fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style H fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
 ```
 <!-- Sources: example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt:21, spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApi.kt:21, spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt:30 -->
 
@@ -943,29 +879,36 @@ CoApi's configuration architecture balances declarative convenience with program
 
 | Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.enabled` | `Boolean` | `true` | Enable/disable CoApi functionality | [CoApiProperties.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L1) |
-| `coapi.mode` | `ClientMode` | `AUTO` | Global client mode (AUTO, REACTIVE, SYNC) | [CoApiProperties.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L2) |
-| `coapi.base-packages` | `List<String>` | `[]` | Base packages for client discovery | [CoApiProperties.kt:3](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L3) |
+| `coapi.enabled` | `Boolean` | `true` | Enable/disable CoApi functionality | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L1) |
+| `coapi.mode` | `ClientMode` | `AUTO` | Global client mode (AUTO, REACTIVE, SYNC) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L2) |
+| `coapi.base-packages` | `List<String>` | `[]` | Base packages for client discovery | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L3) |
 
 ### Client Properties
 
 | Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.base-url` | `String` | `""` | Base URL for the client | [ClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
-| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | Enable load balancing for the client | [ClientDefinition.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.base-url` | `String` | `""` | Base URL for the client; overrides the annotation. An `lb://` URL is rewritten to `http://` and enables load balancing (since v2.3.0) | [CoApiDefinition.kt:156](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L156) |
+| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | Override load balancing (`true` enables, `false` disables; unset follows `base-url`, else the annotation) | [CoApiDefinition.kt:156](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L156) |
+
+::: info
+The `<name>` in `coapi.clients.<name>.*` is the `@CoApi` `name` attribute — or the interface simple name when no `name` is set. Setting a custom `name` on the annotation changes the configuration key.
+
+Since v2.2.0, `${...}` placeholders in `@CoApi` `baseUrl`/`serviceId` must resolve in the active environment: an unresolvable placeholder (without a `${name:default}` fallback) fails startup with `Could not resolve placeholder ...` instead of leaking a literal `${...}` into the client base URL and breaking requests at runtime. Duplicate client names also fail startup with the conflicting types listed.
+:::
 
 ### Reactive Client Properties
 
 | Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | `List<String>` | `[]` | Reactive filter function names | [ReactiveClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L1) |
-| `coapi.clients.<name>.reactive.filter.types` | `List<String>` | `[]` | Reactive filter function types | [ReactiveClientDefinition.kt:2](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.reactive.filter.names` | `List<String>` | `[]` | `ExchangeFilterFunction` bean names | [CoApiProperties.kt:64](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
+| `coapi.clients.<name>.reactive.filter.types` | `List<String>` | `[]` | `ExchangeFilterFunction` bean types (FQCN) | [CoApiProperties.kt:64](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
 
 ### Sync Client Properties
 
 | Property | Type | Default | Description | Source |
 |----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.sync.interceptor.names` | `List<String>` | `[]` | Sync interceptor names | [SyncClientDefinition.kt:1](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L2) |
+| `coapi.clients.<name>.sync.interceptor.names` | `List<String>` | `[]` | `ClientHttpRequestInterceptor` bean names | [CoApiProperties.kt:68](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
+| `coapi.clients.<name>.sync.interceptor.types` | `List<String>` | `[]` | `ClientHttpRequestInterceptor` bean types (FQCN) | [CoApiProperties.kt:68](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
 
 ## Configuration Resolution Flow
 
@@ -973,31 +916,26 @@ The configuration system follows a strict precedence order to ensure predictable
 
 ```mermaid
 flowchart TD
-    A[Start Configuration Resolution] --> B{Check Properties File}
-    B -->|Has coapi.clients.<name>.base-url| C[Use Properties baseUrl]
-    B -->|No properties baseUrl| D{Check @CoApi Annotation}
-    D -->|Has baseUrl| E[Use Annotation baseUrl]
-    D -->|No annotation baseUrl| F[Throw Configuration Exception]
-    
-    A --> G{Check coapi.clients.<name>.load-balanced}
-    G -->|Has property| H[Use Properties loadBalanced]
-    G -->|No property| I{Check @LoadBalanced Annotation}
-    I -->|Has annotation| J[Use Annotation loadBalanced]
-    I -->|No annotation| K[Use Default Behavior]
-    
-    C --> L[Resolve Complete Configuration]
+    A[Start Configuration Resolution] --> B{"coapi.clients.<name>.base-url set?"}
+    B -->|Yes| C["Use properties baseUrl (lb:// rewritten to http://)"]
+    B -->|No| D{"@CoApi baseUrl / serviceId set?"}
+    D -->|Yes| E["Use annotation baseUrl (lb:// rewritten to http://)"]
+    D -->|No| F[Empty baseUrl - client uses absolute URIs per request]
+
+    A --> G{"coapi.clients.<name>.load-balanced set?"}
+    G -->|Yes| H[Use configured value]
+    G -->|No| I{"coapi.clients.<name>.base-url set?"}
+    I -->|Yes| J["Load balanced only if it is an lb:// URL"]
+    I -->|No| K["Annotation: @LoadBalanced, lb://, or serviceId"]
+
+    C --> L[Effective CoApiDefinition]
     E --> L
+    F --> L
     H --> L
     J --> L
     K --> L
-    
-    style A fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style B fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style D fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style G fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style I fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style L fill:#6d5dfc,stroke:#6d5dfc,stroke-width:2px
 ```
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt:144-166 -->
 
 ## Property Hierarchy
 
@@ -1022,8 +960,8 @@ graph TD
     end
     
     subgraph "Annotation Level"
-        H[@CoApi(baseUrl)]
-        I[@LoadBalanced]
+        H["@CoApi(baseUrl)"]
+        I["@LoadBalanced"]
     end
     
     A --> D
@@ -1036,15 +974,6 @@ graph TD
     H --> D
     I --> E
     
-    style A fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style B fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style C fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style D fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style E fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style F fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style G fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style H fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
-    style I fill:#2d333b,stroke:#6d5dfc,stroke-width:2px
 ```
 
 ## Client Configuration Example
@@ -1054,31 +983,31 @@ A complete client configuration example showing all available options:
 ```mermaid
 graph TB
     subgraph "Application.yml"
-        A[coapi:]
+        A["coapi:"]
     end
     
     subgraph "Global Settings"
-        B[enabled: true]
-        C[mode: AUTO]
-        D[base-packages:]
+        B["enabled: true"]
+        C["mode: AUTO"]
+        D["base-packages:"]
         E[ - com.example.clients]
     end
     
     subgraph "Client Definitions"
-        F[clients:]
-        G[GitHubApiClient:]
-        H[base-url: https://api.github.com]
-        I[ServiceApiClient:]
-        J[load-balanced: true]
-        K[reactive:]
-        L[filter:]
-        M[names:]
+        F["clients:"]
+        G["GitHubApiClient:"]
+        H["base-url: https://api.github.com"]
+        I["ServiceApiClient:"]
+        J["load-balanced: true"]
+        K["reactive:"]
+        L["filter:"]
+        M["names:"]
         N[ - loadBalancerExchangeFilterFunction]
-        O[types:]
-        P[ - org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction]
-        Q[sync:]
-        R[interceptor:]
-        S[names:]
+        O["types:"]
+        P[" - org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction"]
+        Q["sync:"]
+        R["interceptor:"]
+        S["names:"]
         T[ - loadBalancerInterceptor]
     end
     
@@ -1102,26 +1031,6 @@ graph TB
     R --> S
     S --> T
     
-    style A fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style B fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style C fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style D fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style E fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style F fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style G fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style H fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style I fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style J fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style K fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style L fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style M fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style N fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style O fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style P fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style Q fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style R fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style S fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
-    style T fill:#2d333b,stroke:#6d5dfc,stroke-width:1px,color:#e6edf3
 ```
 
 ## Configuration Resolution Sequence
@@ -1145,7 +1054,7 @@ sequenceDiagram
         alt Has annotation
             A-->>F: Return baseUrl from annotation
         else No annotation
-            F-->>F: Throw ConfigurationException
+            F-->>F: Use empty baseUrl (client must use absolute URIs per request)
         end
     end
     
@@ -1192,27 +1101,119 @@ coapi:
 
 ## Cross-References
 
-- [Client Mode](../concepts/client-modes.md) - Details about different client operation modes
-- [Annotation Configuration](../annotations/annotations.md) - Using annotations for configuration
-- [Spring Boot Integration](../integrations/spring-boot.md) - Spring Boot specific configuration patterns
-- [Load Balancing](../features/load-balancing.md) - Load balancing configuration and behavior
+- [Client Mode](../deep-dive/client-modes.md) - Details about different client operation modes
+- [Annotation Configuration](../deep-dive/annotations.md) - Using annotations for configuration
+- [Auto Configuration](../deep-dive/auto-configuration.md) - Spring Boot auto configuration patterns
+- [Load Balancing](../deep-dive/load-balancing.md) - Load balancing configuration and behavior
 
 ## References
 
 ### Source Files
 
 - [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt) - Main configuration properties class
-- [AbstractHttpClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) - Configuration resolution logic
-- [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) - Client configuration classes
+- [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) - Configuration override rules (`withOverrides`)
+- [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) - Client configuration SPI (`ClientProperties`, `ReactiveClientProperties`, `SyncClientProperties`)
 - [ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) - Client mode enumeration
 - [ConditionalOnCoApiEnabled.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/ConditionalOnCoApiEnabled.kt) - Conditional configuration
 
 ### Related Pages
 
-- [Getting Started](../getting-started/index.md) - Introduction to CoApi basics
-- [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
-- [Client Mode](../concepts/client-modes.md) - Understanding client operation modes
-- [Spring Boot Integration](../integrations/spring-boot.md) - Spring Boot specific patterns
+- [Getting Started](./overview.md) - Introduction to CoApi basics
+- [Installation](./installation.md) - Installation and setup guide
+- [Client Mode](../deep-dive/client-modes.md) - Understanding client operation modes
+- [Auto Configuration](../deep-dive/auto-configuration.md) - Spring Boot auto configuration
+</doc>
+
+<doc title="migration-v3" path="getting-started/migration-v3.md">
+
+# Migrating to 3.0
+
+CoApi 3.0.0 restructures the client SPI so that each type has one responsibility. **Applications that only use `@CoApi`, `@EnableCoApi` and `coapi.*` YAML properties need no changes**: every configuration key keeps its name and meaning.
+
+You are affected only if you:
+
+- implement or reference `ClientProperties`, `FilterDefinition` or `InterceptorDefinition` in code;
+- subclass or reference `AbstractWebClientFactoryBean`, `AbstractRestClientFactoryBean` or `AbstractHttpClientFactoryBean`;
+- declare `CoApiDefinition` beans.
+
+## Client properties SPI
+
+`ClientProperties` keeps only the mode-neutral endpoint overrides. Filters and interceptors moved to role interfaces in the reactive and sync packages, and the two definition types were unified into the generic `ComponentDefinition<T>`.
+
+| 2.x | 3.0 |
+|-----|-----|
+| `ClientProperties.getBaseUri` / `getLoadBalanced` | unchanged, plus `resolve(definition)` |
+| `ClientProperties.getFilter(name): FilterDefinition` | `ReactiveClientProperties.getFilter(name): ComponentDefinition<ExchangeFilterFunction>` |
+| `ClientProperties.getInterceptor(name): InterceptorDefinition` | `SyncClientProperties.getInterceptor(name): ComponentDefinition<ClientHttpRequestInterceptor>` |
+| `ClientProperties.FilterDefinition` / `InterceptorDefinition` | `me.ahoo.coapi.spring.client.ComponentDefinition<T>` |
+
+```kotlin
+// 2.x
+class MyClientProperties : ClientProperties {
+    override fun getBaseUri(coApiName: String) = ""
+    override fun getLoadBalanced(coApiName: String): Boolean? = null
+    override fun getFilter(coApiName: String) = ClientProperties.FilterDefinition(names = listOf("authFilter"))
+    override fun getInterceptor(coApiName: String) = ClientProperties.InterceptorDefinition()
+}
+
+// 3.0 — implement only the roles you need; each one is an optional bean
+class MyClientProperties : ClientProperties, ReactiveClientProperties {
+    override fun getBaseUri(coApiName: String) = ""
+    override fun getLoadBalanced(coApiName: String): Boolean? = null
+    override fun getFilter(coApiName: String) = ComponentDefinition<ExchangeFilterFunction>(names = listOf("authFilter"))
+}
+```
+
+Without Spring Boot, every role is optional and falls back to its `Empty` implementation. With Spring Boot, `CoApiProperties` implements all three.
+
+## Factory beans
+
+`AbstractWebClientFactoryBean` and `AbstractRestClientFactoryBean` were removed. `WebClientFactoryBean` and `RestClientFactoryBean` are now final, and the load-balancing customizers are internal. `AbstractHttpClientFactoryBean` is generic, and its property getters (`getBaseUrl()`, `loadBalanced()`, `getBaseUrlFromProperties()`, `getLoadBalancedFromProperties()`) were replaced by `effectiveDefinition()`.
+
+Move logic from a factory bean subclass into a customizer bean:
+
+```kotlin
+@Component
+class TimeoutCustomizer : WebClientBuilderCustomizer {
+    override fun customize(coApiDefinition: CoApiDefinition, builder: WebClient.Builder) {
+        // coApiDefinition is the *effective* definition: coapi.clients.<name>.* overrides already applied
+    }
+}
+```
+
+Customizers now receive the **effective** definition. In 2.x they received the annotation definition, so `coApiDefinition.baseUrl` and `coApiDefinition.loadBalanced` could differ from what the client actually used.
+
+## CoApiDefinition beans
+
+A `CoApiDefinition` bean declared by a **non-static** `@Bean` method now fails startup (it logged a warning in 2.3.0). Such a method forced its configuration class to be created before bean post-processing, silently skipping `@Autowired`/`@Value` injection and `@Bean` proxying. Declare the method static, and let CoApi resolve placeholders and `lb://` in `baseUrl`, as it does for the annotation:
+
+```kotlin
+@Configuration
+class OrderApiConfiguration {
+    companion object {
+        @JvmStatic
+        @Bean
+        fun orderApiDefinition(): CoApiDefinition = CoApiDefinition(
+            name = "OrderApi",
+            apiType = OrderApi::class.java,
+            baseUrl = "lb://\${order.service-id}",
+            loadBalanced = false, // lb:// enables load balancing
+        )
+    }
+}
+```
+
+## New fail-fast checks
+
+- A client that resolves to load balanced without Spring Cloud LoadBalancer on the classpath fails with a message naming the client and the fix, instead of a `NoClassDefFoundError`.
+- `${...}` placeholders in a `CoApiDefinition` bean's `baseUrl` are now resolved and must resolve in the active environment, as on the `@CoApi` annotation since v2.2.0; an unresolvable one fails startup. An `lb://` `baseUrl` now also enables load balancing for definition beans.
+
+## Related Pages
+
+- [Configuration Reference](./configuration.md)
+- [Customization & Extensibility](../deep-dive/customization.md)
+- [Load Balancing](../deep-dive/load-balancing.md)
+- [Auto-Configuration](../deep-dive/auto-configuration.md)
 </doc>
 
 <doc title="architecture" path="deep-dive/architecture.md">
@@ -1231,11 +1232,11 @@ The architecture follows a modular design that separates concerns across three m
 
 | Component | Responsibility | Key Features | Source |
 |----------|---------------|---------------|--------|
-| `@CoApi` | Interface definition and configuration | Type-safe HTTP clients, service discovery, load balancing | [CoApi.kt:61](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L61) |
-| `AbstractCoApiRegistrar` | Base registration logic | Client mode inference, factory registration | [AbstractCoApiRegistrar.kt:28](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28) |
-| `CoApiRegistrar` | Individual client registration | Bean definition creation, factory bean registration | [CoApiRegistrar.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22) |
-| `CoApiFactoryBean` | Proxy creation | JDK proxy generation, service proxy factory | [CoApiFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21) |
-| `HttpClientFactoryBean` | HTTP client configuration | WebClient/RestClient creation, filter application | [WebClientFactoryBean.kt:20](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L20) |
+| `@CoApi` | Interface definition and configuration | Type-safe HTTP clients, service discovery, load balancing | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L61) |
+| `AbstractCoApiRegistrar` | Base registration logic | Client mode inference, factory registration | [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28) |
+| `CoApiRegistrar` | Individual client registration | Bean definition creation, factory bean registration | [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22) |
+| `CoApiFactoryBean` | Proxy creation | JDK proxy generation, service proxy factory | [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21) |
+| `HttpClientFactoryBean` | HTTP client configuration | WebClient/RestClient creation, filter application | [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L30) |
 
 ## Module Architecture
 
@@ -1243,7 +1244,7 @@ The architecture follows a modular design that separates concerns across three m
 graph TB
     subgraph "CoApi Module Architecture"
         subgraph "API Layer"
-            A[@CoApi Annotation]
+            A["@CoApi Annotation"]
             B[CoApiDefinition]
             C[HttpExchangeAdapter]
         end
@@ -1294,23 +1295,6 @@ graph TB
     N --> P
     O --> Q
     
-    style A fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style B fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style C fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style D fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style E fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style F fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style G fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style H fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style I fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style J fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style K fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style L fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style M fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style N fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style O fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style P fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style Q fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
 ```
 
 ## Registration Flow
@@ -1320,7 +1304,7 @@ The registration process is the heart of CoApi's architecture, automatically dis
 ```mermaid
 sequenceDiagram
     participant U as User Code
-    participant A as @CoApi Annotation
+    participant A as CoApi Annotation
     participant B as AutoCoApiRegistrar
     participant C as AbstractCoApiRegistrar
     participant D as CoApiRegistrar
@@ -1346,19 +1330,9 @@ sequenceDiagram
     H->>I: create JDK Proxy
     I->>U: Return typed interface
     
-    style U fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style A fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style B fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style C fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style D fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style E fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style F fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style G fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style H fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style I fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
 ```
 
-<!-- Sources: [AutoCoApiRegistrar.kt:28](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt#L28), [AbstractCoApiRegistrar.kt:42](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L42), [CoApiRegistrar.kt:27](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L27), [CoApiFactoryBean.kt:26](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L26), [WebClientFactoryBean.kt:23](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L23) -->
+<!-- Sources: [AutoCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt#L28), [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L42), [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L27), [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L26), [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L23) -->
 
 ## Bean Lifecycle
 
@@ -1378,13 +1352,9 @@ sequenceDiagram
     R->>F: Create FactoryBean
     F->>A: setApplicationContext()
     F->>A: getObject()
-    alt Reactive Mode
-        F->>A: getBean(ReactiveHttpExchangeAdapterFactory)
-        A->>F: Return factory
-    else Sync Mode
-        F->>A: getBean(SyncHttpExchangeAdapterFactory)
-        A->>F: Return factory
-    end
+    F->>A: resolve HttpExchangeAdapterFactory
+    note right of A: unique or @Primary candidate wins;<br/>otherwise the standard-name bean<br/>(mode-specific default registered at startup)
+    A->>F: Return factory
     F->>F: create(HttpExchangeAdapter)
     F->>F: build(HttpServiceProxyFactory)
     F->>F: createClient(apiType)
@@ -1394,14 +1364,9 @@ sequenceDiagram
     end
     C->>F: Client ready for use
     
-    style C fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style R fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style F fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style A fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style L fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
 ```
 
-<!-- Sources: [CoApiFactoryBean.kt:40](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L40), [AbstractCoApiRegistrar.kt:52](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L52), [CoApiFactoryBean.kt:26](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L26) -->
+<!-- Sources: [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L40), [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L52), [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L26) -->
 
 ## Class Diagram
 
@@ -1416,11 +1381,13 @@ classDiagram
     }
     
     class CoApiDefinition {
+        +String name
+        +Class apiType
+        +String baseUrl
+        +boolean loadBalanced
         +String coApiBeanName
         +String httpClientBeanName
-        +Class apiType
-        +ClientMode clientMode
-        +boolean loadBalanced
+        +withOverrides(String, Boolean?) CoApiDefinition
     }
     
     class AbstractCoApiRegistrar {
@@ -1445,12 +1412,12 @@ classDiagram
     
     class WebClientFactoryBean {
         +getObject()
-        +loadBalanced()
+        +effectiveDefinition() CoApiDefinition
     }
     
     class RestClientFactoryBean {
         +getObject()
-        +loadBalanced()
+        +effectiveDefinition() CoApiDefinition
     }
     
     class HttpServiceProxyFactory {
@@ -1477,19 +1444,9 @@ classDiagram
     WebClientFactoryBean --> ReactiveHttpExchangeAdapterFactory : uses
     RestClientFactoryBean --> SyncHttpExchangeAdapterFactory : uses
     
-    style CoApi fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style CoApiDefinition fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style AbstractCoApiRegistrar fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style CoApiRegistrar fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style CoApiFactoryBean fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style WebClientFactoryBean fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style RestClientFactoryBean fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style HttpServiceProxyFactory fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style ReactiveHttpExchangeAdapterFactory fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style SyncHttpExchangeAdapterFactory fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
 ```
 
-<!-- Sources: [CoApi.kt:63](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L63), [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt), [AbstractCoApiRegistrar.kt:28](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28), [CoApiRegistrar.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22), [CoApiFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21), [WebClientFactoryBean.kt:20](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L20), [RestClientFactoryBean.kt:21](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt#L21) -->
+<!-- Sources: [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L63), [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt), [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28), [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22), [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21), [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L30), [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt#L30) -->
 
 ## Layered Architecture
 
@@ -1535,22 +1492,9 @@ graph TD
     K --> L
     L --> M
     
-    style A fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style B fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style C fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style D fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style E fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style F fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style G fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style H fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style I fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style J fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style K fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style L fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style M fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
 ```
 
-<!-- Sources: [CoApi.kt:14](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L14), [AbstractCoApiRegistrar.kt:14](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L14), [CoApiRegistrar.kt:14](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L14) -->
+<!-- Sources: [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L14), [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L14), [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L14) -->
 
 ## Key Design Patterns
 
@@ -1575,9 +1519,9 @@ HttpServiceProxyFactory and client builders use the Builder pattern for fluent c
 
 - [Getting Started](../getting-started/index.md) - Introduction to CoApi basics
 - [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
-- [Client Modes](../concepts/client-modes.md) - Understanding reactive vs sync operation
-- [Spring Boot Integration](../integrations/spring-boot.md) - Spring Boot specific patterns
-- [Annotations](../annotations/annotations.md) - Annotation-based configuration
+- [Client Modes](
+- [Spring Boot Integration](.md) - Spring Boot specific patterns
+- [Annotations](./annotations/annotations.md) - Annotation-based configuration
 
 ## References
 
@@ -1594,11 +1538,11 @@ HttpServiceProxyFactory and client builders use the Builder pattern for fluent c
 
 ### Related Pages
 
-- [Module Architecture](../concepts/module-architecture.md) - Detailed module structure
-- [Registration Process](../concepts/registration.md) - Deep dive into registration mechanics
-- [Bean Lifecycle](../concepts/bean-lifecycle.md) - Spring bean initialization details
-- [Design Patterns](../concepts/design-patterns.md) - Architecture patterns used in CoApi
-- [Performance Considerations](../performance/performance.md) - Performance optimization guidelines
+- [Module Architecture](
+- [Registration Process](
+- [Bean Lifecycle](
+- [Design Patterns](
+- [Performance Considerations](.md) - Performance optimization guidelines
 </doc>
 
 <doc title="annotations" path="deep-dive/annotations.md">
@@ -1687,14 +1631,14 @@ The CoApi system employs a sophisticated URL resolution algorithm that determine
 
 ```mermaid
 graph TD
-    A[Start Class Processing] --> B{Has @CoApi Annotation?}
+    A[Start Class Processing] --> B{"Has @CoApi Annotation?"}
     B -->|No| C[Throw IllegalArgumentException]
     B -->|Yes| D[Resolve Base URL Logic]
     
     D --> E{baseUrl isNotBlank?}
     E -->|Yes| F[Resolve Placeholders]
     E -->|No| G{serviceId isNotBlank?}
-    G -->|Yes| H[Construct lb:// + serviceId]
+    G -->|Yes| H["Construct lb:// + serviceId"]
     G -->|No| I[Empty URL]
     
     F --> J[Determine Load Balanced]
@@ -1702,7 +1646,7 @@ graph TD
     I --> J
     
     J --> K{Load Balanced Check}
-    K --> L[@LoadBalanced annotation present?]
+    K --> L["@LoadBalanced annotation present?"]
     K --> M{URL starts with lb://?}
     
     L -->|Yes| N[loadBalanced = true]
@@ -1719,6 +1663,10 @@ graph TD
     R --> S[Generate Bean Names]
     S --> T[End]
 ```
+
+::: info
+Since v2.2.0, placeholders in `baseUrl`/`serviceId` are resolved with `resolveRequiredPlaceholders`: an unresolvable `${...}` (no property, no `${name:default}` fallback) fails at startup with `Could not resolve placeholder ...` instead of leaking the literal `${...}` into the client base URL, where `{...}` would be parsed as a URI template variable and only fail at request time.
+:::
 
 ## Class Hierarchy and Relationships
 
@@ -1746,7 +1694,7 @@ classDiagram
     }
     
     class Environment {
-        +String resolvePlaceholders(String)
+        +String resolveRequiredPlaceholders(String)
     }
     
     class Class {
@@ -1771,39 +1719,34 @@ sequenceDiagram
     participant C as Class
     participant E as Environment
     participant CAD as CoApiDefinition
-    
-    C->>C: getAnnotation(CoApi::class)
+
+    C->>C: getAnnotation(CoApi.class)
     alt No @CoApi annotation
         C->>CAD: throw IllegalArgumentException
     else Has @CoApi annotation
         C->>C: resolveClientName(coApi)
         C->>C: resolveBaseUrl(environment)
-        
+
         alt baseUrl isNotBlank
-            C->>E: resolvePlaceholders(baseUrl)
+            C->>E: resolveRequiredPlaceholders(baseUrl)
         else serviceId isNotBlank
-            C->>E: resolvePlaceholders(serviceId)
-            C->>C: construct "lb://" + resolvedServiceId
+            C->>E: resolveRequiredPlaceholders(serviceId)
+            C->>C: construct lb:// + serviceId
         else both blank
             C->>C: return empty string
         end
-        
+
         C->>C: determine loadBalanced
         C->>C: check @LoadBalanced annotation
-        C->>C: check baseUrl startsWith "lb://"
-        C->>C: loadBalanced = annotationPresent || protocolBased
-        
+        C->>C: check baseUrl starts with lb://
+        C->>C: loadBalanced = annotationPresent or protocolBased
+
         C->>C: adjust baseUrl if loadBalanced
-        alt baseUrl startsWith "lb://"
-            C->>C: baseUrl = "http://" + substring("lb://".length)
+        alt baseUrl starts with lb://
+            C->>C: strip lb:// prefix
         end
-        
-        C->>CAD: CoApiDefinition(
-            name=resolvedName,
-            apiType=class,
-            baseUrl=baseUrl,
-            loadBalanced=loadBalanced
-        )
+
+        C->>CAD: CoApiDefinition(name, apiType, baseUrl, loadBalanced)
     end
 ```
 
@@ -1867,12 +1810,14 @@ graph LR
     D --> F[Generate Bean Names]
     E --> F
     
-    F --> G[name + ".HttpClient"]
-    F --> H[name + ".CoApi"]
+    F --> G["name + \".HttpClient\""]
+    F --> H["name + \".CoApi\""]
     
     G --> I[HttpClient Bean]
     H --> J[CoApi Bean]
 ```
+
+Client names must be unique: the name is also the key for `coapi.clients.<name>.*` configuration. Since v2.2.0, registering two `@CoApi` interfaces that resolve to the same name (identical custom `name`, or identical interface simple names in different packages) fails at startup with an `IllegalStateException` listing the conflicting types — before v2.2.0 the later definition was silently ignored. Assign a unique `@CoApi(name = "...")` to resolve the conflict.
 
 ## Best Practices
 
@@ -1893,10 +1838,10 @@ graph LR
 - [example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt) - Service discovery example
 
 ### Related Pages
-- [Configuration](../configuration.md) - Detailed configuration guide
-- [Service Discovery](../service-discovery.md) - Load balancing and service discovery
-- [Testing](../testing.md) - Testing strategies for CoApi clients
-- [Examples](../examples.md) - Complete usage examples
+- [Configuration](../getting-started/configuration.md) - Detailed configuration guide
+- [Service Discovery](./load-balancing.md) - Load balancing and service discovery
+- [Testing](.md) - Testing strategies for CoApi clients
+- [Examples](./examples.md) - Complete usage examples
 </doc>
 
 <doc title="client-modes" path="deep-dive/client-modes.md">
@@ -1929,7 +1874,7 @@ The AUTO mode uses intelligent detection to determine the appropriate client typ
 
 ```mermaid
 flowchart TD
-    A[Start Mode Detection] --> B{Check for org.springframework.web.reactive.HandlerResult}
+    A[Start Mode Detection] --> B{"Check for org.springframework.web.reactive.HandlerResult"}
     B -->|Present| C[REACTIVE Mode]
     B -->|Absent| D[SYNC Mode]
     C --> E[Create WebClient-based Adapter]
@@ -2002,133 +1947,67 @@ interface HttpExchangeAdapterFactory {
 
 ## Reactive Stack Implementation
 
-The reactive stack uses WebClient for non-blocking HTTP requests with comprehensive integration for reactive programming paradigms.
+The reactive stack builds one `WebClient` per CoApi client with [WebClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L30):
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant A as Application
-    participant B as AbstractWebClientFactoryBean
-    participant C as WebClient.Builder
-    participant D as ExchangeFilterFunctions
-    participant E as LoadBalancedExchangeFilterFunction
-    participant F as WebClientFactoryBean
-    participant G as WebClientAdapter
-    participant H as HttpExchangeAdapter
-    
-    A->>B: createWebClient()
-    B->>C: WebClient.Builder.fromApplicationContext()
-    C->>B: baseUrl()
-    B->>D: applyFilterFunctions()
-    D->>B: configure()
-    B->>F: create()
-    F->>E: applyLoadBalancer()
-    E->>F: configure()
-    F->>G: create(webClient)
-    G->>H: create()
-    H->>A: return HttpExchangeAdapter
+    participant FB as WebClientFactoryBean
+    participant CTX as ApplicationContext
+    participant B as WebClient.Builder
+    participant LB as LoadBalancedWebClientBuilderCustomizer
+    participant C as WebClientBuilderCustomizer beans
+
+    FB->>CTX: ClientProperties.resolve(definition)
+    CTX-->>FB: effective definition
+    FB->>CTX: getBean(WebClient.Builder)
+    FB->>B: baseUrl(effective.baseUrl)
+    FB->>CTX: ReactiveClientProperties.getFilter(name)
+    FB->>B: add filters (names, then types)
+    opt effective.loadBalanced
+        FB->>LB: customize(effective, builder)
+    end
+    FB->>C: customize(effective, builder) in order
+    FB->>B: build()
 ```
-
-### FactoryBean Hierarchy
-
-The reactive stack follows this inheritance hierarchy:
-
-- **AbstractWebClientFactoryBean**: Base class configuring WebClient.Builder
-  - Gets WebClient.Builder from Spring application context
-  - Applies ExchangeFilterFunctions from ClientProperties
-  - Applies WebClientBuilderCustomizer beans
-  - Sets baseUrl and timeouts
-
-- **WebClientFactoryBean**: Extends with load balancer support
-  - Adds LoadBalancedExchangeFilterFunction when load balancer is available
-  - Configures reactive retry mechanisms
-  - Enables circuit breaker integration
-
-- **WebClientAdapter**: Converts WebClient to HttpExchangeAdapter
-  - Implements HttpExchangeAdapter interface
-  - Handles request/response mapping
-  - Supports reactive streams integration
-
-```kotlin
-// spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt
-abstract class AbstractWebClientFactoryBean : FactoryBean<WebClient> {
-    override fun getObject(): WebClient {
-        val builder = webClientBuilder()
-            .baseUrl(clientProperties.baseUrl)
-        
-        clientProperties.filterFunctions.forEach { filterFunction ->
-            builder.filter(filterFunction)
-        }
-        
-        return builder.build()
-    }
-}
-```
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:32-45 -->
 
 ## Sync Stack Implementation
 
-The sync stack provides traditional synchronous HTTP requests using RestClient with straightforward configuration and excellent performance for common use cases.
+The sync stack builds one `RestClient` per CoApi client with [RestClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt#L30):
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant A as Application
-    participant B as AbstractRestClientFactoryBean
-    participant C as RestClient.Builder
-    participant D as ClientHttpRequestInterceptors
-    participant E as LoadBalancerInterceptor
-    participant F as RestClientFactoryBean
-    participant G as RestClientAdapter
-    participant H as HttpExchangeAdapter
-    
-    A->>B: createRestClient()
-    B->>C: RestClient.Builder.fromApplicationContext()
-    C->>B: baseUrl()
-    B->>D: applyInterceptors()
-    D->>B: configure()
-    B->>F: create()
-    F->>E: applyLoadBalancer()
-    E->>F: configure()
-    F->>G: create(restClient)
-    G->>H: create()
-    H->>A: return HttpExchangeAdapter
+    participant FB as RestClientFactoryBean
+    participant CTX as ApplicationContext
+    participant B as RestClient.Builder
+    participant LB as LoadBalancedRestClientBuilderCustomizer
+    participant C as RestClientBuilderCustomizer beans
+
+    FB->>CTX: ClientProperties.resolve(definition)
+    CTX-->>FB: effective definition
+    FB->>CTX: getBean(RestClient.Builder)
+    FB->>B: baseUrl(effective.baseUrl)
+    FB->>CTX: SyncClientProperties.getInterceptor(name)
+    FB->>B: add interceptors (names, then types)
+    opt effective.loadBalanced
+        FB->>LB: customize(effective, builder)
+    end
+    FB->>C: customize(effective, builder) in order
+    FB->>B: build()
 ```
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:32-50 -->
 
-### FactoryBean Hierarchy
+### Factory Bean Structure
 
-The sync stack follows this inheritance hierarchy:
+Since v3.0.0 there is one flat factory bean per client type:
 
-- **AbstractRestClientFactoryBean**: Base class configuring RestClient.Builder
-  - Gets RestClient.Builder from Spring application context
-  - Applies ClientHttpRequestInterceptors from ClientProperties
-  - Applies RestClientBuilderCustomizer beans
-  - Sets baseUrl and timeouts
+- **[AbstractHttpClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt#L29)** — shared plumbing: resolves the effective definition (optional `ClientProperties`), resolves filter/interceptor beans, collects the ordered customizer beans, and fails fast when a load-balanced client lacks Spring Cloud LoadBalancer.
+- **`WebClientFactoryBean`** / **`RestClientFactoryBean`** — final classes that build the client in the order shown above.
+- **`LoadBalancedWebClientBuilderCustomizer`** / **`LoadBalancedRestClientBuilderCustomizer`** — internal, applied only to load-balanced clients (see [Load Balancing](./load-balancing.md)).
 
-- **RestClientFactoryBean**: Extends with load balancer support
-  - Adds LoadBalancerInterceptor when load balancer is available
-  - Configures retry mechanisms
-  - Enables connection pooling optimization
-
-- **RestClientAdapter**: Converts RestClient to HttpExchangeAdapter
-  - Implements HttpExchangeAdapter interface
-  - Handles request/response mapping
-  - Provides blocking I/O operations
-
-```kotlin
-// spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt
-abstract class AbstractRestClientFactoryBean : FactoryBean<RestClient> {
-    override fun getObject(): RestClient {
-        val builder = restClientBuilder()
-            .baseUrl(clientProperties.baseUrl)
-        
-        clientProperties.interceptors.forEach { interceptor ->
-            builder.requestInterceptor(interceptor)
-        }
-        
-        return builder.build()
-    }
-}
-```
+Both factory beans require exactly one `WebClient.Builder` / `RestClient.Builder` bean by type. Extend clients through `WebClientBuilderCustomizer` / `RestClientBuilderCustomizer` beans (see [Customization](./customization.md)) — the factory beans are not designed for subclassing.
 
 ## Adapter Creation
 
@@ -2175,26 +2054,19 @@ class SyncHttpExchangeAdapterFactory : HttpExchangeAdapterFactory {
 CoApi supports comprehensive configuration through properties:
 
 ```properties
-# Client mode configuration (auto, reactive, sync)
+# Client mode (AUTO, REACTIVE, SYNC); since v2.2.0 an invalid value fails
+# startup with the offending value and the valid options listed
 coapi.mode=auto
 
-# Base URL for all HTTP requests
-coapi.client.base-url=https://api.example.com
+# Enable/disable CoApi auto-configuration
+coapi.enabled=true
 
-# Timeout configuration
-coapi.client.timeout=30s
-coapi.client.read-timeout=60s
-coapi.client.connect-timeout=10s
+# Extra packages to scan for @CoApi interfaces (comma-separated or indexed)
+coapi.base-packages=com.example.clients
 
-# Retry configuration
-coapi.client.retries=3
-coapi.client.retry-backoff=exponential
-coapi.client.retry-backoff-initial=100ms
-coapi.client.retry-backoff-max=2s
-
-# Load balancer configuration
-coapi.client.load-balancer.enabled=true
-coapi.client.load-balancer.strategy=round-robin
+# Per-client overrides - see the Configuration Reference for the full set
+coapi.clients.MyApiClient.base-url=https://api.example.com
+coapi.clients.MyApiClient.load-balanced=false
 ```
 
 ## Feature Variants
@@ -2295,17 +2167,17 @@ Migrating between modes is straightforward due to the adapter pattern:
 1. [ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) - Client mode detection and enum definition
 2. [HttpExchangeAdapterFactory.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/HttpExchangeAdapterFactory.kt) - SPI interface for adapter factories
 3. [ReactiveHttpExchangeAdapterFactory.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveHttpExchangeAdapterFactory.kt) - WebClient adapter factory implementation
-4. [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) - WebClient configuration base class
-5. [AbstractRestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt) - RestClient configuration base class
+4. [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) - WebClient configuration base class
+5. [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) - RestClient configuration base class
 6. [Spring build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/build.gradle.kts) - Gradle feature variants configuration
 
 ## Related Pages
 
-- [HTTP Client Configuration](../configuration/http-client.md) - Detailed configuration options and properties
-- [Load Balancing](../features/load-balancing.md) - Load balancer integration and configuration
-- [Retry Mechanisms](../features/retry.md) - Retry strategies and backoff algorithms
-- [Authentication](../security/authentication.md) - JWT and other authentication methods
-- [Monitoring](../observability/monitoring.md) - Metrics and logging for HTTP clients
+- [HTTP Client Configuration](../getting-started/configuration.md) - Detailed configuration options and properties
+- [Load Balancing](./load-balancing.md) - Load balancer integration and configuration
+- [Retry Mechanisms](.md) - Retry strategies and backoff algorithms
+- [Authentication](./authentication.md) - JWT and other authentication methods
+- [Monitoring](.md) - Metrics and logging for HTTP clients
 </doc>
 
 <doc title="load-balancing" path="deep-dive/load-balancing.md">
@@ -2316,17 +2188,17 @@ Migrating between modes is straightforward due to the adapter pattern:
 
 In microservice architectures, services need to call other services without hardcoding hostnames. CoApi integrates with Spring Cloud LoadBalancer to provide client-side load balancing: the HTTP client itself selects which service instance to call. This eliminates the need for an external load balancer and gives the application direct control over instance selection, retries, and circuit breaking.
 
-CoApi provides three ways to opt into load balancing, all resolving to the same mechanism: a `LoadBalancedExchangeFilterFunction` (reactive) or `LoadBalancerInterceptor` (sync) is added to the HTTP client's filter/interceptor chain.
+CoApi provides three ways to opt into load balancing, all resolving to the same mechanism: a `LoadBalancedExchangeFilterFunction` (reactive) or a `BlockingLoadBalancerInterceptor` (sync) is added to the HTTP client's filter/interceptor chain.
 
 ## At a Glance
 
 | Mechanism | Annotation | Resolved URL | Load Balanced | Source |
 |-----------|-----------|--------------|---------------|--------|
-| Service ID | `@CoApi(serviceId = "svc")` | `http://svc` | Yes | [CoApi.kt:46](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L46) |
-| LB Protocol | `@CoApi(baseUrl = "lb://svc")` | `http://svc` | Yes | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
-| Annotation | `@CoApi @LoadBalanced` | Empty | Yes | [LoadBalanced.kt:17](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
-| Properties | `coapi.clients.<name>.load-balanced=true` | Per properties | Yes | [CoApiProperties.kt:54](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
-| Direct URL | `@CoApi(baseUrl = "http://...")` | As specified | No | [CoApi.kt:38](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| Service ID | `@CoApi(serviceId = "svc")` | `http://svc` | Yes | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L46) |
+| LB Protocol | `@CoApi(baseUrl = "lb://svc")` | `http://svc` | Yes | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
+| Annotation | `@CoApi @LoadBalanced` | Empty | Yes | [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt#L17) |
+| Properties | `coapi.clients.<name>.load-balanced=true/false` | Per properties | `true`→Yes, `false`→No | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L54) |
+| Direct URL | `@CoApi(baseUrl = "http://...")` | As specified | No | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L38) |
 
 ## URL Resolution Flow
 
@@ -2352,19 +2224,6 @@ flowchart TD
     K --> M
     L --> M
 
-    style A fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style B fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style C fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style D fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style E fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style F fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style G fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style H fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style I fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style J fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style K fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style L fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style M fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
 ```
 <!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt:70-97, api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt:17 -->
 
@@ -2379,37 +2238,40 @@ The resolution logic in [CoApiDefinition.kt:70-97](https://github.com/Ahoo-Wang/
 
 ## Runtime Load Balancing Decision
 
-At bean creation time, `AbstractHttpClientFactoryBean.loadBalanced()` applies a precedence order:
+At client creation time, the factory bean resolves the *effective* definition: `ClientProperties.resolve(definition)` applies the `coapi.clients.<name>.*` overrides through the single rule in `CoApiDefinition.withOverrides()`:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant FB as AbstractHttpClientFactoryBean
+    participant FB as WebClientFactoryBean / RestClientFactoryBean
     participant Props as ClientProperties
     participant Def as CoApiDefinition
 
-    FB->>Props: getLoadBalancedFromProperties(name)
-    alt Properties has load-balanced value
-        Props-->>FB: non-null Boolean
-        FB->>FB: return true
-    else Properties has baseUrl
-        FB->>Props: getBaseUrlFromProperties(name)
-        Props-->>FB: non-blank URL
-        FB->>FB: return false (direct URL overrides)
-    else No properties override
-        FB->>Def: definition.loadBalanced
-        FB->>FB: return annotation-determined value
+    FB->>Props: resolve(definition)
+    Props->>Def: withOverrides(base-url, load-balanced)
+    alt load-balanced configured
+        Def-->>FB: configured value (true/false)
+    else base-url configured
+        Def-->>FB: true only for an lb:// URL (rewritten to http://)
+    else no override
+        Def-->>FB: annotation-determined value
     end
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt:42-56 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt:156, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt:39 -->
 
-**Precedence** ([AbstractHttpClientFactoryBean.kt:42-56](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt#L42-L56)):
+**Precedence** ([CoApiDefinition.kt:156](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L156)):
 
 | Priority | Source | Effect |
 |----------|--------|--------|
-| 1 (highest) | `coapi.clients.<name>.load-balanced` | Override to `true` |
-| 2 | `coapi.clients.<name>.base-url` (non-blank) | Forces non-load-balanced |
+| 1 (highest) | `coapi.clients.<name>.load-balanced` | Override to the configured value (`true` enables, `false` disables) |
+| 2 | `coapi.clients.<name>.base-url` (non-blank) | Load balanced only for an `lb://` URL (since v2.3.0); a plain `http(s)://` URL disables it |
 | 3 (lowest) | `@CoApi` / `@LoadBalanced` annotation | Default from annotation |
+
+The `lb://` scheme is matched case-insensitively (`LB://` works too, since v2.3.0). If a client resolves to load balanced but Spring Cloud LoadBalancer is not on the classpath, client creation fails with an actionable message (since v3.0.0) instead of a `NoClassDefFoundError`.
+
+::: info
+Since v2.1.1, an explicit `load-balanced: false` is respected and disables load balancing — before v2.1.1 any configured value (including `false`) was treated as `true`. The `<name>` in `coapi.clients.<name>.*` is the `@CoApi` `name` attribute, or the interface simple name when no name is set.
+:::
 
 ## WebClient Load Balancing
 
@@ -2423,10 +2285,10 @@ sequenceDiagram
     participant Builder as WebClient.Builder
     participant LB as LoadBalancedExchangeFilterFunction
 
-    FB->>FB: loadBalanced() → true
-    FB->>Builder: customize(definition, builder)
+    FB->>FB: effectiveDefinition().loadBalanced → true
+    FB->>Builder: LoadBalancedWebClientBuilderCustomizer.customize(definition, builder)
     Builder->>Builder: builder.filters { ... }
-    Builder->>Builder: check: any existing LoadBalancedExchangeFilterFunction?
+    Builder->>Builder: check: any existing LB filter (LoadBalanced or Deferring)?
     alt Already present
         Builder->>Builder: skip
     else Not present
@@ -2435,13 +2297,13 @@ sequenceDiagram
         Builder->>Builder: filters.add(LB)
     end
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:30-43 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:38-42, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/LoadBalancedWebClientBuilderCustomizer.kt:36 -->
 
-The `LoadBalancedWebClientBuilderCustomizer` inner class ([WebClientFactoryBean.kt:34-43](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L34-L43)) checks for duplicates before adding, ensuring idempotency.
+The internal `LoadBalancedWebClientBuilderCustomizer` ([LoadBalancedWebClientBuilderCustomizer.kt:36](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/LoadBalancedWebClientBuilderCustomizer.kt#L36)) is applied only to load-balanced clients and checks for duplicates before adding, ensuring idempotency. The check recognizes both `LoadBalancedExchangeFilterFunction` and Spring Cloud's `DeferringLoadBalancerExchangeFilterFunction` (the default wiring on `@LoadBalanced WebClient.Builder`), so a builder that already carries load balancing is not double-wired.
 
 ## RestClient Load Balancing
 
-For the synchronous stack, [RestClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) adds `LoadBalancerInterceptor`:
+For the synchronous stack, [RestClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) adds a `BlockingLoadBalancerInterceptor`:
 
 ```mermaid
 sequenceDiagram
@@ -2449,21 +2311,23 @@ sequenceDiagram
     participant FB as RestClientFactoryBean
     participant CTX as ApplicationContext
     participant Builder as RestClient.Builder
-    participant LB as LoadBalancerInterceptor
+    participant LB as BlockingLoadBalancerInterceptor
 
-    FB->>FB: loadBalanced() → true
-    FB->>Builder: customize(definition, builder)
+    FB->>FB: effectiveDefinition().loadBalanced → true
+    FB->>Builder: LoadBalancedRestClientBuilderCustomizer.customize(definition, builder)
     Builder->>Builder: builder.requestInterceptors { ... }
-    Builder->>Builder: check: any existing load balancer interceptor?
+    Builder->>Builder: check: any existing LB interceptor (Blocking or Deferring)?
     alt Already present
         Builder->>Builder: skip
     else Not present
-        Builder->>CTX: getBean(LoadBalancerInterceptor)
+        Builder->>CTX: getBean(BlockingLoadBalancerInterceptor)
         CTX-->>LB: interceptor
         Builder->>Builder: interceptors.add(LB)
     end
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:30-43 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:40-47, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/LoadBalancedRestClientBuilderCustomizer.kt:35 -->
+
+The interceptor is resolved by the `BlockingLoadBalancerInterceptor` interface rather than the concrete `LoadBalancerInterceptor` class, so it works whether Spring Cloud registers the plain interceptor or the `RetryLoadBalancerInterceptor` (retry enabled). Like the reactive side, the dedup check recognizes Spring Cloud's `DeferringLoadBalancerInterceptor` installed on `@LoadBalanced RestClient.Builder`.
 
 ## Per-Client Filter & Interceptor Configuration
 
@@ -2486,12 +2350,12 @@ coapi:
 
 | Property | Type | Applies To | Source |
 |----------|------|-----------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | Bean names | WebClient (reactive) | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.reactive.filter.types` | Class types | WebClient (reactive) | [CoApiProperties.kt:59](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.sync.interceptor.names` | Bean names | RestClient (sync) | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
-| `coapi.clients.<name>.sync.interceptor.types` | Class types | RestClient (sync) | [CoApiProperties.kt:62](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
+| `coapi.clients.<name>.reactive.filter.names` | Bean names | WebClient (reactive) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
+| `coapi.clients.<name>.reactive.filter.types` | Class types | WebClient (reactive) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
+| `coapi.clients.<name>.sync.interceptor.names` | Bean names | RestClient (sync) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
+| `coapi.clients.<name>.sync.interceptor.types` | Class types | RestClient (sync) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
 
-Filter resolution in [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) resolves bean names and types from `ApplicationContext`.
+The factory beans resolve these references from the `ApplicationContext` — all names first, then all types — via [AbstractHttpClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt). The filters come from `ReactiveClientProperties` and the interceptors from `SyncClientProperties` (both implemented by `CoApiProperties`).
 
 ## Service Discovery Configuration
 
@@ -2533,7 +2397,7 @@ spring:
 1. [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt`
 2. [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt`
 3. [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt`
-4. [AbstractHttpClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt`
+4. [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt`
 5. [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt`
 6. [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt`
 7. [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt) — `spring-boot-starter/src/main/kotlin/.../CoApiProperties.kt`
@@ -2552,17 +2416,18 @@ CoApi's HTTP clients are not black boxes. The library exposes a layered customiz
 
 | Customization Point | Interface | Scope | Key File | Source |
 |---------------------|-----------|-------|----------|--------|
-| Base SPI | `HttpClientBuilderCustomizer<Builder>` | All clients | [HttpClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt) | [spring/.../HttpClientBuilderCustomizer.kt:18](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt#L18) |
-| Reactive customizer | `WebClientBuilderCustomizer` | WebClient clients | [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt) | [spring/.../WebClientBuilderCustomizer.kt:20](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt#L20) |
-| Sync customizer | `RestClientBuilderCustomizer` | RestClient clients | [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt) | [spring/.../RestClientBuilderCustomizer.kt:20](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt#L20) |
-| Per-client config | `ClientProperties` | Individual clients | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) | [spring/.../ClientProperties.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L19) |
-| Per-client filters | `FilterDefinition` / `InterceptorDefinition` | Individual clients | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) | [spring/.../ClientProperties.kt:25](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L25) |
+| Base SPI | `HttpClientBuilderCustomizer<Builder>` | All clients | [HttpClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt) | [HttpClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt#L18) |
+| Reactive customizer | `WebClientBuilderCustomizer` | WebClient clients | [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt) | [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt#L20) |
+| Sync customizer | `RestClientBuilderCustomizer` | RestClient clients | [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt) | [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt#L20) |
+| Per-client endpoint | `ClientProperties` | Individual clients | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L24) |
+| Per-client filters | `ReactiveClientProperties` → `ComponentDefinition<ExchangeFilterFunction>` | WebClient clients | [ReactiveClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveClientProperties.kt) | [ReactiveClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveClientProperties.kt#L24) |
+| Per-client interceptors | `SyncClientProperties` → `ComponentDefinition<ClientHttpRequestInterceptor>` | RestClient clients | [SyncClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/SyncClientProperties.kt) | [SyncClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/SyncClientProperties.kt#L24) |
 
 ## Customizer Class Hierarchy
 
 ```mermaid
 classDiagram
-    class HttpClientBuilderCustomiabler~Builder~ {
+    class HttpClientBuilderCustomizer~Builder~ {
         <<fun interface>>
         +customize(CoApiDefinition, Builder)
     }
@@ -2580,31 +2445,29 @@ classDiagram
         <<interface>>
         +getBaseUri(String) String
         +getLoadBalanced(String) Boolean?
-        +getFilter(String) FilterDefinition
-        +getInterceptor(String) InterceptorDefinition
+        +resolve(CoApiDefinition) CoApiDefinition
     }
-    class FilterDefinition {
-        +names: List~String~
-        +types: List~Class~
+    class ReactiveClientProperties {
+        <<fun interface>>
+        +getFilter(String) ComponentDefinition
     }
-    class InterceptorDefinition {
+    class SyncClientProperties {
+        <<fun interface>>
+        +getInterceptor(String) ComponentDefinition
+    }
+    class ComponentDefinition~T~ {
         +names: List~String~
         +types: List~Class~
     }
 
     HttpClientBuilderCustomizer <|-- WebClientBuilderCustomizer
     HttpClientBuilderCustomizer <|-- RestClientBuilderCustomizer
-    ClientProperties --> FilterDefinition
-    ClientProperties --> InterceptorDefinition
-
-    style HttpClientBuilderCustomizer fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style WebClientBuilderCustomizer fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style RestClientBuilderCustomizer fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style ClientProperties fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style FilterDefinition fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style InterceptorDefinition fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
+    ReactiveClientProperties --> ComponentDefinition
+    SyncClientProperties --> ComponentDefinition
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt:18, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt:20, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt:20, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt:19 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt:24, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt:24, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveClientProperties.kt:22, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/SyncClientProperties.kt:22, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ComponentDefinition.kt:20 -->
+
+Since v3.0.0 the mode-specific settings live in their own role interfaces: a sync-only application never sees a reactive type in `ClientProperties`. All three are optional beans; `CoApiProperties` (Spring Boot) implements all of them, and without Spring Boot each one falls back to its `Empty` implementation.
 
 ## Customizer Invocation Order
 
@@ -2613,69 +2476,63 @@ When a `WebClient` or `RestClient` bean is created, customizers are applied in a
 ```mermaid
 sequenceDiagram
     autonumber
-    participant FB as AbstractWebClientFactoryBean
+    participant FB as WebClientFactoryBean
     participant CTX as ApplicationContext
     participant Builder as WebClient.Builder
-    participant Props as ClientProperties
-    participant LB as builderCustomizer
-    participant Global as Global Customizers
+    participant LB as LoadBalancedWebClientBuilderCustomizer
+    participant Global as WebClientBuilderCustomizer beans
 
+    FB->>CTX: ClientProperties.resolve(definition)
+    CTX-->>FB: effective definition
     FB->>CTX: getBean(WebClient.Builder)
     CTX-->>Builder: builder instance
-    FB->>FB: getBaseUrl() → set baseUrl
-    FB->>Props: getFilter(definition.name)
-    Props-->>FB: FilterDefinition
-    FB->>Builder: apply filters (names + types)
-    FB->>LB: builderCustomizer.customize(definition, builder)
-    LB->>Builder: add LoadBalancedExchangeFilterFunction if load-balanced
-    FB->>CTX: getBeanProvider(WebClientBuilderCustomizer).orderedStream()
-    loop For each global customizer (ordered)
-        Global->>Builder: customize(definition, builder)
+    FB->>Builder: baseUrl(effective.baseUrl)
+    FB->>CTX: ReactiveClientProperties.getFilter(name)
+    FB->>Builder: apply filters (names, then types)
+    opt effective.loadBalanced
+        FB->>LB: customize(effective, builder)
+        LB->>Builder: add LoadBalancedExchangeFilterFunction unless present
+    end
+    loop For each customizer bean (ordered)
+        FB->>Global: customize(effective, builder)
     end
     FB->>Builder: build()
-    Builder-->>FB: WebClient instance
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt:38-54, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:30-43 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:32-45 -->
 
-The invocation order in [AbstractWebClientFactoryBean.getObject()](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt#L38):
+The invocation order in [WebClientFactoryBean.getObject()](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L32) (`RestClientFactoryBean` is symmetric with interceptors):
 
 | Order | Step | What | Configurable? |
 |-------|------|------|---------------|
-| 1 | Get builder | `WebClient.Builder` from ApplicationContext | No |
-| 2 | Set base URL | `getBaseUrl()` — properties override annotation | Via `coapi.clients.<name>.base-url` |
-| 3 | Apply filters | `FilterDefinition` from `ClientProperties` | Via YAML |
-| 4 | Per-type customizer | Load balancing filter or `NoOp` | Automatic |
-| 5 | Global customizers | All `WebClientBuilderCustomizer` beans, ordered | Register as Spring bean |
+| 1 | Resolve effective definition | `ClientProperties.resolve(definition)` — `coapi.clients.<name>.*` overrides the annotation | Via YAML |
+| 2 | Get builder | `WebClient.Builder` from ApplicationContext | No |
+| 3 | Set base URL | `effective.baseUrl` | Via `coapi.clients.<name>.base-url` |
+| 4 | Apply filters | `ComponentDefinition` from `ReactiveClientProperties` | Via YAML |
+| 5 | Load balancing | Only when `effective.loadBalanced` | Automatic |
+| 6 | Customizer beans | All `WebClientBuilderCustomizer` beans, ordered | Register as Spring bean |
+
+Customizers receive the **effective** definition (since v3.0.0): `coApiDefinition.baseUrl` and `coApiDefinition.loadBalanced` already reflect the `coapi.clients.<name>.*` overrides.
 
 ## Customizer Decision Flow
 
 ```mermaid
 flowchart TD
-    A[FactoryBean.getObject()] --> B[Get Builder from Context]
+    A["FactoryBean.getObject()"] --> A2["Resolve effective definition"]
+    A2 --> B["Get Builder from Context"]
     B --> C[Set baseUrl]
     C --> D[Apply per-client filters/interceptors]
     D --> E{Load balanced?}
     E -->|Yes| F[Add LB filter/interceptor]
-    E -->|No| G[NoOp customizer]
-    F --> H[Apply global customizers]
-    G --> H
+    E -->|No| H[Apply customizer beans]
+    F --> H
     H --> I[Build client]
 
-    style A fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style B fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style C fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style D fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style E fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style F fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style G fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style H fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
-    style I fill:#2d333b,stroke:#6d5dfc,color:#e6edf3
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt:38-54, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt:34-56 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:32-45, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:32-50 -->
 
 ## Per-Client Filter Configuration
 
-Filters and interceptors are configured per client via YAML properties. The `ClientProperties` interface provides typed access:
+Filters and interceptors are configured per client via YAML properties; `ReactiveClientProperties` and `SyncClientProperties` provide typed access:
 
 **Reactive (WebClient) filters:**
 ```yaml
@@ -2703,7 +2560,7 @@ coapi:
             - com.example.LoggingInterceptor
 ```
 
-Filter resolution in [AbstractWebClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt):
+Resolution in [AbstractHttpClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) (all names first, then all types):
 - **names** → resolved as beans from `ApplicationContext` by name
 - **types** → resolved as beans from `ApplicationContext` by class type
 
@@ -2764,12 +2621,38 @@ coapi:
             - bearerTokenFilter
 ```
 
+## Custom HttpExchangeAdapterFactory
+
+`HttpExchangeAdapterFactory` decides how an HTTP client bean (WebClient or RestClient) is turned into the `HttpExchangeAdapter` that powers the interface proxy. You can replace the default factory with your own bean — for example to wrap adapters with metrics or tracing:
+
+```kotlin
+@Configuration(proxyBeanMethods = false)
+class MyCoApiConfiguration {
+    @Bean
+    fun customHttpExchangeAdapterFactory(): HttpExchangeAdapterFactory =
+        HttpExchangeAdapterFactory { beanFactory, httpClientName ->
+            val webClient = beanFactory.getBean(httpClientName, WebClient::class.java)
+            MetricsWebClientAdapter.wrap(WebClientAdapter.create(webClient))
+        }
+}
+```
+
+Resolution order in [CoApiFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) (since v2.1.1):
+
+| Scenario | Factory used |
+|----------|--------------|
+| Exactly one `HttpExchangeAdapterFactory` bean | That bean |
+| Multiple candidates, one marked `@Primary` | The `@Primary` bean |
+| Multiple candidates, none primary | The bean registered under the standard name `CoApi.HttpExchangeAdapterFactory` (the registrar default) |
+
+Registering a custom factory under the standard bean name replaces the default outright; a custom factory under any other name takes effect only when it is the single candidate or marked `@Primary`. Before v2.1.1, multiple non-primary candidates failed startup with `NoUniqueBeanDefinitionException`.
+
 ## YAML Configuration Reference
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `coapi.clients.<name>.base-url` | String | `""` | Override annotation's baseUrl |
-| `coapi.clients.<name>.load-balanced` | Boolean | `null` | Override load balancing |
+| `coapi.clients.<name>.load-balanced` | Boolean | `null` | Override load balancing (`true` enables, `false` disables; unset falls back to the annotation) |
 | `coapi.clients.<name>.reactive.filter.names` | List | `[]` | Filter bean names |
 | `coapi.clients.<name>.reactive.filter.types` | List | `[]` | Filter class types |
 | `coapi.clients.<name>.sync.interceptor.names` | List | `[]` | Interceptor bean names |
@@ -2788,8 +2671,8 @@ coapi:
 2. [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt`
 3. [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt`
 4. [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt`
-5. [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt`
-6. [AbstractRestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt`
+5. [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt`
+6. [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt`
 7. [ConsumerWebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerWebClientBuilderCustomizer.kt) — `example/example-consumer-server/src/main/kotlin/.../ConsumerWebClientBuilderCustomizer.kt`
 </doc>
 
@@ -2809,11 +2692,11 @@ The authentication layer leverages Spring WebFlux's reactive programming model t
 
 | Component | Responsibility | Key Features | Source |
 |----------|---------------|---------------|--------|
-| `HeaderSetFilter` | Generic header injection on requests | Configurable header names, value providers, mappers | [HeaderSetFilter.kt:22](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt#L22) |
-| `BearerTokenFilter` | Authorization header injection | Bearer token prefix, token provider integration | [BearerTokenFilter.kt:18](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt#L18) |
-| `ExpirableToken` | Token with expiration information | JWT expiry detection, time-based validation | [ExpirableToken.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L19) |
-| `ExpirableTokenProvider` | Token provider interface | Reactive token fetching, header value mapping | [ExpirableTokenProvider.kt:33](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L33) |
-| `CachedExpirableTokenProvider` | Cached token provider | Reactive caching, automatic expiry invalidation | [CachedExpirableTokenProvider.kt:19](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt#L19) |
+| `HeaderSetFilter` | Generic header injection on requests | Configurable header names, value providers, mappers | [HeaderSetFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/HeaderSetFilter.kt#L22) |
+| `BearerTokenFilter` | Authorization header injection | Bearer token prefix, token provider integration | [BearerTokenFilter.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/BearerTokenFilter.kt#L18) |
+| `ExpirableToken` | Token with expiration information | JWT expiry detection, time-based validation | [ExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L19) |
+| `ExpirableTokenProvider` | Token provider interface | Reactive token fetching, header value mapping | [ExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/ExpirableTokenProvider.kt#L33) |
+| `CachedExpirableTokenProvider` | Cached token provider | Reactive caching, automatic expiry invalidation | [CachedExpirableTokenProvider.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/CachedExpirableTokenProvider.kt#L19) |
 
 ## Class Hierarchy
 
@@ -2827,52 +2710,43 @@ classDiagram
         +HeaderValueMapper headerValueMapper
         +filter(ClientRequest, ExchangeFunction)
     }
-    
     class ExchangeFilterFunction {
         <<interface>>
         +filter(ClientRequest, ExchangeFunction)
     }
-    
     class HeaderValueProvider {
         <<fun interface>>
         +getHeaderValue(): Mono~String~
     }
-    
     class HeaderValueMapper {
         <<fun interface>>
         +map(String): String
     }
-    
     class BearerTokenFilter {
         -ExpirableTokenProvider tokenProvider
         +filter(ClientRequest, ExchangeFunction)
     }
-    
     class BearerHeaderValueMapper {
         <<object>>
         +map(String): String
         +String.withBearerPrefix()
     }
-    
     class ExpirableToken {
         +String token
         +Long expireAt
         +Boolean isExpired
         +String.jwtToExpirableToken()
     }
-    
     class ExpirableTokenProvider {
         <<interface>>
         +getToken(): Mono~ExpirableToken~
         +getHeaderValue(): Mono~String~
     }
-    
     class CachedExpirableTokenProvider {
         +ExpirableTokenProvider delegate
         +Mono~ExpirableToken~ tokenCache
         +getToken(): Mono~ExpirableToken~
     }
-    
     HeaderSetFilter --> ExchangeFilterFunction : implements
     HeaderSetFilter --> HeaderValueProvider : uses
     HeaderSetFilter --> HeaderValueMapper : uses
@@ -2881,16 +2755,6 @@ classDiagram
     BearerHeaderValueMapper --> HeaderValueMapper : implements
     ExpirableTokenProvider --> HeaderValueProvider : extends
     CachedExpirableTokenProvider --> ExpirableTokenProvider : implements
-    
-    style HeaderSetFilter fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style ExchangeFilterFunction fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style HeaderValueProvider fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style HeaderValueMapper fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style BearerTokenFilter fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style BearerHeaderValueMapper fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style ExpirableToken fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style ExpirableTokenProvider fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style CachedExpirableTokenProvider fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
 ```
 
 ## Token Caching Flow
@@ -2901,43 +2765,33 @@ The reactive caching mechanism ensures efficient token management while maintain
 sequenceDiagram
     participant C as CachedExpirableTokenProvider
     participant D as Delegate Provider
-    participant T as Mono~ExpirableToken~
+    participant T as Mono
     participant R as Reactive Cache
     participant U as User Request
     participant E as Expiration Check
-    
     autonumber
-    
-    U->>C: getToken()
+    U->>C: getToken
     C->>T: tokenCache
     alt Cache Empty
-        T->>D: getToken()
-        D->>D: Fetch token from source
+        T->>D: getToken
+        D->>D: Fetch token
         D->>T: Return ExpirableToken
-        T->>R: cacheInvalidateIf { it.isExpired }
+        T->>R: cacheInvalidateIf
         R->>C: Return cached Mono
         T->>U: Return cached token
     else Cache Valid
         T->>U: Return cached token
     else Cache Expired
         T->>E: Check expiration
-        E->>R: cacheInvalidateIf { true }
+        E->>R: cacheInvalidateIf
         R->>T: Force refresh
-        T->>D: getToken()
+        T->>D: getToken
         D->>D: Fetch fresh token
-        D->>T: Return new ExpirableToken
+        D->>T: Return ExpirableToken
         T->>R: Update cache
         T->>U: Return fresh token
     end
-    
-    style C fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style D fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style T fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style R fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style U fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style E fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    
-    note over C,C: Uses Mono.cacheInvalidateIf for reactive caching
+    note over C,C: Reactive caching
 ```
 
 ## Request Authentication Flow
@@ -2952,44 +2806,36 @@ sequenceDiagram
     participant T as CachedExpirableTokenProvider
     participant C as Cache
     participant P as ExpirableToken
-    
     autonumber
-    
-    U->>R: makeRequest()
-    R->>F: filter(request)
+    U->>R: makeRequest
+    R->>F: filter request
     alt Authorization Header Exists
-        F->>R: Skip, pass through
+        F->>R: Skip
         R->>U: Return response
     else No Authorization Header
-        F->>T: getHeaderValue()
-        alt Token Cached and Valid
+        F->>T: getHeaderValue
+        alt Token Cached
             T->>C: Get cached token
             C->>T: Return ExpirableToken
-            T->>F: Return token string
-        else Token Expired or Not Cached
-            T->>P: getToken()
-            P->>P: Check if expired
-            alt Token Expired
+            T->>F: Return token
+        else Token Expired
+            T->>P: getToken
+            P->>P: Check expired
+            alt Expired
                 P->>C: Force refresh
-                C->>T: Invalidate cache
-                T->>P: fetchNewToken()
+                C->>T: Invalidate
+                T->>P: fetchNewToken
                 P->>P: return new token
-            else Token Valid
-                P->>T: Return existing token
+            else Valid
+                P->>T: Return token
             end
-            T->>F: Return token string
+            T->>F: Return token
         end
-        F->>F: map with Bearer prefix
-        F->>F: Set Authorization header
-        F->>R: Continue with request
+        F->>F: Bearer prefix
+        F->>F: Authorization header
+        F->>R: Continue
         R->>U: Return response
-        
-        style U fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-        style R fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-        style F fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-        style T fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-        style C fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-        style P fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
+    end
 ```
 
 ## JWT Expiry Check State Diagram
@@ -2999,32 +2845,19 @@ The token management system handles JWT expiry checks through a state machine ap
 ```mermaid
 stateDiagram-v2
     [*] --> NotRequested
-    
-    NotRequested --> Fetching : getToken() called
+    NotRequested --> Fetching : getToken called
     Fetching --> ValidToken : Token received, not expired
     Fetching --> InvalidToken : Token received, expired
     Fetching --> Error : Token fetch failed
-    
     ValidToken --> Cached : Token cached
     Cached --> ValidCheck : Check if still valid
     ValidCheck --> ValidToken : Token still valid
     ValidCheck --> Expired : Token expired
     Expired --> Fetching : Auto-refresh triggered
-    
     InvalidToken --> Fetching : Force refresh
     Error --> Fetching : Retry after delay
-    
     [*] --> ValidToken : Initial token fetch
     ValidToken --> [*] : Application shutdown
-    
-    style NotRequested fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
-    style Fetching fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style ValidToken fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style InvalidToken fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style Cached fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style ValidCheck fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style Expired fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
-    style Error fill:#2d333b,stroke:#6d5dfc,stroke-width:2px,color:#e6edf3
 ```
 
 ## Core Components
@@ -3086,14 +2919,16 @@ data class ExpirableToken(val token: String, val expireAt: Long) {
         private val jwtParser = JWT()
         fun String.jwtToExpirableToken(): ExpirableToken {
             val decodedJWT = jwtParser.decodeJwt(this)
-            val expiresAt = checkNotNull(decodedJWT.expiresAt)
+            val expiresAt = checkNotNull(decodedJWT.expiresAt) {
+                "JWT token has no exp claim - required for expirable tokens."
+            }
             return ExpirableToken(this, expiresAt.time)
         }
     }
 }
 ```
 
-The companion object provides a convenient extension function to convert JWT strings to `ExpirableToken` instances by decoding the JWT and extracting the expiration timestamp.
+The companion object provides a convenient extension function to convert JWT strings to `ExpirableToken` instances by decoding the JWT and extracting the expiration timestamp. The `exp` claim is required: since v2.2.0, a JWT without it fails with "JWT token has no exp claim - required for expirable tokens." (previously a bare `Required value was null.`). Note that JWT `exp` is a Unix timestamp in seconds, so the millisecond precision of the original `Date` is truncated.
 
 ### CachedExpirableTokenProvider
 
@@ -3198,10 +3033,10 @@ class WebClientConfig {
 ## Cross-References
 
 - [Getting Started](../getting-started/index.md) - Introduction to CoApi basics
-- [Client Modes](../client-modes.md) - Understanding reactive vs sync operation
-- [Spring Boot Integration](../integrations/spring-boot.md) - Spring Boot specific patterns
+- [Client Modes](./client-modes.md) - Understanding reactive vs sync operation
+- [Spring Boot Integration](.md) - Spring Boot specific patterns
 - [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
-- [Annotations](../annotations.md) - Annotation-based configuration
+- [Annotations](./annotations.md) - Annotation-based configuration
 
 ## References
 
@@ -3215,11 +3050,11 @@ class WebClientConfig {
 
 ### Related Pages
 
-- [Client Modes](../client-modes.md) - Understanding reactive vs sync operation
+- [Client Modes](./client-modes.md) - Understanding reactive vs sync operation
 - [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
-- [Spring Boot Integration](../integrations/spring-boot.md) - Spring Boot specific patterns
-- [Load Balancing](../load-balancing.md) - Load balancing integration
-- [Architecture Overview](../architecture.md) - System architecture and design
+- [Spring Boot Integration](.md) - Spring Boot specific patterns
+- [Load Balancing](./load-balancing.md) - Load balancing integration
+- [Architecture Overview](./architecture.md) - System architecture and design
 </doc>
 
 <doc title="auto-configuration" path="deep-dive/auto-configuration.md">
@@ -3257,11 +3092,11 @@ sequenceDiagram
     participant ABS as AbstractCoApiRegistrar
     participant CR as CoApiRegistrar
     
-    SB->>AC: @AutoConfiguration
-    AC->>CO: @ConditionalOnCoApiEnabled
+    SB->>AC: AutoConfiguration
+    AC->>CO: ConditionalOnCoApiEnabled
     CO->>AC: Check coapi.enabled=true (default)
-    AC->>AC: @Import(AutoCoApiRegistrar)
-    AC->>AC: @EnableConfigurationProperties(CoApiProperties)
+    AC->>AC: Import AutoCoApiRegistrar
+    AC->>AC: EnableConfigurationProperties
     AC->>AC: return
     SB->>AC: Instantiate CoApiAutoConfiguration
     AC->>AC: Import AutoCoApiRegistrar
@@ -3281,7 +3116,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant DC as Developer Configuration
-    participant EC as @EnableCoApi
+    participant EC as EnableCoApi
     participant ECR as EnableCoApiRegistrar
     participant ABS as AbstractCoApiRegistrar
     participant CR as CoApiRegistrar
@@ -3347,19 +3182,39 @@ Handles automatic scanning and registration of CoApi clients:
 
 ```mermaid
 graph TD
-    A[AutoCoApiRegistrar] --> B[getCoApiDefinitions()]
-    A --> C[getScanBasePackages()]
-    B --> D[Scanned Definitions]
-    B --> E[Registered CoApiDefinition Beans]
-    C --> F[AutoConfigurationPackages.get()]
-    C --> G[coapi.base-packages Property]
-    D --> H[ApiClientScanner]
-    H --> I[ClassPathScanningCandidateComponentProvider]
-    I --> J[AnnotationTypeFilter(CoApi::class.java)]
-    I --> K[Interface Only Filter]
+    A["AutoCoApiRegistrar"] --> B["getCoApiDefinitions()"]
+    A --> C["getScanBasePackages()"]
+    B --> D["Scanned Definitions"]
+    B --> E["Registered CoApiDefinition Beans"]
+    C --> F["AutoConfigurationPackages.get()"]
+    C --> G["coapi.base-packages Property"]
+    D --> H["ApiClientScanner"]
+    H --> I["ClassPathScanningCandidateComponentProvider"]
+    I --> J["AnnotationTypeFilter(CoApi.class)"]
+    I --> K["Interface Only Filter"]
 ```
 
-The registrar combines automatically scanned interface definitions with any explicitly registered `CoApiDefinition` beans.
+The registrar combines automatically scanned interface definitions with any explicitly registered `CoApiDefinition` beans. Since v2.2.0, name conflicts within the merged set (e.g. a registered definition colliding with a scanned interface of the same client name) fail startup with an `IllegalStateException` listing the conflicting types.
+
+::: warning Declare `CoApiDefinition` beans with a static `@Bean` method
+`CoApiDefinition` beans are read while bean definitions are still being registered, before any `BeanPostProcessor` exists. A non-static `@Bean` method therefore forces its configuration class to be created too early: its `@Autowired`/`@Value` fields are not injected and its `@Bean` methods are not proxied. CoApi logs a warning for such methods since v2.3.0 and **fails startup since v3.0.0**. Declare the method static (Kotlin: `@JvmStatic` in a `companion object`) — the same rule Spring applies to `BeanFactoryPostProcessor` beans. Do not use `@Value` parameters (they are not resolved yet at that point): since v3.0.0 CoApi resolves `${...}` placeholders and the `lb://` scheme in a definition bean's `baseUrl` itself, exactly as for the `@CoApi` annotation:
+
+```kotlin
+@Configuration
+class OrderApiConfiguration {
+    companion object {
+        @JvmStatic
+        @Bean
+        fun orderApiDefinition(): CoApiDefinition = CoApiDefinition(
+            name = "OrderApi",
+            apiType = OrderApi::class.java,
+            baseUrl = "\${order.url}", // resolved by CoApi (v3.0.0+); on v2.3.x resolve it via an Environment parameter
+            loadBalanced = false,
+        )
+    }
+}
+```
+:::
 
 ```kotlin
 private fun getScanBasePackages(): Set<String> {
@@ -3460,22 +3315,22 @@ The scanning combines multiple base package sources:
 
 ```mermaid
 graph TD
-    A[Spring Boot Auto-configuration] --> B[CoApiAutoConfiguration]
-    B --> C[AutoCoApiRegistrar]
-    C --> D[Conditional Check]
-    D --> E{coapi.enabled=true?}
-    E -->|Yes| F[getCoApiDefinitions()]
-    E -->|No| G[Skip Configuration]
-    F --> H[getScanBasePackages()]
-    H --> I[AutoConfigurationPackages.get()]
-    H --> J[coapi.base-packages]
-    I --> K[Scan CoApi Interfaces]
+    A["Spring Boot Auto-configuration"] --> B["CoApiAutoConfiguration"]
+    B --> C["AutoCoApiRegistrar"]
+    C --> D["Conditional Check"]
+    D --> E{"coapi.enabled=true?"}
+    E -->|Yes| F["getCoApiDefinitions()"]
+    E -->|No| G["Skip Configuration"]
+    F --> H["getScanBasePackages()"]
+    H --> I["AutoConfigurationPackages.get()"]
+    H --> J["coapi.base-packages"]
+    I --> K["Scan CoApi Interfaces"]
     J --> K
-    K --> L[ApiClientScanner.findCandidateComponents()]
-    L --> M[Create CoApiDefinition]
-    M --> N[CoApiRegistrar.register()]
-    N --> O[Register HttpExchangeAdapterFactory]
-    O --> P[Register Client Beans]
+    K --> L["ApiClientScanner.findCandidateComponents()"]
+    L --> M["Create CoApiDefinition"]
+    M --> N["CoApiRegistrar.register()"]
+    N --> O["Register HttpExchangeAdapterFactory"]
+    O --> P["Register Client Beans"]
 ```
 
 ## Configuration Properties
@@ -3507,15 +3362,15 @@ This ensures that Spring Boot automatically discovers and includes the CoApi aut
 2. [Spring Boot @Conditional Annotations](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-conditional-on-property)
 3. [Spring ClassPathScanningCandidateComponentProvider](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ClassPathScanningCandidateComponentProvider.html)
 4. [Spring ImportBeanDefinitionRegistrar Interface](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ImportBeanDefinitionRegistrar.html)
-5. [CoApi @EnableCoApi Annotation](../../api/annotation.md)
-6. [CoApi Client Configuration](../../clients/configuration.md)
+5. [CoApi @EnableCoApi Annotation](.././annotations.md)
+6. [CoApi Client Configuration](.././customization
 
 ## Related Pages
 
-- [Client Configuration](../clients/configuration.md) - Detailed client configuration options
-- [Api Annotation](../api/annotation.md) - Using the @CoApi annotation
-- [Properties Configuration](../configuration/properties.md) - CoApi properties configuration
-- [Spring Integration](../integration/spring.md) - Advanced Spring integration patterns
+- [Client Configuration](./customization
+- [Api Annotation](./annotations.md) - Using the @CoApi annotation
+- [Properties Configuration](../getting-started/configuration.md) - CoApi properties configuration
+- [Spring Integration](.md) - Advanced Spring integration patterns
 </doc>
 
 <doc title="examples" path="deep-dive/examples.md">
@@ -3646,14 +3501,6 @@ graph TD
     D --> F[Filter via bean name in YAML]
     E --> G[Filter via class type in YAML]
     
-    style A fill:#161b22
-    style B fill:#161b22
-    style C fill:#161b22
-    style D fill:#2d333b
-    style E fill:#2d333b
-    style F fill:#2d333b
-    style G fill:#2d333b
-    
 ```
 
 **Filter Types:**
@@ -3717,14 +3564,6 @@ graph TD
     D --> F[Acquire timeout]
     D --> G[Idle timeout]
     
-    style A fill:#161b22
-    style B fill:#2d333b
-    style C fill:#2d333b
-    style D fill:#161b22
-    style E fill:#2d333b
-    style F fill:#2d333b
-    style G fill:#2d333b
-    
 ```
 
 **Implementation:**
@@ -3746,8 +3585,8 @@ graph TD
 ## Related Pages
 
 - [Getting Started](../getting-started.md) - Basic setup and configuration
-- [Configuration](../configuration.md) - Detailed configuration options
-- [Advanced Topics](../advanced-topics.md) - Advanced patterns and customizations
-- [Best Practices](../best-practices.md) - Recommended approaches and patterns
-- [Troubleshooting](../troubleshooting.md) - Common issues and solutions
+- [Configuration](../getting-started/configuration.md) - Detailed configuration options
+- [Advanced Topics](.md) - Advanced patterns and customizations
+- [Best Practices](.md) - Recommended approaches and patterns
+- [Troubleshooting](.md) - Common issues and solutions
 </doc>

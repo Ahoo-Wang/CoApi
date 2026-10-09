@@ -59,37 +59,36 @@ flowchart TD
 
 ## 运行时负载均衡决策
 
-在 bean 创建时，`AbstractHttpClientFactoryBean.loadBalanced()` 应用优先级顺序：
+创建客户端时，工厂 Bean 先解析出*生效的*定义：`ClientProperties.resolve(definition)` 通过 `CoApiDefinition.withOverrides()` 这一条规则，应用 `coapi.clients.<name>.*` 的覆盖配置：
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant FB as AbstractHttpClientFactoryBean
+    participant FB as WebClientFactoryBean / RestClientFactoryBean
     participant Props as ClientProperties
     participant Def as CoApiDefinition
 
-    FB->>Props: getLoadBalancedFromProperties(name)
-    alt Properties has load-balanced value
-        Props-->>FB: non-null Boolean
-        FB->>FB: return configured value (true/false)
-    else Properties has baseUrl
-        FB->>Props: getBaseUrlFromProperties(name)
-        Props-->>FB: non-blank URL
-        FB->>FB: return false (direct URL overrides)
-    else No properties override
-        FB->>Def: definition.loadBalanced
-        FB->>FB: return annotation-determined value
+    FB->>Props: resolve(definition)
+    Props->>Def: withOverrides(base-url, load-balanced)
+    alt 配置了 load-balanced
+        Def-->>FB: 配置值（true/false）
+    else 配置了 base-url
+        Def-->>FB: 仅 lb:// URL 为 true（改写为 http://）
+    else 无覆盖配置
+        Def-->>FB: 注解决定的值
     end
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt:42-56 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt:156, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt:39 -->
 
-**优先级**（[AbstractHttpClientFactoryBean.kt:42-56](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt#L42-L56)）：
+**优先级**（[CoApiDefinition.kt:156](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L156)）：
 
 | 优先级 | 来源 | 效果 |
-|----------|--------|--------|
+|--------|------|------|
 | 1（最高） | `coapi.clients.<name>.load-balanced` | 覆盖为配置值（`true` 启用，`false` 禁用） |
-| 2 | `coapi.clients.<name>.base-url`（非空） | 强制非负载均衡 |
-| 3（最低） | `@CoApi` / `@LoadBalanced` 注解 | 注解的默认值 |
+| 2 | `coapi.clients.<name>.base-url`（非空） | 仅 `lb://` URL 启用负载均衡（自 v2.3.0 起）；普通 `http(s)://` URL 则禁用 |
+| 3（最低） | `@CoApi` / `@LoadBalanced` 注解 | 注解决定的默认值 |
+
+`lb://` 前缀匹配不区分大小写（`LB://` 同样有效，自 v2.3.0 起）。如果某客户端被判定为负载均衡、但 classpath 上没有 Spring Cloud LoadBalancer，创建客户端时会抛出说明原因和解决办法的异常（自 v3.0.0 起），而不是 `NoClassDefFoundError`。
 
 ::: info
 自 v2.1.1 起，显式配置 `load-balanced: false` 会被正确尊重并禁用负载均衡——在 v2.1.1 之前，任何配置值（包括 `false`）都会被当作 `true`。配置键中的 `<name>` 是 `@CoApi` 的 `name` 属性；未设置时为接口的简单类名。
@@ -107,8 +106,8 @@ sequenceDiagram
     participant Builder as WebClient.Builder
     participant LB as LoadBalancedExchangeFilterFunction
 
-    FB->>FB: loadBalanced() → true
-    FB->>Builder: customize(definition, builder)
+    FB->>FB: effectiveDefinition().loadBalanced → true
+    FB->>Builder: LoadBalancedWebClientBuilderCustomizer.customize(definition, builder)
     Builder->>Builder: builder.filters { ... }
     Builder->>Builder: check: any existing LB filter (LoadBalanced or Deferring)?
     alt Already present
@@ -119,9 +118,9 @@ sequenceDiagram
         Builder->>Builder: filters.add(LB)
     end
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:30-43 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:38-42, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/LoadBalancedWebClientBuilderCustomizer.kt:36 -->
 
-`LoadBalancedWebClientBuilderCustomizer` 内部类（[WebClientFactoryBean.kt:34-43](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L34-L43)）在添加前检查重复项，确保幂等性。该检查同时识别 `LoadBalancedExchangeFilterFunction` 与 Spring Cloud 的 `DeferringLoadBalancerExchangeFilterFunction`（`@LoadBalanced WebClient.Builder` 上的默认装配），因此已带负载均衡能力的 Builder 不会被重复装配。
+内部的 `LoadBalancedWebClientBuilderCustomizer`（[LoadBalancedWebClientBuilderCustomizer.kt:36](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/LoadBalancedWebClientBuilderCustomizer.kt#L36)）只作用于负载均衡的客户端，在添加前检查重复项，确保幂等性。该检查同时识别 `LoadBalancedExchangeFilterFunction` 与 Spring Cloud 的 `DeferringLoadBalancerExchangeFilterFunction`（`@LoadBalanced WebClient.Builder` 上的默认装配），因此已带负载均衡能力的 Builder 不会被重复装配。
 
 ## RestClient 负载均衡
 
@@ -135,8 +134,8 @@ sequenceDiagram
     participant Builder as RestClient.Builder
     participant LB as BlockingLoadBalancerInterceptor
 
-    FB->>FB: loadBalanced() → true
-    FB->>Builder: customize(definition, builder)
+    FB->>FB: effectiveDefinition().loadBalanced → true
+    FB->>Builder: LoadBalancedRestClientBuilderCustomizer.customize(definition, builder)
     Builder->>Builder: builder.requestInterceptors { ... }
     Builder->>Builder: check: any existing LB interceptor (Blocking or Deferring)?
     alt Already present
@@ -147,7 +146,7 @@ sequenceDiagram
         Builder->>Builder: interceptors.add(LB)
     end
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:30-43 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:40-47, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/LoadBalancedRestClientBuilderCustomizer.kt:35 -->
 
 拦截器按 `BlockingLoadBalancerInterceptor` 接口解析，而非具体的 `LoadBalancerInterceptor` 类，因此无论 Spring Cloud 注册的是普通拦截器还是 `RetryLoadBalancerInterceptor`（启用重试时）都能正确工作。与响应式侧一致，去重检查也识别 Spring Cloud 安装在 `@LoadBalanced RestClient.Builder` 上的 `DeferringLoadBalancerInterceptor`。
 
@@ -172,12 +171,12 @@ coapi:
 
 | 属性 | 类型 | 适用于 | 来源 |
 |----------|------|-----------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | Bean 名称 | WebClient（响应式） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.reactive.filter.types` | 类类型 | WebClient（响应式） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.sync.interceptor.names` | Bean 名称 | RestClient（同步） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
-| `coapi.clients.<name>.sync.interceptor.types` | 类类型 | RestClient（同步） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
+| `coapi.clients.<name>.reactive.filter.names` | Bean 名称 | WebClient（响应式） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
+| `coapi.clients.<name>.reactive.filter.types` | 类类型 | WebClient（响应式） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
+| `coapi.clients.<name>.sync.interceptor.names` | Bean 名称 | RestClient（同步） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
+| `coapi.clients.<name>.sync.interceptor.types` | 类类型 | RestClient（同步） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
 
-[AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) 中的过滤器解析从 `ApplicationContext` 解析 bean 名称和类型。
+工厂 Bean 通过 [AbstractHttpClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) 从 `ApplicationContext` 解析这些引用——先按名称、再按类型。过滤器来自 `ReactiveClientProperties`，拦截器来自 `SyncClientProperties`（两者都由 `CoApiProperties` 实现）。
 
 ## 服务发现配置
 
@@ -219,7 +218,7 @@ spring:
 1. [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt`
 2. [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt`
 3. [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt`
-4. [AbstractHttpClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt`
+4. [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt`
 5. [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt`
 6. [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt`
 7. [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt) — `spring-boot-starter/src/main/kotlin/.../CoApiProperties.kt`

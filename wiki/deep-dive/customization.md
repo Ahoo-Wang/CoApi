@@ -16,14 +16,15 @@ CoApi's HTTP clients are not black boxes. The library exposes a layered customiz
 | Base SPI | `HttpClientBuilderCustomizer<Builder>` | All clients | [HttpClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt) | [HttpClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt#L18) |
 | Reactive customizer | `WebClientBuilderCustomizer` | WebClient clients | [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt) | [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt#L20) |
 | Sync customizer | `RestClientBuilderCustomizer` | RestClient clients | [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt) | [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt#L20) |
-| Per-client config | `ClientProperties` | Individual clients | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L19) |
-| Per-client filters | `FilterDefinition` / `InterceptorDefinition` | Individual clients | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L25) |
+| Per-client endpoint | `ClientProperties` | Individual clients | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L24) |
+| Per-client filters | `ReactiveClientProperties` → `ComponentDefinition<ExchangeFilterFunction>` | WebClient clients | [ReactiveClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveClientProperties.kt) | [ReactiveClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveClientProperties.kt#L24) |
+| Per-client interceptors | `SyncClientProperties` → `ComponentDefinition<ClientHttpRequestInterceptor>` | RestClient clients | [SyncClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/SyncClientProperties.kt) | [SyncClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/SyncClientProperties.kt#L24) |
 
 ## Customizer Class Hierarchy
 
 ```mermaid
 classDiagram
-    class HttpClientBuilderCustomiabler~Builder~ {
+    class HttpClientBuilderCustomizer~Builder~ {
         <<fun interface>>
         +customize(CoApiDefinition, Builder)
     }
@@ -41,24 +42,29 @@ classDiagram
         <<interface>>
         +getBaseUri(String) String
         +getLoadBalanced(String) Boolean?
-        +getFilter(String) FilterDefinition
-        +getInterceptor(String) InterceptorDefinition
+        +resolve(CoApiDefinition) CoApiDefinition
     }
-    class FilterDefinition {
-        +names: List~String~
-        +types: List~Class~
+    class ReactiveClientProperties {
+        <<fun interface>>
+        +getFilter(String) ComponentDefinition
     }
-    class InterceptorDefinition {
+    class SyncClientProperties {
+        <<fun interface>>
+        +getInterceptor(String) ComponentDefinition
+    }
+    class ComponentDefinition~T~ {
         +names: List~String~
         +types: List~Class~
     }
 
     HttpClientBuilderCustomizer <|-- WebClientBuilderCustomizer
     HttpClientBuilderCustomizer <|-- RestClientBuilderCustomizer
-    ClientProperties --> FilterDefinition
-    ClientProperties --> InterceptorDefinition
+    ReactiveClientProperties --> ComponentDefinition
+    SyncClientProperties --> ComponentDefinition
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt:18, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt:20, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt:20, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt:19 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt:24, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt:24, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveClientProperties.kt:22, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/SyncClientProperties.kt:22, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ComponentDefinition.kt:20 -->
+
+Since v3.0.0 the mode-specific settings live in their own role interfaces: a sync-only application never sees a reactive type in `ClientProperties`. All three are optional beans; `CoApiProperties` (Spring Boot) implements all of them, and without Spring Boot each one falls back to its `Empty` implementation.
 
 ## Customizer Invocation Order
 
@@ -67,60 +73,63 @@ When a `WebClient` or `RestClient` bean is created, customizers are applied in a
 ```mermaid
 sequenceDiagram
     autonumber
-    participant FB as AbstractWebClientFactoryBean
+    participant FB as WebClientFactoryBean
     participant CTX as ApplicationContext
     participant Builder as WebClient.Builder
-    participant Props as ClientProperties
-    participant LB as builderCustomizer
-    participant Global as Global Customizers
+    participant LB as LoadBalancedWebClientBuilderCustomizer
+    participant Global as WebClientBuilderCustomizer beans
 
+    FB->>CTX: ClientProperties.resolve(definition)
+    CTX-->>FB: effective definition
     FB->>CTX: getBean(WebClient.Builder)
     CTX-->>Builder: builder instance
-    FB->>FB: getBaseUrl() → set baseUrl
-    FB->>Props: getFilter(definition.name)
-    Props-->>FB: FilterDefinition
-    FB->>Builder: apply filters (names + types)
-    FB->>LB: builderCustomizer.customize(definition, builder)
-    LB->>Builder: add LoadBalancedExchangeFilterFunction if load-balanced
-    FB->>CTX: getBeanProvider(WebClientBuilderCustomizer).orderedStream()
-    loop For each global customizer (ordered)
-        Global->>Builder: customize(definition, builder)
+    FB->>Builder: baseUrl(effective.baseUrl)
+    FB->>CTX: ReactiveClientProperties.getFilter(name)
+    FB->>Builder: apply filters (names, then types)
+    opt effective.loadBalanced
+        FB->>LB: customize(effective, builder)
+        LB->>Builder: add LoadBalancedExchangeFilterFunction unless present
+    end
+    loop For each customizer bean (ordered)
+        FB->>Global: customize(effective, builder)
     end
     FB->>Builder: build()
-    Builder-->>FB: WebClient instance
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt:38-54, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:30-43 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:32-45 -->
 
-The invocation order in [AbstractWebClientFactoryBean.getObject()](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt#L38):
+The invocation order in [WebClientFactoryBean.getObject()](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L32) (`RestClientFactoryBean` is symmetric with interceptors):
 
 | Order | Step | What | Configurable? |
 |-------|------|------|---------------|
-| 1 | Get builder | `WebClient.Builder` from ApplicationContext | No |
-| 2 | Set base URL | `getBaseUrl()` — properties override annotation | Via `coapi.clients.<name>.base-url` |
-| 3 | Apply filters | `FilterDefinition` from `ClientProperties` | Via YAML |
-| 4 | Per-type customizer | Load balancing filter or `NoOp` | Automatic |
-| 5 | Global customizers | All `WebClientBuilderCustomizer` beans, ordered | Register as Spring bean |
+| 1 | Resolve effective definition | `ClientProperties.resolve(definition)` — `coapi.clients.<name>.*` overrides the annotation | Via YAML |
+| 2 | Get builder | `WebClient.Builder` from ApplicationContext | No |
+| 3 | Set base URL | `effective.baseUrl` | Via `coapi.clients.<name>.base-url` |
+| 4 | Apply filters | `ComponentDefinition` from `ReactiveClientProperties` | Via YAML |
+| 5 | Load balancing | Only when `effective.loadBalanced` | Automatic |
+| 6 | Customizer beans | All `WebClientBuilderCustomizer` beans, ordered | Register as Spring bean |
+
+Customizers receive the **effective** definition (since v3.0.0): `coApiDefinition.baseUrl` and `coApiDefinition.loadBalanced` already reflect the `coapi.clients.<name>.*` overrides.
 
 ## Customizer Decision Flow
 
 ```mermaid
 flowchart TD
-    A["FactoryBean.getObject()"] --> B["Get Builder from Context"]
+    A["FactoryBean.getObject()"] --> A2["Resolve effective definition"]
+    A2 --> B["Get Builder from Context"]
     B --> C[Set baseUrl]
     C --> D[Apply per-client filters/interceptors]
     D --> E{Load balanced?}
     E -->|Yes| F[Add LB filter/interceptor]
-    E -->|No| G[NoOp customizer]
-    F --> H[Apply global customizers]
-    G --> H
+    E -->|No| H[Apply customizer beans]
+    F --> H
     H --> I[Build client]
 
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt:38-54, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt:34-56 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:32-45, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:32-50 -->
 
 ## Per-Client Filter Configuration
 
-Filters and interceptors are configured per client via YAML properties. The `ClientProperties` interface provides typed access:
+Filters and interceptors are configured per client via YAML properties; `ReactiveClientProperties` and `SyncClientProperties` provide typed access:
 
 **Reactive (WebClient) filters:**
 ```yaml
@@ -148,7 +157,7 @@ coapi:
             - com.example.LoggingInterceptor
 ```
 
-Filter resolution in [AbstractWebClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt):
+Resolution in [AbstractHttpClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) (all names first, then all types):
 - **names** → resolved as beans from `ApplicationContext` by name
 - **types** → resolved as beans from `ApplicationContext` by class type
 
@@ -259,6 +268,6 @@ Registering a custom factory under the standard bean name replaces the default o
 2. [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt`
 3. [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt`
 4. [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt`
-5. [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt`
-6. [AbstractRestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt`
+5. [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt`
+6. [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt`
 7. [ConsumerWebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerWebClientBuilderCustomizer.kt) — `example/example-consumer-server/src/main/kotlin/.../ConsumerWebClientBuilderCustomizer.kt`

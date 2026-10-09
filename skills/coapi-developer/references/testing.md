@@ -53,35 +53,28 @@ interface MockServiceApi
 
 ## HTTP Client Factory Precedence Test
 
-When testing final base URL selection, assert that per-client configuration wins over the parsed
-definition URL. Include the local factory and definition helpers from
-`spring/src/test/kotlin/me/ahoo/coapi/spring/client/IHttpClientFactoryBeanTest.kt`.
+When testing final base URL selection, test the pure override rule — no Spring mocks needed. See
+`spring/src/test/kotlin/me/ahoo/coapi/spring/client/ClientPropertiesTest.kt`.
 
 ```kotlin
-private val mockDefinition = CoApiDefinition(
-    name = "testClient",
-    apiType = Any::class.java,
-    baseUrl = "http://localhost:8080",
-    loadBalanced = false
-)
+class ClientPropertiesTest {
+    private val definition = CoApiDefinition(
+        name = "testClient",
+        apiType = Any::class.java,
+        baseUrl = "http://localhost:8080",
+        loadBalanced = false
+    )
 
-private class TestHttpClientFactoryBean(
-    override val definition: CoApiDefinition
-) : AbstractHttpClientFactoryBean()
+    private fun properties(baseUrl: String = "", loadBalanced: Boolean? = null) = object : ClientProperties {
+        override fun getBaseUri(coApiName: String): String = baseUrl
+        override fun getLoadBalanced(coApiName: String): Boolean? = loadBalanced
+    }
 
-class IHttpClientFactoryBeanTest {
     @Test
-    fun `getBaseUrl should return URL from properties when available`() {
-        val mockApplicationContext = mockk<ApplicationContext>()
-        val mockClientProperties = mockk<ClientProperties>()
-
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
-        every { mockClientProperties.getBaseUri("testClient") } returns "http://properties-url:9090"
-
-        val factoryBean = TestHttpClientFactoryBean(mockDefinition)
-        factoryBean.setApplicationContext(mockApplicationContext)
-
-        factoryBean.getBaseUrl().assert().isEqualTo("http://properties-url:9090")
+    fun `lb scheme in configured base URL should be rewritten and imply load balancing`() {
+        val resolved = properties(baseUrl = "lb://order-service").resolve(definition)
+        resolved.baseUrl.assert().isEqualTo("http://order-service")
+        resolved.loadBalanced.assert().isTrue()
     }
 }
 ```

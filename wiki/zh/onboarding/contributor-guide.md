@@ -542,22 +542,25 @@ interface GitHubApiClient {
 
 #### 负载均衡实现
 
-负载均衡通过构建器自定义器实现：
+负载均衡的客户端会得到一个内部的 Builder 定制器；只有当生效的定义是负载均衡时，工厂 Bean 才会应用它（因此 Spring Cloud 仍是可选依赖）：
 
 ```kotlin
-// From WebClientFactoryBean.kt
-private class LoadBalancedWebClientBuilderCustomizer : WebClient.Builder.() -> Unit {
-    override fun invoke(builder: WebClient.Builder) {
-        builder.filter(loadBalancerExchangeFilterFunction())
+// spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/LoadBalancedWebClientBuilderCustomizer.kt
+internal class LoadBalancedWebClientBuilderCustomizer(
+    private val beanFactory: BeanFactory
+) : WebClientBuilderCustomizer {
+    override fun customize(coApiDefinition: CoApiDefinition, builder: WebClient.Builder) {
+        builder.filters { filters ->
+            val hasLoadBalancedFilter = filters.any { filter ->
+                filter is LoadBalancedExchangeFilterFunction || filter is DeferringLoadBalancerExchangeFilterFunction<*>
+            }
+            if (!hasLoadBalancedFilter) {
+                filters.add(beanFactory.getBean(LoadBalancedExchangeFilterFunction::class.java))
+            }
+        }
     }
 }
-
-// From RestClientFactoryBean.kt
-private class LoadBalancedRestClientBuilderCustomizer : RestClient.Builder.() -> Unit {
-    override fun invoke(builder: RestClient.Builder) {
-        builder.requestInterceptor(loadBalancerInterceptor)
-    }
-}
+// 同步模式对应的 LoadBalancedRestClientBuilderCustomizer 会添加 BlockingLoadBalancerInterceptor。
 ```
 
 ### 认证

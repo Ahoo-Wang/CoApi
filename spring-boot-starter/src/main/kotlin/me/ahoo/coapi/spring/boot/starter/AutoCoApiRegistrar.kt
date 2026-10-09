@@ -13,7 +13,6 @@
 
 package me.ahoo.coapi.spring.boot.starter
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import me.ahoo.coapi.api.CoApi
 import me.ahoo.coapi.spring.AbstractCoApiRegistrar
 import me.ahoo.coapi.spring.CoApiDefinition
@@ -30,9 +29,6 @@ import org.springframework.core.type.AnnotationMetadata
 import org.springframework.core.type.filter.AnnotationTypeFilter
 
 class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
-    companion object {
-        private val log = KotlinLogging.logger {}
-    }
 
     /**
      * Binds `coapi.base-packages` in either form (comma-separated or indexed list) with Boot's
@@ -63,31 +59,32 @@ class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
 
     /**
      * Collects [CoApiDefinition] beans. They have to be instantiated here, while bean definitions are still
-     * being registered and before any `BeanPostProcessor` exists, so lookup never triggers eager
-     * initialization for type matching, and instance `@Bean` methods are flagged (see [warnIfInstanceFactoryMethod]).
+     * being registered and before any `BeanPostProcessor` exists. Hence: lookup never triggers eager
+     * initialization for type matching, instance `@Bean` methods are rejected (see [requireStaticFactoryMethod]),
+     * and placeholders in [CoApiDefinition.baseUrl] are resolved here, like on the `@CoApi` annotation.
      */
     private fun getCoApiDefinitionBeans(): List<CoApiDefinition> {
         val beanFactory = appContext as? ConfigurableListableBeanFactory
-            ?: return appContext.getBeanProvider<CoApiDefinition>().toList()
+            ?: return appContext.getBeanProvider<CoApiDefinition>().map { it.resolvePlaceholders(env) }
         return beanFactory.getBeanNamesForType(CoApiDefinition::class.java, true, false).map { beanName ->
-            beanFactory.warnIfInstanceFactoryMethod(beanName)
-            beanFactory.getBean(beanName, CoApiDefinition::class.java)
+            beanFactory.requireStaticFactoryMethod(beanName)
+            beanFactory.getBean(beanName, CoApiDefinition::class.java).resolvePlaceholders(env)
         }
     }
 
     /**
-     * A non-static `@Bean` method forces its configuration class to be created here, too early: its
-     * `@Autowired`/`@Value` fields are not injected and its `@Bean` methods are not proxied.
-     * Same pitfall and remedy as Spring's own `BeanFactoryPostProcessor` beans: declare the method static.
+     * A non-static `@Bean` method would force its configuration class to be created here, too early: its
+     * `@Autowired`/`@Value` fields would not be injected and its `@Bean` methods would not be proxied.
+     * Same pitfall as Spring's own `BeanFactoryPostProcessor` beans, but failing fast instead of degrading silently.
      */
-    private fun ConfigurableListableBeanFactory.warnIfInstanceFactoryMethod(beanName: String) {
+    private fun ConfigurableListableBeanFactory.requireStaticFactoryMethod(beanName: String) {
         val factoryBeanName = getBeanDefinition(beanName).factoryBeanName ?: return
-        log.warn {
-            "CoApiDefinition bean [$beanName] is declared by a non-static @Bean method on [$factoryBeanName], " +
-                "which is instantiated before bean post-processing: its @Autowired/@Value fields are not injected " +
-                "and its @Bean methods are not proxied. Declare the method static " +
-                "(Kotlin: @JvmStatic in a companion object) and resolve placeholders via an Environment parameter."
-        }
+        throw IllegalStateException(
+            "CoApiDefinition bean [$beanName] is declared by a non-static @Bean method on [$factoryBeanName]. " +
+                "CoApiDefinition beans are read before bean post-processing, which would create [$factoryBeanName] " +
+                "too early (no @Autowired/@Value injection, no @Bean proxying). Declare the method static " +
+                "(Kotlin: @JvmStatic in a companion object); placeholders in baseUrl are resolved by CoApi."
+        )
     }
 
     private fun Set<String>.toApiClientDefinitions(): Set<CoApiDefinition> {

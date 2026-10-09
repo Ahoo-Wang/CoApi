@@ -59,37 +59,36 @@ The resolution logic in [CoApiDefinition.kt:70-97](https://github.com/Ahoo-Wang/
 
 ## Runtime Load Balancing Decision
 
-At bean creation time, `AbstractHttpClientFactoryBean.loadBalanced()` applies a precedence order:
+At client creation time, the factory bean resolves the *effective* definition: `ClientProperties.resolve(definition)` applies the `coapi.clients.<name>.*` overrides through the single rule in `CoApiDefinition.withOverrides()`:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant FB as AbstractHttpClientFactoryBean
+    participant FB as WebClientFactoryBean / RestClientFactoryBean
     participant Props as ClientProperties
     participant Def as CoApiDefinition
 
-    FB->>Props: getLoadBalancedFromProperties(name)
-    alt Properties has load-balanced value
-        Props-->>FB: non-null Boolean
-        FB->>FB: return configured value (true/false)
-    else Properties has baseUrl
-        FB->>Props: getBaseUrlFromProperties(name)
-        Props-->>FB: non-blank URL
-        FB->>FB: return false (direct URL overrides)
-    else No properties override
-        FB->>Def: definition.loadBalanced
-        FB->>FB: return annotation-determined value
+    FB->>Props: resolve(definition)
+    Props->>Def: withOverrides(base-url, load-balanced)
+    alt load-balanced configured
+        Def-->>FB: configured value (true/false)
+    else base-url configured
+        Def-->>FB: true only for an lb:// URL (rewritten to http://)
+    else no override
+        Def-->>FB: annotation-determined value
     end
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt:42-56 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt:156, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt:39 -->
 
-**Precedence** ([AbstractHttpClientFactoryBean.kt:42-56](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt#L42-L56)):
+**Precedence** ([CoApiDefinition.kt:156](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L156)):
 
 | Priority | Source | Effect |
 |----------|--------|--------|
 | 1 (highest) | `coapi.clients.<name>.load-balanced` | Override to the configured value (`true` enables, `false` disables) |
-| 2 | `coapi.clients.<name>.base-url` (non-blank) | Forces non-load-balanced |
+| 2 | `coapi.clients.<name>.base-url` (non-blank) | Load balanced only for an `lb://` URL (since v2.3.0); a plain `http(s)://` URL disables it |
 | 3 (lowest) | `@CoApi` / `@LoadBalanced` annotation | Default from annotation |
+
+The `lb://` scheme is matched case-insensitively (`LB://` works too, since v2.3.0). If a client resolves to load balanced but Spring Cloud LoadBalancer is not on the classpath, client creation fails with an actionable message (since v3.0.0) instead of a `NoClassDefFoundError`.
 
 ::: info
 Since v2.1.1, an explicit `load-balanced: false` is respected and disables load balancing — before v2.1.1 any configured value (including `false`) was treated as `true`. The `<name>` in `coapi.clients.<name>.*` is the `@CoApi` `name` attribute, or the interface simple name when no name is set.
@@ -107,8 +106,8 @@ sequenceDiagram
     participant Builder as WebClient.Builder
     participant LB as LoadBalancedExchangeFilterFunction
 
-    FB->>FB: loadBalanced() → true
-    FB->>Builder: customize(definition, builder)
+    FB->>FB: effectiveDefinition().loadBalanced → true
+    FB->>Builder: LoadBalancedWebClientBuilderCustomizer.customize(definition, builder)
     Builder->>Builder: builder.filters { ... }
     Builder->>Builder: check: any existing LB filter (LoadBalanced or Deferring)?
     alt Already present
@@ -119,9 +118,9 @@ sequenceDiagram
         Builder->>Builder: filters.add(LB)
     end
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:30-43 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:38-42, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/LoadBalancedWebClientBuilderCustomizer.kt:36 -->
 
-The `LoadBalancedWebClientBuilderCustomizer` inner class ([WebClientFactoryBean.kt:34-43](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L34-L43)) checks for duplicates before adding, ensuring idempotency. The check recognizes both `LoadBalancedExchangeFilterFunction` and Spring Cloud's `DeferringLoadBalancerExchangeFilterFunction` (the default wiring on `@LoadBalanced WebClient.Builder`), so a builder that already carries load balancing is not double-wired.
+The internal `LoadBalancedWebClientBuilderCustomizer` ([LoadBalancedWebClientBuilderCustomizer.kt:36](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/LoadBalancedWebClientBuilderCustomizer.kt#L36)) is applied only to load-balanced clients and checks for duplicates before adding, ensuring idempotency. The check recognizes both `LoadBalancedExchangeFilterFunction` and Spring Cloud's `DeferringLoadBalancerExchangeFilterFunction` (the default wiring on `@LoadBalanced WebClient.Builder`), so a builder that already carries load balancing is not double-wired.
 
 ## RestClient Load Balancing
 
@@ -135,8 +134,8 @@ sequenceDiagram
     participant Builder as RestClient.Builder
     participant LB as BlockingLoadBalancerInterceptor
 
-    FB->>FB: loadBalanced() → true
-    FB->>Builder: customize(definition, builder)
+    FB->>FB: effectiveDefinition().loadBalanced → true
+    FB->>Builder: LoadBalancedRestClientBuilderCustomizer.customize(definition, builder)
     Builder->>Builder: builder.requestInterceptors { ... }
     Builder->>Builder: check: any existing LB interceptor (Blocking or Deferring)?
     alt Already present
@@ -147,7 +146,7 @@ sequenceDiagram
         Builder->>Builder: interceptors.add(LB)
     end
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:30-43 -->
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:40-47, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/LoadBalancedRestClientBuilderCustomizer.kt:35 -->
 
 The interceptor is resolved by the `BlockingLoadBalancerInterceptor` interface rather than the concrete `LoadBalancerInterceptor` class, so it works whether Spring Cloud registers the plain interceptor or the `RetryLoadBalancerInterceptor` (retry enabled). Like the reactive side, the dedup check recognizes Spring Cloud's `DeferringLoadBalancerInterceptor` installed on `@LoadBalanced RestClient.Builder`.
 
@@ -172,12 +171,12 @@ coapi:
 
 | Property | Type | Applies To | Source |
 |----------|------|-----------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | Bean names | WebClient (reactive) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.reactive.filter.types` | Class types | WebClient (reactive) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L59) |
-| `coapi.clients.<name>.sync.interceptor.names` | Bean names | RestClient (sync) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
-| `coapi.clients.<name>.sync.interceptor.types` | Class types | RestClient (sync) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L62) |
+| `coapi.clients.<name>.reactive.filter.names` | Bean names | WebClient (reactive) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
+| `coapi.clients.<name>.reactive.filter.types` | Class types | WebClient (reactive) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
+| `coapi.clients.<name>.sync.interceptor.names` | Bean names | RestClient (sync) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
+| `coapi.clients.<name>.sync.interceptor.types` | Class types | RestClient (sync) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
 
-Filter resolution in [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) resolves bean names and types from `ApplicationContext`.
+The factory beans resolve these references from the `ApplicationContext` — all names first, then all types — via [AbstractHttpClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt). The filters come from `ReactiveClientProperties` and the interceptors from `SyncClientProperties` (both implemented by `CoApiProperties`).
 
 ## Service Discovery Configuration
 
@@ -219,7 +218,7 @@ spring:
 1. [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt`
 2. [LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt`
 3. [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt`
-4. [AbstractHttpClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt`
+4. [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt`
 5. [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt`
 6. [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt`
 7. [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt) — `spring-boot-starter/src/main/kotlin/.../CoApiProperties.kt`

@@ -15,8 +15,13 @@ package me.ahoo.coapi.spring.boot.starter
 
 import me.ahoo.coapi.spring.ClientMode
 import me.ahoo.coapi.spring.client.ClientProperties
+import me.ahoo.coapi.spring.client.ComponentDefinition
+import me.ahoo.coapi.spring.client.reactive.ReactiveClientProperties
+import me.ahoo.coapi.spring.client.sync.SyncClientProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.bind.DefaultValue
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 
 const val COAPI_PREFIX = "coapi"
 const val ENABLED_SUFFIX_KEY = ".enabled"
@@ -27,7 +32,7 @@ data class CoApiProperties(
     val mode: ClientMode = ClientMode.AUTO,
     val basePackages: List<String> = emptyList(),
     val clients: Map<String, ClientDefinition> = emptyMap(),
-) : ClientProperties {
+) : ClientProperties, ReactiveClientProperties, SyncClientProperties {
     companion object {
         const val COAPI_BASE_PACKAGES = "$COAPI_PREFIX.base-packages"
     }
@@ -40,12 +45,12 @@ data class CoApiProperties(
         return clients[coApiName]?.loadBalanced
     }
 
-    override fun getFilter(coApiName: String): ClientProperties.FilterDefinition {
-        return clients[coApiName]?.reactive?.filter ?: ClientProperties.FilterDefinition()
+    override fun getFilter(coApiName: String): ComponentDefinition<ExchangeFilterFunction> {
+        return clients[coApiName]?.reactive?.filter ?: ComponentDefinition()
     }
 
-    override fun getInterceptor(coApiName: String): ClientProperties.InterceptorDefinition {
-        return clients[coApiName]?.sync?.interceptor ?: ClientProperties.InterceptorDefinition()
+    override fun getInterceptor(coApiName: String): ComponentDefinition<ClientHttpRequestInterceptor> {
+        return clients[coApiName]?.sync?.interceptor ?: ComponentDefinition()
     }
 }
 
@@ -57,9 +62,9 @@ data class ClientDefinition(
 )
 
 data class ReactiveClientDefinition(
-    var filter: ClientProperties.FilterDefinition = ClientProperties.FilterDefinition(),
+    var filter: ComponentDefinition<ExchangeFilterFunction> = ComponentDefinition(),
 )
 
 data class SyncClientDefinition(
-    var interceptor: ClientProperties.InterceptorDefinition = ClientProperties.InterceptorDefinition(),
+    var interceptor: ComponentDefinition<ClientHttpRequestInterceptor> = ComponentDefinition(),
 )

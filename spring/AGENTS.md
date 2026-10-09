@@ -16,7 +16,7 @@ Core Spring integration. Contains registrar, factory beans, client implementatio
 
 ```
 spring/src/main/kotlin/me/ahoo/coapi/spring/
-├── CoApiDefinition.kt          # Parsed @CoApi metadata
+├── CoApiDefinition.kt          # Parsed @CoApi metadata; normalize()/withOverrides() own the URL + LB rules
 ├── CoApiFactoryBean.kt         # Creates JDK proxy via HttpServiceProxyFactory
 ├── CoApiRegistrar.kt           # Registers all mode-dependent beans: HttpExchangeAdapterFactory + client/proxy per @CoApi
 ├── AbstractCoApiRegistrar.kt   # Template: mode inference; subclasses supply CoApiDefinitions
@@ -25,18 +25,21 @@ spring/src/main/kotlin/me/ahoo/coapi/spring/
 ├── ClientMode.kt               # REACTIVE/SYNC/AUTO enum
 ├── HttpExchangeAdapterFactory.kt  # SPI interface
 └── client/
-    ├── AbstractHttpClientFactoryBean.kt  # Base: single owner of baseUrl/lb:// + loadBalanced resolution
-    ├── ClientProperties.kt               # Per-client overrides (optional bean; Empty fallback)
-    ├── HttpClientBuilderCustomizer.kt    # Base SPI for customizers
+    ├── AbstractHttpClientFactoryBean.kt  # Shared factory plumbing: effectiveDefinition(), component/customizer lookup
+    ├── ClientProperties.kt               # Endpoint overrides (baseUrl/loadBalanced) + resolve(); optional, Empty fallback
+    ├── ComponentDefinition.kt            # Filter/interceptor references by bean name and type
+    ├── HttpClientBuilderCustomizer.kt    # Base SPI for customizers (receives the effective definition)
     ├── reactive/                         # WebClient stack
     │   ├── WebClientFactoryBean.kt
-    │   ├── AbstractWebClientFactoryBean.kt
+    │   ├── LoadBalancedWebClientBuilderCustomizer.kt  # internal, only for load-balanced clients
+    │   ├── ReactiveClientProperties.kt   # Per-client ExchangeFilterFunctions
     │   ├── ReactiveHttpExchangeAdapterFactory.kt
     │   ├── WebClientBuilderCustomizer.kt
     │   └── auth/                         # BearerTokenFilter, CachedExpirableTokenProvider
     └── sync/                             # RestClient stack
         ├── RestClientFactoryBean.kt
-        ├── AbstractRestClientFactoryBean.kt
+        ├── LoadBalancedRestClientBuilderCustomizer.kt # internal, only for load-balanced clients
+        ├── SyncClientProperties.kt       # Per-client ClientHttpRequestInterceptors
         ├── SyncHttpExchangeAdapterFactory.kt
         └── RestClientBuilderCustomizer.kt
 ```
