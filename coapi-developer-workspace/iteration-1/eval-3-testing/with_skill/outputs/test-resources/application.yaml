@@ -1,6 +1,0 @@
-weather:
-  url: https://api.weather.example.com
-
-coapi:
-  base-packages:
-    - me.ahoo.coapi.example.weather.client
