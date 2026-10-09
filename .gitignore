@@ -1,24 +1,39 @@
-.gradle
-**/build/
-!src/**/build/
-
-# Ignore Gradle GUI config
+# Gradle
+.gradle/
+build/
+!**/src/**/build/
 gradle-app.setting
-
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+.gradletasknamecache
+# Keep the Gradle wrapper (jars and properties are often ignored elsewhere)
 !gradle-wrapper.jar
-
-# Avoid ignore Gradle wrappper properties
 !gradle-wrapper.properties
 
-# Cache of project
-.gradletasknamecache
+# Kotlin 2.x compiler session data
+.kotlin/
 
-# Eclipse Gradle plugin generated files
-# Eclipse Core
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Eclipse
 .project
-# JDT-specific (Eclipse Java Development Tools)
 .classpath
+.settings/
+bin/
 
-# Ignore Gradle build output directory
-build
+# VS Code
+.vscode/
+
+# Claude Code: per-user settings and worktrees (CLAUDE.md / shared settings stay tracked)
+.claude/settings.local.json
+.claude/worktrees/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and local env
+*.log
+.env
+.env.*
