@@ -1,6 +1,3 @@
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-}
 /*
  * Copyright [2022-present] [ahoo wang <ahoowang@qq.com> (https://github.com/Ahoo-Wang)].
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +10,10 @@ plugins {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
 
 rootProject.name = "CoApi"
 

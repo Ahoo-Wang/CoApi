@@ -52,7 +52,8 @@ allprojects {
     configure<DetektExtension> {
         config.setFrom(files("${rootProject.rootDir}/config/detekt/detekt.yml"))
         buildUponDefaultConfig = true
-        autoCorrect = true
+        // Fix formatting locally, but fail in CI so unformatted code cannot be merged.
+        autoCorrect = !isInCI
     }
     dependencies {
         detektPlugins(dependenciesProject)
@@ -92,8 +93,9 @@ configure(libraryProjects) {
     }
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         compilerOptions {
-            freeCompilerArgs = listOf("-Xjsr305=strict", "-Xjvm-default=all-compatibility")
+            freeCompilerArgs = listOf("-Xjsr305=strict", "-jvm-default=enable")
             javaParameters = true
+            allWarningsAsErrors = true
         }
     }
     tasks.withType<JavaCompile> {
