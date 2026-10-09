@@ -102,7 +102,17 @@ configure(libraryProjects) {
         options.compilerArgs.addAll(listOf("-parameters"))
     }
     apply<TestRetryPlugin>()
+    // Sources compile for Java 17; CI runs the tests on every supported LTS via -PtestJavaVersion=<N>.
+    val testJavaVersion = findProperty("testJavaVersion")?.toString()
+    val javaToolchains = the<JavaToolchainService>()
     tasks.withType<Test> {
+        if (testJavaVersion != null) {
+            javaLauncher.set(
+                javaToolchains.launcherFor {
+                    languageVersion.set(JavaLanguageVersion.of(testJavaVersion))
+                }
+            )
+        }
         useJUnitPlatform()
         testLogging {
             exceptionFormat = TestExceptionFormat.FULL
