@@ -112,5 +112,6 @@ Detekt is configured with `config/detekt/detekt.yml`. Key relaxations:
 ## Compiler Flags
 
 - `-Xjsr305=strict` — strict null-safety for JSR-305 annotations
-- `-Xjvm-default=all-compatibility` — Java interoperability for Kotlin default methods
+- `-jvm-default=enable` — Java interoperability for Kotlin default methods (formerly `-Xjvm-default=all-compatibility`)
+- `allWarningsAsErrors` — compiler warnings fail the build for library modules
 - `-parameters` — preserve parameter names in bytecode
