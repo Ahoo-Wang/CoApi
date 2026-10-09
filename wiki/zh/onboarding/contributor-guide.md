@@ -605,26 +605,19 @@ object BearerHeaderValueMapper : HeaderValueMapper {
 #### Token Provider 实现
 
 ```kotlin
-interface ExpirableTokenProvider {
-    fun getToken(): Mono<String>
-    fun isExpired(): Boolean
-    fun refresh(): Mono<String>
+// spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/auth/
+interface ExpirableTokenProvider : HeaderValueProvider {
+    fun getToken(): Mono<ExpirableToken>
 }
 
-class CachedExpirableTokenProvider(
-    private val delegate: ExpirableTokenProvider
+class CachedExpirableTokenProvider @JvmOverloads constructor(
+    tokenProvider: ExpirableTokenProvider,
+    private val refreshBeforeExpiry: Duration = DEFAULT_REFRESH_BEFORE_EXPIRY // 60s
 ) : ExpirableTokenProvider {
-    
-    private val cachedToken = AtomicReference<String>()
-    private val expirationTime = AtomicReference<Long>()
-    
-    override fun getToken(): Mono<String> {
-        return if (isExpired()) {
-            refresh()
-        } else {
-            Mono.just(cachedToken.get())
-        }
-    }
+    private val tokenCache: Mono<ExpirableToken> = tokenProvider.getToken()
+        .cacheInvalidateIf { it.expiresWithin(refreshBeforeExpiry) }
+
+    override fun getToken(): Mono<ExpirableToken> = tokenCache
 }
 ```
 

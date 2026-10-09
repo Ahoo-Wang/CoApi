@@ -2,10 +2,13 @@ package me.ahoo.coapi.spring.client.reactive.auth
 
 import me.ahoo.coapi.spring.client.reactive.auth.ExpirableToken.Companion.jwtToExpirableToken
 import me.ahoo.test.asserts.assert
+import me.ahoo.test.asserts.assertThrownBy
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 import reactor.kotlin.test.test
+import java.time.Duration
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 class CachedExpirableTokenProviderTest {
 
@@ -34,6 +37,44 @@ class CachedExpirableTokenProviderTest {
             .consumeNextWith {
                 it.assert().isEqualTo(MockBearerTokenProvider.notExpiredToken)
             }.verifyComplete()
+    }
+
+    private class CountingTokenProvider(private val expireIn: Duration) : ExpirableTokenProvider {
+        val calls = AtomicInteger()
+
+        override fun getToken(): Mono<ExpirableToken> {
+            return Mono.fromCallable {
+                calls.incrementAndGet()
+                ExpirableToken("token", System.currentTimeMillis() + expireIn.toMillis())
+            }
+        }
+    }
+
+    @Test
+    fun `token expiring within the refresh margin should be refreshed`() {
+        val tokenProvider = CountingTokenProvider(expireIn = Duration.ofSeconds(30))
+        val cached = CachedExpirableTokenProvider(tokenProvider, refreshBeforeExpiry = Duration.ofSeconds(60))
+
+        repeat(3) { cached.getToken().block() }
+
+        tokenProvider.calls.get().assert().isEqualTo(3)
+    }
+
+    @Test
+    fun `token valid beyond the refresh margin should be cached`() {
+        val tokenProvider = CountingTokenProvider(expireIn = Duration.ofMinutes(10))
+        val cached = CachedExpirableTokenProvider(tokenProvider)
+
+        repeat(3) { cached.getToken().block() }
+
+        tokenProvider.calls.get().assert().isEqualTo(1)
+    }
+
+    @Test
+    fun `negative refresh margin should be rejected`() {
+        assertThrownBy<IllegalArgumentException> {
+            CachedExpirableTokenProvider(CountingTokenProvider(Duration.ofMinutes(10)), Duration.ofSeconds(-1))
+        }
     }
 
     object MockBearerTokenProvider : ExpirableTokenProvider {
