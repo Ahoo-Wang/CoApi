@@ -14,32 +14,50 @@
 package me.ahoo.coapi.spring.client
 
 import me.ahoo.coapi.spring.CoApiDefinition
+import me.ahoo.coapi.spring.CoApiDefinition.Companion.isLoadBalancedUrl
+import me.ahoo.coapi.spring.CoApiDefinition.Companion.toHttpUrl
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
+/**
+ * Base class for the per-[CoApiDefinition] HTTP client factory beans.
+ *
+ * Owns the single rule for resolving the effective endpoint, where configuration
+ * ([ClientProperties]) overrides the annotation ([definition]):
+ * - `base-url`: the configured value wins over the annotation; an `lb://` scheme is
+ *   rewritten to `http://` and implies load balancing, just like on the annotation.
+ * - `load-balanced`: an explicit configured value always wins; otherwise it follows
+ *   the configured `base-url` when one is set, else the annotation.
+ */
 abstract class AbstractHttpClientFactoryBean : ApplicationContextAware {
     abstract val definition: CoApiDefinition
 
     lateinit var appContext: ApplicationContext
+
+    /**
+     * [ClientProperties] is optional: plain `@EnableCoApi` setups without Spring Boot
+     * have no properties bean, in which case the annotation alone defines the client.
+     */
+    protected val clientProperties: ClientProperties by lazy {
+        appContext.getBeanProvider(ClientProperties::class.java).getIfAvailable { ClientProperties.Empty }
+    }
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.appContext = applicationContext
     }
 
     fun getBaseUrlFromProperties(): String {
-        val clientProperties = appContext.getBean(ClientProperties::class.java)
         return clientProperties.getBaseUri(definition.name)
     }
 
     fun getLoadBalancedFromProperties(): Boolean? {
-        val clientProperties = appContext.getBean(ClientProperties::class.java)
         return clientProperties.getLoadBalanced(definition.name)
     }
 
     fun getBaseUrl(): String {
         return getBaseUrlFromProperties().ifBlank {
             definition.baseUrl
-        }
+        }.toHttpUrl()
     }
 
     @Suppress("ReturnCount")
@@ -50,8 +68,20 @@ abstract class AbstractHttpClientFactoryBean : ApplicationContextAware {
         }
         val baseUrlFromProperties = getBaseUrlFromProperties()
         if (baseUrlFromProperties.isNotBlank()) {
-            return false
+            return baseUrlFromProperties.isLoadBalancedUrl()
         }
         return definition.loadBalanced
+    }
+
+    /**
+     * Resolves the configured components by bean name first, then by bean type,
+     * preserving the configured order.
+     */
+    protected fun <T : Any> resolveBeans(
+        componentType: Class<T>,
+        names: List<String>,
+        types: List<Class<out T>>
+    ): List<T> {
+        return names.map { appContext.getBean(it, componentType) } + types.map { appContext.getBean(it) }
     }
 }

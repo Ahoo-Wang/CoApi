@@ -19,6 +19,7 @@ import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
 import org.springframework.context.ApplicationContext
+import org.springframework.context.support.StaticApplicationContext
 
 class IHttpClientFactoryBeanTest {
 
@@ -38,7 +39,7 @@ class IHttpClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
 
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getBaseUri("testClient") } returns "http://properties-url:9090"
 
         val factoryBean = TestHttpClientFactoryBean(mockDefinition)
@@ -53,7 +54,7 @@ class IHttpClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
 
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns true
 
         val factoryBean = TestHttpClientFactoryBean(mockDefinition)
@@ -68,7 +69,7 @@ class IHttpClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
 
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns null
 
         val factoryBean = TestHttpClientFactoryBean(mockDefinition)
@@ -83,7 +84,7 @@ class IHttpClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
 
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getBaseUri("testClient") } returns "http://properties-url:9090"
 
         val factoryBean = TestHttpClientFactoryBean(mockDefinition)
@@ -98,7 +99,7 @@ class IHttpClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
 
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getBaseUri("testClient") } returns ""
 
         val factoryBean = TestHttpClientFactoryBean(mockDefinition)
@@ -113,7 +114,7 @@ class IHttpClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
 
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns true
 
         val factoryBean = TestHttpClientFactoryBean(mockDefinition)
@@ -128,7 +129,7 @@ class IHttpClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
 
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns false
 
         val factoryBean = TestHttpClientFactoryBean(mockDefinition)
@@ -143,7 +144,7 @@ class IHttpClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
 
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns null
         every { mockClientProperties.getBaseUri("testClient") } returns "http://example.com"
 
@@ -159,7 +160,7 @@ class IHttpClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
 
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns null
         every { mockClientProperties.getBaseUri("testClient") } returns ""
 
@@ -168,5 +169,30 @@ class IHttpClientFactoryBeanTest {
         val loadBalanced = factoryBean.loadBalanced()
 
         loadBalanced.assert().isEqualTo(false)
+    }
+
+    @Test
+    fun `lb scheme in properties base URL should be rewritten and imply load balancing`() {
+        val mockApplicationContext = mockk<ApplicationContext>()
+        val mockClientProperties = mockk<ClientProperties>()
+
+        mockApplicationContext.stubClientProperties(mockClientProperties)
+        every { mockClientProperties.getLoadBalanced("testClient") } returns null
+        every { mockClientProperties.getBaseUri("testClient") } returns "lb://order-service"
+
+        val factoryBean = TestHttpClientFactoryBean(mockDefinition)
+        factoryBean.setApplicationContext(mockApplicationContext)
+
+        factoryBean.getBaseUrl().assert().isEqualTo("http://order-service")
+        factoryBean.loadBalanced().assert().isTrue()
+    }
+
+    @Test
+    fun `missing ClientProperties bean should fall back to the annotation definition`() {
+        val factoryBean = TestHttpClientFactoryBean(mockDefinition)
+        factoryBean.setApplicationContext(StaticApplicationContext())
+
+        factoryBean.getBaseUrl().assert().isEqualTo("http://localhost:8080")
+        factoryBean.loadBalanced().assert().isFalse()
     }
 }

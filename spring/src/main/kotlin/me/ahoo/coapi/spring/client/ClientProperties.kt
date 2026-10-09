@@ -16,12 +16,26 @@ package me.ahoo.coapi.spring.client
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 
+/**
+ * Per-client configuration that overrides what the `@CoApi` annotation declares,
+ * keyed by [me.ahoo.coapi.spring.CoApiDefinition.name].
+ */
 interface ClientProperties {
 
     fun getBaseUri(coApiName: String): String
     fun getLoadBalanced(coApiName: String): Boolean?
     fun getFilter(coApiName: String): FilterDefinition
     fun getInterceptor(coApiName: String): InterceptorDefinition
+
+    /**
+     * No overrides: every client is defined by its annotation alone.
+     */
+    object Empty : ClientProperties {
+        override fun getBaseUri(coApiName: String): String = ""
+        override fun getLoadBalanced(coApiName: String): Boolean? = null
+        override fun getFilter(coApiName: String): FilterDefinition = FilterDefinition()
+        override fun getInterceptor(coApiName: String): InterceptorDefinition = InterceptorDefinition()
+    }
 
     data class FilterDefinition(
         val names: List<String> = emptyList(),

@@ -75,25 +75,30 @@ data class CoApiDefinition(
             // Resolve the base URL from the CoApi annotation
             val resolvedBaseUrl = coApi.resolveBaseUrl(environment)
 
-            // Determine if the CoApi is load balanced
-            val resolvedLoadBalanced = getAnnotation(LoadBalanced::class.java) != null
-            val baseUrlLoadBalanced = resolvedBaseUrl.startsWith(LB_PROTOCOL_PREFIX)
-            val loadBalanced = resolvedLoadBalanced || baseUrlLoadBalanced
+            // Load balanced either explicitly via @LoadBalanced or implicitly via the `lb://` scheme
+            val loadBalanced = isAnnotationPresent(LoadBalanced::class.java) || resolvedBaseUrl.isLoadBalancedUrl()
 
-            // Adjust the base URL if it's load balanced
-            val baseUrl = if (baseUrlLoadBalanced) {
-                HTTP_PROTOCOL_PREFIX + resolvedBaseUrl.substring(LB_PROTOCOL_PREFIX.length)
-            } else {
-                resolvedBaseUrl
-            }
-
-            // Return a new CoApiDefinition instance
             return CoApiDefinition(
                 name = resolveClientName(coApi),
                 apiType = this,
-                baseUrl = baseUrl,
+                baseUrl = resolvedBaseUrl.toHttpUrl(),
                 loadBalanced = loadBalanced
             )
+        }
+
+        /**
+         * Whether this URL uses the load-balanced `lb://` scheme.
+         */
+        fun String.isLoadBalancedUrl(): Boolean = startsWith(LB_PROTOCOL_PREFIX)
+
+        /**
+         * Rewrites the load-balanced `lb://` scheme to `http://`; any other URL is returned unchanged.
+         */
+        fun String.toHttpUrl(): String {
+            if (!isLoadBalancedUrl()) {
+                return this
+            }
+            return HTTP_PROTOCOL_PREFIX + substring(LB_PROTOCOL_PREFIX.length)
         }
 
         /**

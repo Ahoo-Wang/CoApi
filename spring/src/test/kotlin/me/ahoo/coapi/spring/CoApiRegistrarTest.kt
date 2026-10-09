@@ -52,6 +52,20 @@ class CoApiRegistrarTest {
 
         registrar.register(setOf(definition1, definition2))
 
-        verify(exactly = 4) { registry.registerBeanDefinition(any(), any()) }
+        // 2 beans per definition + the shared HttpExchangeAdapterFactory
+        verify(exactly = 5) { registry.registerBeanDefinition(any(), any()) }
+        verify(exactly = 1) { registry.registerBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME, any()) }
+    }
+
+    @Test
+    fun registerShouldKeepExistingHttpExchangeAdapterFactory() {
+        val registry = mockRegistry()
+        every { registry.containsBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME) } returns true
+        val registrar = CoApiRegistrar(registry, ClientMode.SYNC)
+
+        registrar.register(setOf(CoApiDefinition("ApiA", Any::class.java, "http://a", false)))
+
+        verify(exactly = 0) { registry.registerBeanDefinition(HttpExchangeAdapterFactory.BEAN_NAME, any()) }
+        verify(exactly = 2) { registry.registerBeanDefinition(any(), any()) }
     }
 }

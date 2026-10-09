@@ -158,8 +158,9 @@ class CoApiAutoConfigurationTest {
         ApplicationContextRunner()
             .withPropertyValues("github.url=https://api.github.com")
             .withPropertyValues(
+                // whitespace after the comma must be tolerated
                 "${CoApiProperties.COAPI_BASE_PACKAGES}=me.ahoo.coapi.spring.boot.starter" +
-                    ",me.ahoo.coapi.example.consumer.client"
+                    ", me.ahoo.coapi.example.consumer.client"
             )
             .withPropertyValues(filterNameProperty)
             .withPropertyValues(filterTypeProperty)

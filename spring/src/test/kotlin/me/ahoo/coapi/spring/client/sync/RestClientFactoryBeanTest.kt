@@ -17,6 +17,7 @@ import io.mockk.every
 import io.mockk.mockk
 import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.client.ClientProperties
+import me.ahoo.coapi.spring.client.stubClientProperties
 import me.ahoo.test.asserts.assert
 import org.junit.jupiter.api.Test
 import org.springframework.cloud.client.loadbalancer.BlockingLoadBalancerInterceptor
@@ -39,7 +40,7 @@ class RestClientFactoryBeanTest {
     fun `customize should not add duplicate load balancer interceptor when already present`() {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns true
 
         val existingInterceptor = mockk<LoadBalancerInterceptor>()
@@ -59,7 +60,7 @@ class RestClientFactoryBeanTest {
     fun `customize should not add duplicate load balancer interceptor when deferring interceptor already present`() {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns true
 
         val existingInterceptor = mockk<DeferringLoadBalancerInterceptor>()
@@ -80,7 +81,7 @@ class RestClientFactoryBeanTest {
         val mockApplicationContext = mockk<ApplicationContext>()
         val mockClientProperties = mockk<ClientProperties>()
         val loadBalancerInterceptor = mockk<BlockingLoadBalancerInterceptor>()
-        every { mockApplicationContext.getBean(ClientProperties::class.java) } returns mockClientProperties
+        mockApplicationContext.stubClientProperties(mockClientProperties)
         every { mockClientProperties.getLoadBalanced("testClient") } returns true
         every { mockApplicationContext.getBean(BlockingLoadBalancerInterceptor::class.java) } returns loadBalancerInterceptor
 
