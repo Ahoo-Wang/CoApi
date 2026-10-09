@@ -28,6 +28,7 @@ plugins {
 dependencies {
     kapt(platform(project(":dependencies")))
     api(project(":spring"))
+    implementation("io.github.oshai:kotlin-logging-jvm")
     "reactiveSupportImplementation"("org.springframework.boot:spring-boot-webclient")
     "syncSupportImplementation"("org.springframework.boot:spring-boot-restclient")
     api("org.springframework.boot:spring-boot-starter")

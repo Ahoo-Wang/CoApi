@@ -140,6 +140,26 @@ graph TD
 
 The registrar combines automatically scanned interface definitions with any explicitly registered `CoApiDefinition` beans. Since v2.2.0, name conflicts within the merged set (e.g. a registered definition colliding with a scanned interface of the same client name) fail startup with an `IllegalStateException` listing the conflicting types.
 
+::: warning Declare `CoApiDefinition` beans with a static `@Bean` method
+`CoApiDefinition` beans are read while bean definitions are still being registered, before any `BeanPostProcessor` exists. A non-static `@Bean` method therefore forces its configuration class to be created too early: its `@Autowired`/`@Value` fields are not injected and its `@Bean` methods are not proxied. Since v2.3.0 CoApi logs a warning for such methods. Declare the method static (Kotlin: `@JvmStatic` in a `companion object`) — the same rule Spring applies to `BeanFactoryPostProcessor` beans — and resolve placeholders through an `Environment` parameter, because `@Value` parameters are not resolved yet at that point:
+
+```kotlin
+@Configuration
+class OrderApiConfiguration {
+    companion object {
+        @JvmStatic
+        @Bean
+        fun orderApiDefinition(environment: Environment): CoApiDefinition = CoApiDefinition(
+            name = "OrderApi",
+            apiType = OrderApi::class.java,
+            baseUrl = environment.resolveRequiredPlaceholders("\${order.url}"),
+            loadBalanced = false,
+        )
+    }
+}
+```
+:::
+
 ```kotlin
 private fun getScanBasePackages(): Set<String> {
     val coApiBasePackages = getCoApiBasePackages()
