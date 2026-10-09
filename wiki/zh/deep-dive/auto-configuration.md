@@ -141,7 +141,7 @@ graph TD
 注册器将自动扫描的接口定义与任何显式注册的 `CoApiDefinition` Bean 结合在一起。自 v2.2.0 起，合并集合内的名称冲突（例如注册的定义与扫描到的同名接口冲突）会在启动期抛出 `IllegalStateException` 并列出冲突类型。
 
 ::: warning 用静态 `@Bean` 方法声明 `CoApiDefinition` Bean
-`CoApiDefinition` Bean 是在注册 Bean 定义的阶段读取的，此时还没有任何 `BeanPostProcessor`。因此非静态的 `@Bean` 方法会迫使它所在的配置类被过早创建：该类的 `@Autowired`/`@Value` 字段不会被注入，`@Bean` 方法也不会被代理。自 v2.3.0 起，CoApi 会对这类方法输出警告。请把方法声明为静态（Kotlin 中在 `companion object` 里加 `@JvmStatic`）——这与 Spring 对 `BeanFactoryPostProcessor` Bean 的要求相同；占位符请通过 `Environment` 参数解析，因为此时 `@Value` 参数还不会被解析：
+`CoApiDefinition` Bean 是在注册 Bean 定义的阶段读取的，此时还没有任何 `BeanPostProcessor`。因此非静态的 `@Bean` 方法会迫使它所在的配置类被过早创建：该类的 `@Autowired`/`@Value` 字段不会被注入，`@Bean` 方法也不会被代理。CoApi 自 v2.3.0 起对这类方法输出警告，**自 v3.0.0 起直接启动失败**。请把方法声明为静态（Kotlin 中在 `companion object` 里加 `@JvmStatic`）——这与 Spring 对 `BeanFactoryPostProcessor` Bean 的要求相同。不要使用 `@Value` 参数（此时还不会被解析）：自 v3.0.0 起，CoApi 会像处理 `@CoApi` 注解一样，自行解析定义 Bean 的 `baseUrl` 中的 `${...}` 占位符和 `lb://` 前缀：
 
 ```kotlin
 @Configuration
@@ -149,10 +149,10 @@ class OrderApiConfiguration {
     companion object {
         @JvmStatic
         @Bean
-        fun orderApiDefinition(environment: Environment): CoApiDefinition = CoApiDefinition(
+        fun orderApiDefinition(): CoApiDefinition = CoApiDefinition(
             name = "OrderApi",
             apiType = OrderApi::class.java,
-            baseUrl = environment.resolveRequiredPlaceholders("\${order.url}"),
+            baseUrl = "\${order.url}", // v3.0.0+ 由 CoApi 解析；v2.3.x 请通过 Environment 参数解析
             loadBalanced = false,
         )
     }

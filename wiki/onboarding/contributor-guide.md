@@ -535,22 +535,25 @@ interface GitHubApiClient {
 
 #### Load Balancing Implementation
 
-The load balancing is implemented through builder customizers:
+Load-balanced clients get an internal builder customizer, applied by the factory bean only when the effective definition is load balanced (Spring Cloud stays an optional dependency):
 
 ```kotlin
-// From WebClientFactoryBean.kt
-private class LoadBalancedWebClientBuilderCustomizer : WebClient.Builder.() -> Unit {
-    override fun invoke(builder: WebClient.Builder) {
-        builder.filter(loadBalancerExchangeFilterFunction())
+// spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/LoadBalancedWebClientBuilderCustomizer.kt
+internal class LoadBalancedWebClientBuilderCustomizer(
+    private val beanFactory: BeanFactory
+) : WebClientBuilderCustomizer {
+    override fun customize(coApiDefinition: CoApiDefinition, builder: WebClient.Builder) {
+        builder.filters { filters ->
+            val hasLoadBalancedFilter = filters.any { filter ->
+                filter is LoadBalancedExchangeFilterFunction || filter is DeferringLoadBalancerExchangeFilterFunction<*>
+            }
+            if (!hasLoadBalancedFilter) {
+                filters.add(beanFactory.getBean(LoadBalancedExchangeFilterFunction::class.java))
+            }
+        }
     }
 }
-
-// From RestClientFactoryBean.kt
-private class LoadBalancedRestClientBuilderCustomizer : RestClient.Builder.() -> Unit {
-    override fun invoke(builder: RestClient.Builder) {
-        builder.requestInterceptor(loadBalancerInterceptor)
-    }
-}
+// The sync counterpart, LoadBalancedRestClientBuilderCustomizer, adds a BlockingLoadBalancerInterceptor.
 ```
 
 ### Authentication

@@ -104,133 +104,67 @@ interface HttpExchangeAdapterFactory {
 
 ## 响应式堆栈实现
 
-响应式堆栈使用 WebClient 进行非阻塞 HTTP 请求，与响应式编程范式全面集成。
+响应式堆栈通过 [WebClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L30) 为每个 CoApi 客户端构建一个 `WebClient`：
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant A as Application
-    participant B as AbstractWebClientFactoryBean
-    participant C as WebClient.Builder
-    participant D as ExchangeFilterFunctions
-    participant E as LoadBalancedExchangeFilterFunction
-    participant F as WebClientFactoryBean
-    participant G as WebClientAdapter
-    participant H as HttpExchangeAdapter
+    participant FB as WebClientFactoryBean
+    participant CTX as ApplicationContext
+    participant B as WebClient.Builder
+    participant LB as LoadBalancedWebClientBuilderCustomizer
+    participant C as WebClientBuilderCustomizer Bean
 
-    A->>B: createWebClient()
-    B->>C: WebClient.Builder.fromApplicationContext()
-    C->>B: baseUrl()
-    B->>D: applyFilterFunctions()
-    D->>B: configure()
-    B->>F: create()
-    F->>E: applyLoadBalancer()
-    E->>F: configure()
-    F->>G: create(webClient)
-    G->>H: create()
-    H->>A: return HttpExchangeAdapter
+    FB->>CTX: ClientProperties.resolve(definition)
+    CTX-->>FB: 生效的定义
+    FB->>CTX: getBean(WebClient.Builder)
+    FB->>B: baseUrl(effective.baseUrl)
+    FB->>CTX: ReactiveClientProperties.getFilter(name)
+    FB->>B: 添加过滤器（先名称，后类型）
+    opt effective.loadBalanced
+        FB->>LB: customize(effective, builder)
+    end
+    FB->>C: 按顺序 customize(effective, builder)
+    FB->>B: build()
 ```
-
-### FactoryBean 层次结构
-
-响应式堆栈遵循以下继承层次结构：
-
-- **AbstractWebClientFactoryBean**：配置 WebClient.Builder 的基类
-  - 从 Spring 应用上下文获取 WebClient.Builder
-  - 应用 ClientProperties 中的 ExchangeFilterFunctions
-  - 应用 WebClientBuilderCustomizer beans
-  - 设置 baseUrl 和超时
-
-- **WebClientFactoryBean**：扩展负载均衡器支持
-  - 当负载均衡器可用时添加 LoadBalancedExchangeFilterFunction
-  - 配置响应式重试机制
-  - 启用断路器集成
-
-- **WebClientAdapter**：将 WebClient 转换为 HttpExchangeAdapter
-  - 实现 HttpExchangeAdapter 接口
-  - 处理请求/响应映射
-  - 支持响应式流集成
-
-```kotlin
-// spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt
-abstract class AbstractWebClientFactoryBean : FactoryBean<WebClient> {
-    override fun getObject(): WebClient {
-        val builder = webClientBuilder()
-            .baseUrl(clientProperties.baseUrl)
-
-        clientProperties.filterFunctions.forEach { filterFunction ->
-            builder.filter(filterFunction)
-        }
-
-        return builder.build()
-    }
-}
-```
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:32-45 -->
 
 ## 同步堆栈实现
 
-同步堆栈使用 RestClient 提供传统的同步 HTTP 请求，配置简单，对于常见用例具有出色的性能。
+同步堆栈通过 [RestClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt#L30) 为每个 CoApi 客户端构建一个 `RestClient`：
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant A as Application
-    participant B as AbstractRestClientFactoryBean
-    participant C as RestClient.Builder
-    participant D as ClientHttpRequestInterceptors
-    participant E as LoadBalancerInterceptor
-    participant F as RestClientFactoryBean
-    participant G as RestClientAdapter
-    participant H as HttpExchangeAdapter
+    participant FB as RestClientFactoryBean
+    participant CTX as ApplicationContext
+    participant B as RestClient.Builder
+    participant LB as LoadBalancedRestClientBuilderCustomizer
+    participant C as RestClientBuilderCustomizer Bean
 
-    A->>B: createRestClient()
-    B->>C: RestClient.Builder.fromApplicationContext()
-    C->>B: baseUrl()
-    B->>D: applyInterceptors()
-    D->>B: configure()
-    B->>F: create()
-    F->>E: applyLoadBalancer()
-    E->>F: configure()
-    F->>G: create(restClient)
-    G->>H: create()
-    H->>A: return HttpExchangeAdapter
+    FB->>CTX: ClientProperties.resolve(definition)
+    CTX-->>FB: 生效的定义
+    FB->>CTX: getBean(RestClient.Builder)
+    FB->>B: baseUrl(effective.baseUrl)
+    FB->>CTX: SyncClientProperties.getInterceptor(name)
+    FB->>B: 添加拦截器（先名称，后类型）
+    opt effective.loadBalanced
+        FB->>LB: customize(effective, builder)
+    end
+    FB->>C: 按顺序 customize(effective, builder)
+    FB->>B: build()
 ```
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:32-50 -->
 
-### FactoryBean 层次结构
+### 工厂 Bean 结构
 
-同步堆栈遵循以下继承层次结构：
+自 v3.0.0 起，每种客户端只有一个扁平的工厂 Bean：
 
-- **AbstractRestClientFactoryBean**：配置 RestClient.Builder 的基类
-  - 从 Spring 应用上下文获取 RestClient.Builder
-  - 应用 ClientProperties 中的 ClientHttpRequestInterceptors
-  - 应用 RestClientBuilderCustomizer beans
-  - 设置 baseUrl 和超时
+- **[AbstractHttpClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt#L29)**——共享的基础逻辑：解析生效的定义（`ClientProperties` 可选）、解析过滤器/拦截器 Bean、收集有序的定制器 Bean；负载均衡的客户端缺少 Spring Cloud LoadBalancer 时立即失败。
+- **`WebClientFactoryBean`** / **`RestClientFactoryBean`**——final 类，按上图顺序构建客户端。
+- **`LoadBalancedWebClientBuilderCustomizer`** / **`LoadBalancedRestClientBuilderCustomizer`**——内部类，只作用于负载均衡的客户端（见[负载均衡](./load-balancing.md)）。
 
-- **RestClientFactoryBean**：扩展负载均衡器支持
-  - 当负载均衡器可用时添加 LoadBalancerInterceptor
-  - 配置重试机制
-  - 启用连接池优化
-
-- **RestClientAdapter**：将 RestClient 转换为 HttpExchangeAdapter
-  - 实现 HttpExchangeAdapter 接口
-  - 处理请求/响应映射
-  - 提供阻塞 I/O 操作
-
-```kotlin
-// spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt
-abstract class AbstractRestClientFactoryBean : FactoryBean<RestClient> {
-    override fun getObject(): RestClient {
-        val builder = restClientBuilder()
-            .baseUrl(clientProperties.baseUrl)
-
-        clientProperties.interceptors.forEach { interceptor ->
-            builder.requestInterceptor(interceptor)
-        }
-
-        return builder.build()
-    }
-}
-```
+两个工厂 Bean 都要求按类型恰好能解析出一个 `WebClient.Builder` / `RestClient.Builder` Bean。扩展客户端请注册 `WebClientBuilderCustomizer` / `RestClientBuilderCustomizer` Bean（见[自定义配置](./customization.md)），工厂 Bean 不是为继承而设计的。
 
 ## 适配器创建
 
@@ -390,8 +324,8 @@ features {
 1. [ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) - 客户端模式检测和枚举定义
 2. [HttpExchangeAdapterFactory.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/HttpExchangeAdapterFactory.kt) - 适配器工厂的 SPI 接口
 3. [ReactiveHttpExchangeAdapterFactory.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveHttpExchangeAdapterFactory.kt) - WebClient 适配器工厂实现
-4. [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) - WebClient 配置基类
-5. [AbstractRestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt) - RestClient 配置基类
+4. [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) - WebClient 配置基类
+5. [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) - RestClient 配置基类
 6. [Spring build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/build.gradle.kts) - Gradle 特性变体配置
 
 ## 相关页面

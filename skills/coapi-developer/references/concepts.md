@@ -57,10 +57,11 @@ CoApi resolves the target URL in two layers:
 1. `CoApiDefinition` resolves annotation data. `@CoApi(baseUrl = "...")` wins first; if it is blank,
    `@CoApi(serviceId = "...")` is resolved through `lb://<serviceId>`. `toCoApiDefinition()` then
    normalizes `lb://...` to `http://...` and sets `loadBalanced=true`; otherwise the definition URL is blank.
-2. `AbstractHttpClientFactoryBean.getBaseUrl()` checks `coapi.clients.<name>.base-url` first. If that
-   property is blank, it falls back to `CoApiDefinition.baseUrl`. `loadBalanced()` follows the same
-   layering: `coapi.clients.<name>.load-balanced` (true or false) wins; otherwise a non-blank
-   `base-url` property forces non-load-balanced; otherwise the annotation-derived value.
+2. At factory time, `ClientProperties.resolve(definition)` applies `coapi.clients.<name>.*` through
+   `CoApiDefinition.withOverrides()`: a non-blank `base-url` wins over the annotation URL (an `lb://` URL is
+   rewritten to `http://` and implies load balancing); `load-balanced` (true or false) always wins; otherwise
+   a configured `base-url` decides (`lb://` → load balanced, plain URL → not), else the annotation value.
+   Factory beans expose the result as `effectiveDefinition()`, and builder customizers receive it.
 
 Use this carefully when explaining precedence: per-client configuration can override the annotation at
 factory time, but it does not change the parsed `CoApiDefinition`.

@@ -92,7 +92,8 @@ Requires `spring-cloud-starter-loadbalancer` on classpath.
 - `CoApiDefinition` — holds parsed metadata from `@CoApi` annotation (name, baseUrl, loadBalanced)
 - `CoApiFactoryBean` — creates the HTTP service proxy for the annotated interface
 - `HttpExchangeAdapterFactory` — SPI for creating `HttpExchangeAdapter` instances
-- `AbstractHttpClientFactoryBean` — base for `WebClientFactoryBean` and `RestClientFactoryBean`
+- `AbstractHttpClientFactoryBean` — shared plumbing for the final `WebClientFactoryBean` / `RestClientFactoryBean`; clients are built from `effectiveDefinition()`
+- `ClientProperties` (endpoint overrides) / `ReactiveClientProperties` (filters) / `SyncClientProperties` (interceptors) — optional per-client configuration roles; `CoApiDefinition.withOverrides()` owns the override rules
 
 ## Testing
 

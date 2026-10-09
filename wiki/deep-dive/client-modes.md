@@ -104,133 +104,67 @@ interface HttpExchangeAdapterFactory {
 
 ## Reactive Stack Implementation
 
-The reactive stack uses WebClient for non-blocking HTTP requests with comprehensive integration for reactive programming paradigms.
+The reactive stack builds one `WebClient` per CoApi client with [WebClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L30):
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant A as Application
-    participant B as AbstractWebClientFactoryBean
-    participant C as WebClient.Builder
-    participant D as ExchangeFilterFunctions
-    participant E as LoadBalancedExchangeFilterFunction
-    participant F as WebClientFactoryBean
-    participant G as WebClientAdapter
-    participant H as HttpExchangeAdapter
-    
-    A->>B: createWebClient()
-    B->>C: WebClient.Builder.fromApplicationContext()
-    C->>B: baseUrl()
-    B->>D: applyFilterFunctions()
-    D->>B: configure()
-    B->>F: create()
-    F->>E: applyLoadBalancer()
-    E->>F: configure()
-    F->>G: create(webClient)
-    G->>H: create()
-    H->>A: return HttpExchangeAdapter
+    participant FB as WebClientFactoryBean
+    participant CTX as ApplicationContext
+    participant B as WebClient.Builder
+    participant LB as LoadBalancedWebClientBuilderCustomizer
+    participant C as WebClientBuilderCustomizer beans
+
+    FB->>CTX: ClientProperties.resolve(definition)
+    CTX-->>FB: effective definition
+    FB->>CTX: getBean(WebClient.Builder)
+    FB->>B: baseUrl(effective.baseUrl)
+    FB->>CTX: ReactiveClientProperties.getFilter(name)
+    FB->>B: add filters (names, then types)
+    opt effective.loadBalanced
+        FB->>LB: customize(effective, builder)
+    end
+    FB->>C: customize(effective, builder) in order
+    FB->>B: build()
 ```
-
-### FactoryBean Hierarchy
-
-The reactive stack follows this inheritance hierarchy:
-
-- **AbstractWebClientFactoryBean**: Base class configuring WebClient.Builder
-  - Gets WebClient.Builder from Spring application context
-  - Applies ExchangeFilterFunctions from ClientProperties
-  - Applies WebClientBuilderCustomizer beans
-  - Sets baseUrl and timeouts
-
-- **WebClientFactoryBean**: Extends with load balancer support
-  - Adds LoadBalancedExchangeFilterFunction when load balancer is available
-  - Configures reactive retry mechanisms
-  - Enables circuit breaker integration
-
-- **WebClientAdapter**: Converts WebClient to HttpExchangeAdapter
-  - Implements HttpExchangeAdapter interface
-  - Handles request/response mapping
-  - Supports reactive streams integration
-
-```kotlin
-// spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt
-abstract class AbstractWebClientFactoryBean : FactoryBean<WebClient> {
-    override fun getObject(): WebClient {
-        val builder = webClientBuilder()
-            .baseUrl(clientProperties.baseUrl)
-        
-        clientProperties.filterFunctions.forEach { filterFunction ->
-            builder.filter(filterFunction)
-        }
-        
-        return builder.build()
-    }
-}
-```
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:32-45 -->
 
 ## Sync Stack Implementation
 
-The sync stack provides traditional synchronous HTTP requests using RestClient with straightforward configuration and excellent performance for common use cases.
+The sync stack builds one `RestClient` per CoApi client with [RestClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt#L30):
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant A as Application
-    participant B as AbstractRestClientFactoryBean
-    participant C as RestClient.Builder
-    participant D as ClientHttpRequestInterceptors
-    participant E as LoadBalancerInterceptor
-    participant F as RestClientFactoryBean
-    participant G as RestClientAdapter
-    participant H as HttpExchangeAdapter
-    
-    A->>B: createRestClient()
-    B->>C: RestClient.Builder.fromApplicationContext()
-    C->>B: baseUrl()
-    B->>D: applyInterceptors()
-    D->>B: configure()
-    B->>F: create()
-    F->>E: applyLoadBalancer()
-    E->>F: configure()
-    F->>G: create(restClient)
-    G->>H: create()
-    H->>A: return HttpExchangeAdapter
+    participant FB as RestClientFactoryBean
+    participant CTX as ApplicationContext
+    participant B as RestClient.Builder
+    participant LB as LoadBalancedRestClientBuilderCustomizer
+    participant C as RestClientBuilderCustomizer beans
+
+    FB->>CTX: ClientProperties.resolve(definition)
+    CTX-->>FB: effective definition
+    FB->>CTX: getBean(RestClient.Builder)
+    FB->>B: baseUrl(effective.baseUrl)
+    FB->>CTX: SyncClientProperties.getInterceptor(name)
+    FB->>B: add interceptors (names, then types)
+    opt effective.loadBalanced
+        FB->>LB: customize(effective, builder)
+    end
+    FB->>C: customize(effective, builder) in order
+    FB->>B: build()
 ```
+<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:32-50 -->
 
-### FactoryBean Hierarchy
+### Factory Bean Structure
 
-The sync stack follows this inheritance hierarchy:
+Since v3.0.0 there is one flat factory bean per client type:
 
-- **AbstractRestClientFactoryBean**: Base class configuring RestClient.Builder
-  - Gets RestClient.Builder from Spring application context
-  - Applies ClientHttpRequestInterceptors from ClientProperties
-  - Applies RestClientBuilderCustomizer beans
-  - Sets baseUrl and timeouts
+- **[AbstractHttpClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt#L29)** — shared plumbing: resolves the effective definition (optional `ClientProperties`), resolves filter/interceptor beans, collects the ordered customizer beans, and fails fast when a load-balanced client lacks Spring Cloud LoadBalancer.
+- **`WebClientFactoryBean`** / **`RestClientFactoryBean`** — final classes that build the client in the order shown above.
+- **`LoadBalancedWebClientBuilderCustomizer`** / **`LoadBalancedRestClientBuilderCustomizer`** — internal, applied only to load-balanced clients (see [Load Balancing](./load-balancing.md)).
 
-- **RestClientFactoryBean**: Extends with load balancer support
-  - Adds LoadBalancerInterceptor when load balancer is available
-  - Configures retry mechanisms
-  - Enables connection pooling optimization
-
-- **RestClientAdapter**: Converts RestClient to HttpExchangeAdapter
-  - Implements HttpExchangeAdapter interface
-  - Handles request/response mapping
-  - Provides blocking I/O operations
-
-```kotlin
-// spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt
-abstract class AbstractRestClientFactoryBean : FactoryBean<RestClient> {
-    override fun getObject(): RestClient {
-        val builder = restClientBuilder()
-            .baseUrl(clientProperties.baseUrl)
-        
-        clientProperties.interceptors.forEach { interceptor ->
-            builder.requestInterceptor(interceptor)
-        }
-        
-        return builder.build()
-    }
-}
-```
+Both factory beans require exactly one `WebClient.Builder` / `RestClient.Builder` bean by type. Extend clients through `WebClientBuilderCustomizer` / `RestClientBuilderCustomizer` beans (see [Customization](./customization.md)) — the factory beans are not designed for subclassing.
 
 ## Adapter Creation
 
@@ -390,8 +324,8 @@ Migrating between modes is straightforward due to the adapter pattern:
 1. [ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) - Client mode detection and enum definition
 2. [HttpExchangeAdapterFactory.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/HttpExchangeAdapterFactory.kt) - SPI interface for adapter factories
 3. [ReactiveHttpExchangeAdapterFactory.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveHttpExchangeAdapterFactory.kt) - WebClient adapter factory implementation
-4. [AbstractWebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/AbstractWebClientFactoryBean.kt) - WebClient configuration base class
-5. [AbstractRestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/AbstractRestClientFactoryBean.kt) - RestClient configuration base class
+4. [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) - WebClient configuration base class
+5. [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) - RestClient configuration base class
 6. [Spring build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/build.gradle.kts) - Gradle feature variants configuration
 
 ## Related Pages
