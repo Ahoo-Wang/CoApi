@@ -17,18 +17,38 @@ import me.ahoo.coapi.api.CoApi
 import me.ahoo.coapi.spring.AbstractCoApiRegistrar
 import me.ahoo.coapi.spring.CoApiDefinition
 import me.ahoo.coapi.spring.CoApiDefinition.Companion.toCoApiDefinition
+import org.springframework.beans.factory.BeanClassLoaderAware
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.beans.factory.getBeanProvider
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages
 import org.springframework.boot.context.properties.bind.Bindable
 import org.springframework.boot.context.properties.bind.Binder
+import org.springframework.context.ResourceLoaderAware
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
 import org.springframework.core.env.Environment
+import org.springframework.core.io.ResourceLoader
 import org.springframework.core.type.AnnotationMetadata
 import org.springframework.core.type.filter.AnnotationTypeFilter
+import org.springframework.util.ClassUtils
 
-class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
+class AutoCoApiRegistrar : AbstractCoApiRegistrar(), BeanClassLoaderAware, ResourceLoaderAware {
+
+    /**
+     * Scanned interfaces are loaded with the application's bean class loader, like Spring's own component
+     * scanning. CoApi's own class loader may differ, e.g. under Spring Boot DevTools' RestartClassLoader,
+     * which would produce proxy types that do not match the application's injection points.
+     */
+    private var beanClassLoader: ClassLoader? = null
+    private var resourceLoader: ResourceLoader? = null
+
+    override fun setBeanClassLoader(classLoader: ClassLoader) {
+        this.beanClassLoader = classLoader
+    }
+
+    override fun setResourceLoader(resourceLoader: ResourceLoader) {
+        this.resourceLoader = resourceLoader
+    }
 
     /**
      * Binds `coapi.base-packages` in either form (comma-separated or indexed list) with Boot's
@@ -89,10 +109,12 @@ class AutoCoApiRegistrar : AbstractCoApiRegistrar() {
 
     private fun Set<String>.toApiClientDefinitions(): Set<CoApiDefinition> {
         val scanner = ApiClientScanner(false, env)
+        resourceLoader?.let { scanner.resourceLoader = it }
         return flatMap { basePackage ->
             scanner.findCandidateComponents(basePackage)
         }.map { beanDefinition ->
-            Class.forName(beanDefinition.beanClassName).toCoApiDefinition(env)
+            ClassUtils.forName(requireNotNull(beanDefinition.beanClassName), beanClassLoader)
+                .toCoApiDefinition(env)
         }.toSet()
     }
 }
