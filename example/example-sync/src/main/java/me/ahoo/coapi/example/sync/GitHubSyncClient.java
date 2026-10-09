@@ -16,7 +16,6 @@ package me.ahoo.coapi.example.sync;
 import me.ahoo.coapi.api.CoApi;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.service.annotation.GetExchange;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -24,8 +23,5 @@ import java.util.List;
 public interface GitHubSyncClient {
     @GetExchange("repos/{owner}/{repo}/issues")
     List<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
-
-    @GetExchange("repos/{owner}/{repo}/issues")
-    Flux<Issue> getIssueWithReactive(@PathVariable String owner, @PathVariable String repo);
 }
 
