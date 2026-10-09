@@ -1,0 +1,22 @@
+# Path-based labels, applied by .github/workflows/pr-labeler.yml
+"area: api":
+  - changed-files:
+      - any-glob-to-any-file: "api/**"
+"area: spring":
+  - changed-files:
+      - any-glob-to-any-file: "spring/**"
+"area: starter":
+  - changed-files:
+      - any-glob-to-any-file: "spring-boot-starter/**"
+"area: example":
+  - changed-files:
+      - any-glob-to-any-file: "example/**"
+"area: build":
+  - changed-files:
+      - any-glob-to-any-file: ["*.gradle.kts", "**/*.gradle.kts", "gradle/**", "bom/**", "dependencies/**", "config/**"]
+"area: ci":
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: ["wiki/**", "**/*.md", "llms.txt", "skills/**"]

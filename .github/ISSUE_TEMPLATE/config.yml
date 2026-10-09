@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation
+    url: https://coapi.ahoo.me/
+    about: Guides, configuration reference and the 3.0 migration guide.
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/Ahoo-Wang/CoApi/security/advisories/new
+    about: Please report vulnerabilities privately, not as public issues.

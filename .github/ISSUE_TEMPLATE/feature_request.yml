@@ -1,0 +1,22 @@
+name: "✨ Feature Request"
+description: Suggest an idea for CoApi
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem does this solve? Describe the use case, not only the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: The API or configuration you would like, e.g. an example `@CoApi` interface or `coapi.*` properties.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

@@ -1,0 +1,53 @@
+name: "🐛 Bug Report"
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before reporting, please search [existing issues](https://github.com/Ahoo-Wang/CoApi/issues?q=is%3Aissue) and read the [documentation](https://coapi.ahoo.me/).
+  - type: input
+    id: version
+    attributes:
+      label: CoApi version
+      placeholder: "3.0.0"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Spring Boot / JDK version
+      placeholder: "Spring Boot 4.1.1, JDK 21"
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Client mode
+      options:
+        - REACTIVE (WebClient)
+        - SYNC (RestClient)
+        - AUTO / not sure
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: A minimal `@CoApi` interface and the relevant `coapi.*` configuration help most.
+      render: kotlin
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the full stack trace or log output if any.
+    validations:
+      required: true

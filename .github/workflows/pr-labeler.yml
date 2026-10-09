@@ -1,0 +1,76 @@
+#
+# Copyright [2021-present] [ahoo wang <ahoowang@qq.com> (https://github.com/Ahoo-Wang)].
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#      http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: PR Labeler
+on:
+  # pull_request_target so labels can also be set on PRs from forks.
+  # Safe: no job checks out or runs code from the PR.
+  pull_request_target:
+    types: [ opened, edited, synchronize, reopened ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  title:
+    name: Conventional PR Title
+    runs-on: ubuntu-latest
+    steps:
+      # The PR title becomes the squash commit on main, so it must follow Conventional Commits.
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+            release
+
+  label:
+    name: Label PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label by changed paths
+        uses: actions/labeler@v7
+        with:
+          sync-labels: true
+
+      - name: Label by title type
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const match = /^(\w+)(\([^)]*\))?(!)?:/.exec(title);
+            if (!match) return;
+            const byType = {
+              feat: 'enhancement', fix: 'bug', docs: 'documentation', refactor: 'refactor',
+              perf: 'performance', test: 'test', build: 'build', ci: 'ci', chore: 'chore',
+            };
+            const labels = [byType[match[1]], match[3] ? 'breaking-change' : undefined].filter(Boolean);
+            if (labels.length === 0) return;
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels,
+            });
