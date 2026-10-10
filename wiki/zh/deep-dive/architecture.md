@@ -77,7 +77,7 @@ sequenceDiagram
 
 | 修改内容 | 文件 | 测试 |
 |----------|------|------|
-| URL / 负载均衡优先级 | `spring/.../CoApiDefinition.kt` | `CoApiDefinitionTest` |
+| URL / 负载均衡优先级 | `spring/.../CoApiDefinition.kt` | `CoApiDefinitionTest`、`ClientPropertiesTest` |
 | 客户端构建流程 | `spring/.../client/reactive/WebClientFactoryBean.kt`、`spring/.../client/sync/RestClientFactoryBean.kt`、`AbstractHttpClientFactoryBean.kt` | `WebClientFactoryBeanTest`、`RestClientFactoryBeanTest` |
 | 模式选择 | `spring/.../ClientMode.kt` | `ClientModeTest` |
 | Bean 注册 | `spring/.../CoApiRegistrar.kt` | `CoApiRegistrarTest`、`CoApiContextTest` |

@@ -23,7 +23,7 @@ A `${...}` placeholder in `@CoApi(baseUrl)`, `@CoApi(serviceId)` or a `CoApiDefi
 
 ### `CoApi [...] is load balanced, but Spring Cloud LoadBalancer is not on the classpath`
 
-The client uses `serviceId`, an `lb://` URL or `@LoadBalanced`, or `coapi.clients.<name>.load-balanced=true` is set. Add `org.springframework.cloud:spring-cloud-starter-loadbalancer`. If this environment should call a fixed host instead, set `coapi.clients.<name>.base-url` to a plain URL, or set `coapi.clients.<name>.load-balanced=false`.
+The client uses `serviceId`, an `lb://` URL or `@LoadBalanced`, or `coapi.clients.<name>.load-balanced=true` is set. Add `org.springframework.cloud:spring-cloud-starter-loadbalancer`. If this environment should call a fixed host instead, set `coapi.clients.<name>.load-balanced=false`, or set `coapi.clients.<name>.base-url` to a plain URL. A plain `base-url` is not enough if `load-balanced=true` is set: remove that flag or set it to `false`.
 
 ### `CoApiDefinition bean [...] is declared by a non-static @Bean method`
 

@@ -51,7 +51,7 @@ description: 全部 coapi.* 属性，以及单客户端属性如何覆盖 @CoApi
 | 未设置 | 已设置 | 仅当它是 `lb://` URL 时 |
 | 未设置 | 未设置 | 取决于注解：`serviceId`、`lb://` 形式的 `baseUrl`，或 `@LoadBalanced` |
 
-这些规则集中实现在 `CoApiDefinition.withOverrides()` 中，并由 `CoApiDefinitionTest` 覆盖测试。
+这些规则集中实现在 `CoApiDefinition.withOverrides()` 中，并由 `ClientPropertiesTest` 覆盖测试。
 
 ## 示例
 

@@ -77,7 +77,7 @@ spring:
 
 ## Bypassing the load balancer per environment
 
-To call a fixed host somewhere (for example in staging), override the URL. A plain `base-url` turns load balancing off for that client:
+To call a fixed host somewhere (for example in staging), override the URL. A plain `base-url` turns load balancing off for that client, unless `load-balanced: true` is also set for it (the explicit flag wins):
 
 ```yaml
 coapi:

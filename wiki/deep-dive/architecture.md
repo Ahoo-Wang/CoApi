@@ -77,7 +77,7 @@ These rules are deliberate. Keep them when changing code.
 
 | Change | Files | Tests |
 |--------|-------|-------|
-| URL / load-balancing precedence | `spring/.../CoApiDefinition.kt` | `CoApiDefinitionTest` |
+| URL / load-balancing precedence | `spring/.../CoApiDefinition.kt` | `CoApiDefinitionTest`, `ClientPropertiesTest` |
 | Client build pipeline | `spring/.../client/reactive/WebClientFactoryBean.kt`, `spring/.../client/sync/RestClientFactoryBean.kt`, `AbstractHttpClientFactoryBean.kt` | `WebClientFactoryBeanTest`, `RestClientFactoryBeanTest` |
 | Mode selection | `spring/.../ClientMode.kt` | `ClientModeTest` |
 | Bean registration | `spring/.../CoApiRegistrar.kt` | `CoApiRegistrarTest`, `CoApiContextTest` |

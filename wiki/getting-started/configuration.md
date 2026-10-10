@@ -51,7 +51,7 @@ An `lb://` scheme (case-insensitive) is always rewritten to `http://` and marks 
 | unset | set | only if it is an `lb://` URL |
 | unset | unset | as the annotation says: `serviceId`, an `lb://` `baseUrl`, or `@LoadBalanced` |
 
-These rules are implemented in one place, `CoApiDefinition.withOverrides()`, and covered by `CoApiDefinitionTest`.
+These rules are implemented in one place, `CoApiDefinition.withOverrides()`, and covered by `ClientPropertiesTest`.
 
 ## Example
 

@@ -23,7 +23,7 @@ CoApi 在启动时检查配置，出错时给出包含客户端名称和解决�
 
 ### `CoApi [...] is load balanced, but Spring Cloud LoadBalancer is not on the classpath`
 
-客户端使用了 `serviceId`、`lb://` URL 或 `@LoadBalanced`，或者设置了 `coapi.clients.<name>.load-balanced=true`。添加 `org.springframework.cloud:spring-cloud-starter-loadbalancer`。如果当前环境应调用固定主机，把 `coapi.clients.<name>.base-url` 设为普通 URL，或设置 `coapi.clients.<name>.load-balanced=false`。
+客户端使用了 `serviceId`、`lb://` URL 或 `@LoadBalanced`，或者设置了 `coapi.clients.<name>.load-balanced=true`。添加 `org.springframework.cloud:spring-cloud-starter-loadbalancer`。如果当前环境应调用固定主机，设置 `coapi.clients.<name>.load-balanced=false`，或把 `coapi.clients.<name>.base-url` 设为普通 URL。若设置了 `load-balanced=true`，仅改 `base-url` 不够，需删除该标志或设为 `false`。
 
 ### `CoApiDefinition bean [...] is declared by a non-static @Bean method`
 
