@@ -1,147 +1,55 @@
 ---
-title: Auto-configuration
-description: CoApi Spring Boot auto-configuration documentation
+title: Registering Clients
+description: How CoApi finds client interfaces, through Spring Boot classpath scanning, coapi.base-packages, @EnableCoApi, or CoApiDefinition beans, and how to use it without Spring Boot.
 ---
 
-# Auto-configuration
+# Registering Clients
 
-CoApi provides comprehensive Spring Boot auto-configuration that simplifies the setup process while maintaining flexibility for custom configurations. The framework supports two distinct activation paths to accommodate different use cases and development preferences.
+A `@CoApi` interface becomes a bean only once a registrar finds it. There are four ways to make sure that happens. You can combine them.
 
-## Overview
+| Way | Needs Spring Boot | Use it for |
+|-----|-------------------|------------|
+| Classpath scanning (default) | yes | Clients in your application's packages |
+| `coapi.base-packages` | yes | Clients in other packages or JARs, by package |
+| `@EnableCoApi(clients = [...])` | no | Clients listed explicitly, in any package |
+| `CoApiDefinition` beans | yes | Interfaces you cannot annotate, or definitions built in code |
 
-CoApi's auto-configuration system is designed to automatically detect and configure CoApi clients based on classpath scanning and explicit configuration. The system leverages Spring Boot's conditional configuration mechanism to ensure that CoApi components are only registered when needed, providing a seamless integration experience.
+## Classpath scanning
 
-The auto-configuration is built around a modular architecture that combines automatic scanning with manual configuration options, allowing developers to choose the approach that best fits their application architecture.
+With the starter on the classpath, `CoApiAutoConfiguration` scans the **auto-configuration packages** (the package of your `@SpringBootApplication` class and everything below it) for interfaces annotated with `@CoApi`. Classes are ignored.
 
-## At-a-Glance
+Scanning is on unless `coapi.enabled=false`.
 
-| Feature | Auto Configuration | Manual Configuration |
-|---------|-------------------|---------------------|
-| **Activation** | Spring Boot auto-configuration | `@EnableCoApi` annotation |
-| **Scanning** | Automatic classpath scanning | Explicit client specification |
-| **Base Packages** | `@SpringBootApplication` + `coapi.base-packages` | Annotation attributes |
-| **Flexibility** | High (combines scanning + registered beans) | Medium (explicit control) |
-| **Setup Complexity** | Low (zero configuration) | Low (minimal annotation setup) |
+## `coapi.base-packages`
 
-## Activation Paths
+Adds packages to scan, typically for clients shipped in a library JAR:
 
-### Auto (Spring Boot) Configuration Path
-
-```mermaid
-sequenceDiagram
-    participant SB as Spring Boot
-    participant AC as CoApiAutoConfiguration
-    participant CO as ConditionalOnCoApiEnabled
-    participant ACR as AutoCoApiRegistrar
-    participant ABS as AbstractCoApiRegistrar
-    participant CR as CoApiRegistrar
-    
-    SB->>AC: AutoConfiguration
-    AC->>CO: ConditionalOnCoApiEnabled
-    CO->>AC: Check coapi.enabled=true (default)
-    AC->>AC: Import AutoCoApiRegistrar
-    AC->>AC: EnableConfigurationProperties
-    AC->>AC: return
-    SB->>AC: Instantiate CoApiAutoConfiguration
-    AC->>AC: Import AutoCoApiRegistrar
-    AC->>ABR: getCoApiDefinitions()
-    ABR->>ACR: AbstractCoApiRegistrar.registerBeanDefinitions()
-    ACR->>ACR: inferClientMode()
-    ACR->>ABR: registerHttpExchangeAdapterFactory()
-    ABR->>ACR: register()
-    AC->>SB: return AutoCoApiRegistrar
-    SB->>CR: CoApiRegistrar.register(apiDefinitions)
-    CR->>CR: Register CoApiDefinition beans
-    SB->>SB: Complete auto-configuration
+```yaml
+coapi:
+  base-packages:
+    - com.example.order.client
+    - com.example.payment.client
 ```
 
-### Manual Configuration Path
+A comma-separated string (`coapi.base-packages=com.a,com.b`) works too.
 
-```mermaid
-sequenceDiagram
-    participant DC as Developer Configuration
-    participant EC as EnableCoApi
-    participant ECR as EnableCoApiRegistrar
-    participant ABS as AbstractCoApiRegistrar
-    participant CR as CoApiRegistrar
-    
-    DC->>DC: @EnableCoApi(clents=[...])
-    DC->>EC: Annotate with explicit clients
-    EC->>ECR: @Import(EnableCoApiRegistrar)
-    EC->>ECR: Import EnableCoApiRegistrar
-    DC->>DC: return
-    EC->>ECR: getCoApiDefinitions()
-    ECR->>ECR: Extract clients from @EnableCoApi
-    ECR->>ECR: Map to CoApiDefinition via toCoApiDefinition()
-    ECR->>ABR: AbstractCoApiRegistrar.registerBeanDefinitions()
-    ABR->>ECR: inferClientMode()
-    ABR->>ECR: registerHttpExchangeAdapterFactory()
-    ECR->>ABR: register()
-    EC->>CR: CoApiRegistrar.register(apiDefinitions)
-    CR->>CR: Register CoApiDefinition beans
-```
+## `@EnableCoApi`
 
-## Auto-Configuration Components
-
-### CoApiAutoConfiguration
-
-The main auto-configuration class that orchestrates the entire setup process:
+Registers exactly the listed interfaces:
 
 ```kotlin
-@AutoConfiguration
-@ConditionalOnCoApiEnabled
-@Import(AutoCoApiRegistrar::class)
-@EnableConfigurationProperties(CoApiProperties::class)
-class CoApiAutoConfiguration
+@EnableCoApi(clients = [TodoClient::class, GitHubApiClient::class])
+@SpringBootApplication
+class ConsumerApplication
 ```
 
-This class serves as the entry point for automatic configuration and delegates the actual registration to specialized components.
+`@EnableCoApi` lives in `coapi-spring` and works without Spring Boot. It does not depend on `coapi.enabled`.
 
-[`spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt:20`](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiAutoConfiguration.kt#L20)
+Registering the same interface by more than one way is harmless: the first registration wins, and later ones are skipped with a `WARN` log line. The same skip applies to two *different* interfaces that share a name across registration paths, so give clients unique names.
 
-### ConditionalOnCoApiEnabled
+## `CoApiDefinition` beans
 
-Controls whether CoApi auto-configuration should be enabled:
-
-```kotlin
-@ConditionalOnProperty(
-    value = [ConditionalOnCoApiEnabled.ENABLED_KEY],
-    matchIfMissing = true,
-    havingValue = "true",
-)
-annotation class ConditionalOnCoApiEnabled {
-    companion object {
-        const val ENABLED_KEY: String = COAPI_PREFIX + ENABLED_SUFFIX_KEY
-    }
-}
-```
-
-The configuration is enabled by default and can be disabled by setting `coapi.enabled=false` in application properties.
-
-[`spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/ConditionalOnCoApiEnabled.kt:18`](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/ConditionalOnCoApiEnabled.kt#L18)
-
-### AutoCoApiRegistrar
-
-Handles automatic scanning and registration of CoApi clients:
-
-```mermaid
-graph TD
-    A["AutoCoApiRegistrar"] --> B["getCoApiDefinitions()"]
-    A --> C["getScanBasePackages()"]
-    B --> D["Scanned Definitions"]
-    B --> E["Registered CoApiDefinition Beans"]
-    C --> F["AutoConfigurationPackages.get()"]
-    C --> G["coapi.base-packages Property"]
-    D --> H["ApiClientScanner"]
-    H --> I["ClassPathScanningCandidateComponentProvider"]
-    I --> J["AnnotationTypeFilter(CoApi.class)"]
-    I --> K["Interface Only Filter"]
-```
-
-The registrar combines automatically scanned interface definitions with any explicitly registered `CoApiDefinition` beans. Since v2.2.0, name conflicts within the merged set (e.g. a registered definition colliding with a scanned interface of the same client name) fail startup with an `IllegalStateException` listing the conflicting types.
-
-::: warning Declare `CoApiDefinition` beans with a static `@Bean` method
-`CoApiDefinition` beans are read while bean definitions are still being registered, before any `BeanPostProcessor` exists. A non-static `@Bean` method therefore forces its configuration class to be created too early: its `@Autowired`/`@Value` fields are not injected and its `@Bean` methods are not proxied. CoApi logs a warning for such methods since v2.3.0 and **fails startup since v3.0.0**. Declare the method static (Kotlin: `@JvmStatic` in a `companion object`) — the same rule Spring applies to `BeanFactoryPostProcessor` beans. Do not use `@Value` parameters (they are not resolved yet at that point): since v3.0.0 CoApi resolves `${...}` placeholders and the `lb://` scheme in a definition bean's `baseUrl` itself, exactly as for the `@CoApi` annotation:
+When you cannot put `@CoApi` on an interface (it comes from a third party, or the definition is computed), declare a `CoApiDefinition` bean instead:
 
 ```kotlin
 @Configuration
@@ -152,166 +60,34 @@ class OrderApiConfiguration {
         fun orderApiDefinition(): CoApiDefinition = CoApiDefinition(
             name = "OrderApi",
             apiType = OrderApi::class.java,
-            baseUrl = "\${order.url}", // resolved by CoApi (v3.0.0+); on v2.3.x resolve it via an Environment parameter
-            loadBalanced = false,
+            baseUrl = "lb://\${order.service-id}",
+            loadBalanced = false, // lb:// already enables load balancing
         )
     }
 }
 ```
-:::
+
+Rules:
+
+- The `@Bean` method must be **static** (Kotlin: `@JvmStatic` in a `companion object`). CoApi reads these beans before bean post-processing. A non-static method would create its configuration class too early, so startup fails instead.
+- Placeholders and `lb://` in `baseUrl` are resolved just like on the annotation.
+- Names must be unique. A clash with a scanned client fails startup; a clash with an `@EnableCoApi` client is skipped with a `WARN` log.
+- Only Spring Boot auto-configuration collects these beans. `@EnableCoApi` alone does not.
+
+## Without Spring Boot
+
+Use `coapi-spring` and `@EnableCoApi` on a configuration class, and provide what Boot would otherwise provide:
 
 ```kotlin
-private fun getScanBasePackages(): Set<String> {
-    val coApiBasePackages = getCoApiBasePackages()
-    if (AutoConfigurationPackages.has(appContext).not()) {
-        return coApiBasePackages
-    }
-    return AutoConfigurationPackages.get(appContext).toSet() + coApiBasePackages
+@Configuration
+@EnableCoApi(clients = [GitHubApiClient::class])
+class ClientConfiguration {
+    @Bean
+    @Scope("prototype")
+    fun restClientBuilder(): RestClient.Builder = RestClient.builder()
 }
 ```
 
-[`spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt:48`](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt#L48)
-
-### EnableCoApiRegistrar
-
-Handles manual configuration through the `@EnableCoApi` annotation:
-
-```kotlin
-@Suppress("UNCHECKED_CAST")
-override fun getCoApiDefinitions(importingClassMetadata: AnnotationMetadata): Set<CoApiDefinition> {
-    val enableCoApi =
-        importingClassMetadata.getAnnotationAttributes(EnableCoApi::class.java.name) ?: return emptySet()
-    val clients = enableCoApi[EnableCoApi::clients.name] as Array<Class<*>>
-    return clients.map { clientType ->
-        clientType.toCoApiDefinition(env)
-    }.toSet()
-}
-```
-
-[`spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApiRegistrar.kt:22`](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApiRegistrar.kt#L22)
-
-### AbstractCoApiRegistrar
-
-Provides the template method pattern for bean registration:
-
-```mermaid
-sequenceDiagram
-    participant ACR as AbstractCoApiRegistrar
-    participant CM as inferClientMode
-    participant RH as registerHttpExchangeAdapterFactory
-    participant CR as CoApiRegistrar
-    
-    ACR->>ACR: registerBeanDefinitions()
-    ACR->>CM: inferClientMode()
-    CM->>ACR: return ClientMode
-    ACR->>RH: registerHttpExchangeAdapterFactory(clientMode, registry)
-    RH->>RH: Register SyncHttpExchangeAdapterFactory or ReactiveHttpExchangeAdapterFactory
-    ACR->>ACR: getCoApiDefinitions(importingClassMetadata)
-    ACR->>CR: CoApiRegistrar(registry, clientMode)
-    ACR->>CR: register(apiDefinitions)
-    CR->>CR: Register CoApiDefinition beans
-```
-
-The abstract class implements the Spring `ImportBeanDefinitionRegistrar` interface and provides a structured approach to bean registration.
-
-```kotlin
-override fun registerBeanDefinitions(importingClassMetadata: AnnotationMetadata, registry: BeanDefinitionRegistry) {
-    val clientMode = inferClientMode {
-        env.getProperty(it)
-    }
-    registerHttpExchangeAdapterFactory(clientMode, registry)
-    val coApiRegistrar = CoApiRegistrar(registry, clientMode)
-    val apiDefinitions = getCoApiDefinitions(importingClassMetadata)
-    coApiRegistrar.register(apiDefinitions)
-}
-```
-
-[`spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt:42`](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L42)
-
-## Classpath Scanning Process
-
-The automatic scanning process uses a specialized component scanner that finds interfaces annotated with `@CoApi`:
-
-```kotlin
-class ApiClientScanner(useDefaultFilters: Boolean, environment: Environment) :
-    ClassPathScanningCandidateComponentProvider(useDefaultFilters, environment) {
-    init {
-        addIncludeFilter(AnnotationTypeFilter(CoApi::class.java))
-    }
-
-    override fun isCandidateComponent(beanDefinition: AnnotatedBeanDefinition): Boolean {
-        return beanDefinition.metadata.isInterface
-    }
-}
-```
-
-[`spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt:72`](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt#L72)
-
-The scanning combines multiple base package sources:
-
-1. **Spring Boot Auto-configuration packages**: Automatically detected from the main application class
-2. **CoApi-specific packages**: Configured via `coapi.base-packages` property
-3. **Supports both single string and array notation**:
-   - Single package: `coapi.base-packages=com.example.clients`
-   - Multiple packages: `coapi.base-packages[0]=com.example.clients,coapi.base-packages[1]=com.example.external`
-
-## Bean Registration Sequence
-
-```mermaid
-graph TD
-    A["Spring Boot Auto-configuration"] --> B["CoApiAutoConfiguration"]
-    B --> C["AutoCoApiRegistrar"]
-    C --> D["Conditional Check"]
-    D --> E{"coapi.enabled=true?"}
-    E -->|Yes| F["getCoApiDefinitions()"]
-    E -->|No| G["Skip Configuration"]
-    F --> H["getScanBasePackages()"]
-    H --> I["AutoConfigurationPackages.get()"]
-    H --> J["coapi.base-packages"]
-    I --> K["Scan CoApi Interfaces"]
-    J --> K
-    K --> L["ApiClientScanner.findCandidateComponents()"]
-    L --> M["Create CoApiDefinition"]
-    M --> N["CoApiRegistrar.register()"]
-    N --> O["Register HttpExchangeAdapterFactory"]
-    O --> P["Register Client Beans"]
-```
-
-## Configuration Properties
-
-The auto-configuration supports several properties through `CoApiProperties`:
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `coapi.enabled` | `true` | Enable/disable CoApi auto-configuration |
-| `coapi.base-packages` | (empty) | Comma-separated list of base packages to scan |
-| `coapi.client-mode` | `reactive` | Client mode: `sync` or `reactive` |
-
-## Spring Boot Auto-configuration Registration
-
-The auto-configuration is registered in the Spring Boot auto-configuration metadata:
-
-```properties
-# META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
-me.ahoo.coapi.spring.boot.starter.CoApiAutoConfiguration
-```
-
-[`spring-boot-starter/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports:1`](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports#L1)
-
-This ensures that Spring Boot automatically discovers and includes the CoApi auto-configuration when the starter dependency is present in the classpath.
-
-## References
-
-1. [Spring Boot Auto-Configuration Documentation](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-auto-configuration)
-2. [Spring Boot @Conditional Annotations](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-conditional-on-property)
-3. [Spring ClassPathScanningCandidateComponentProvider](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ClassPathScanningCandidateComponentProvider.html)
-4. [Spring ImportBeanDefinitionRegistrar Interface](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ImportBeanDefinitionRegistrar.html)
-5. [CoApi @EnableCoApi Annotation](.././annotations.md)
-6. [CoApi Client Configuration](.././customization
-
-## Related Pages
-
-- [Client Configuration](./customization
-- [Api Annotation](./annotations.md) - Using the @CoApi annotation
-- [Properties Configuration](../getting-started/configuration.md) - CoApi properties configuration
-- [Spring Integration](.md) - Advanced Spring integration patterns
+- A `WebClient.Builder` or `RestClient.Builder` bean for the [client mode](./client-modes.md). Make it prototype-scoped, because CoApi configures the builder it receives.
+- `coapi.mode` is read from the `Environment`. Set it explicitly, because `AUTO` may pick a mode whose builder you did not define.
+- Optionally, `ClientProperties` / `ReactiveClientProperties` / `SyncClientProperties` beans for per-client overrides. See [Configuration](../getting-started/configuration.md#without-spring-boot).

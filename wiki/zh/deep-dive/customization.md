@@ -1,273 +1,107 @@
 ---
-title: Customization & Extensibility
-description: Deep dive into CoApi's customization SPI — WebClientBuilderCustomizer, RestClientBuilderCustomizer, filter/interceptor chains, and per-client configuration via YAML properties.
+title: 自定义
+description: 单客户端过滤器与拦截器、全局 Builder 定制器、替换 CoApi 的 Bean，以及客户端的构建顺序。
 ---
 
-# 自定义和扩展
+# 自定义
 
-## 概述
+CoApi 基于应用的 Builder Bean 创建每个 HTTP 客户端。你可以通过三种方式介入，作用范围从小到大：
 
-CoApi 的 HTTP 客户端不是黑盒。该库公开了分层自定义 SPI，允许在三个时间点拦截和修改客户端构建器：（1）用于过滤器和拦截器的每客户端 YAML 配置，（2）用于负载均衡和协议特定调整的每类型构建器自定义器，（3）应用于所有客户端的全局自定义器 bean。这种设计意味着通用关注点（连接池、指标、追踪）可以全局应用，而特定于客户端的覆盖（认证头、超时）可以针对各个接口。
+| 需求 | 使用 |
+|------|------|
+| 给**部分**客户端添加过滤器/拦截器，无需代码 | `coapi.clients.<name>.reactive.filter` / `.sync.interceptor` |
+| 修改**所有**客户端的 Builder，或在代码中按客户端修改 | `WebClientBuilderCustomizer` / `RestClientBuilderCustomizer` Bean |
+| 完全替换某个客户端或适配器 | 自己定义对应的 Bean |
 
-## 一览
+## 客户端的构建过程
 
-| 自定义点 | 接口 | 范围 | 关键文件 | 来源 |
-|---------------------|-----------|-------|----------|--------|
-| 基础 SPI | `HttpClientBuilderCustomizer<Builder>` | 所有客户端 | [HttpClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt) | [HttpClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt#L18) |
-| 响应式自定义器 | `WebClientBuilderCustomizer` | WebClient 客户端 | [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt) | [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt#L20) |
-| 同步自定义器 | `RestClientBuilderCustomizer` | RestClient 客户端 | [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt) | [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt#L20) |
-| 每客户端端点 | `ClientProperties` | 各个客户端 | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) | [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt#L24) |
-| 每客户端过滤器 | `ReactiveClientProperties` → `ComponentDefinition<ExchangeFilterFunction>` | WebClient 客户端 | [ReactiveClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveClientProperties.kt) | [ReactiveClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveClientProperties.kt#L24) |
-| 每客户端拦截器 | `SyncClientProperties` → `ComponentDefinition<ClientHttpRequestInterceptor>` | RestClient 客户端 | [SyncClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/SyncClientProperties.kt) | [SyncClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/SyncClientProperties.kt#L24) |
+对每个客户端，`WebClientFactoryBean` 或 `RestClientFactoryBean` 会：
 
-## 自定义器类层次结构
+1. 从容器获取 Builder（`WebClient.Builder` / `RestClient.Builder`）；
+2. 设置[生效定义](../getting-started/configuration.md#覆盖规则)中的 base URL；
+3. 添加配置的过滤器（响应式）或拦截器（同步）：先按名称，再按类型；
+4. 如果客户端是[负载均衡](./load-balancing.md)的，添加负载均衡器；
+5. 按 `@Order` 顺序调用所有 Builder 定制器 Bean；
+6. 构建客户端。
 
-```mermaid
-classDiagram
-    class HttpClientBuilderCustomizer~Builder~ {
-        <<fun interface>>
-        +customize(CoApiDefinition, Builder)
-    }
-    class WebClientBuilderCustomizer {
-        <<fun interface>>
-        +customize(CoApiDefinition, WebClient.Builder)
-        +NoOp
-    }
-    class RestClientBuilderCustomizer {
-        <<fun interface>>
-        +customize(CoApiDefinition, RestClient.Builder)
-        +NoOp
-    }
-    class ClientProperties {
-        <<interface>>
-        +getBaseUri(String) String
-        +getLoadBalanced(String) Boolean?
-        +resolve(CoApiDefinition) CoApiDefinition
-    }
-    class ReactiveClientProperties {
-        <<fun interface>>
-        +getFilter(String) ComponentDefinition
-    }
-    class SyncClientProperties {
-        <<fun interface>>
-        +getInterceptor(String) ComponentDefinition
-    }
-    class ComponentDefinition~T~ {
-        +names: List~String~
-        +types: List~Class~
-    }
+定制器最后运行，因此能看到并修改之前的所有设置。
 
-    HttpClientBuilderCustomizer <|-- WebClientBuilderCustomizer
-    HttpClientBuilderCustomizer <|-- RestClientBuilderCustomizer
-    ReactiveClientProperties --> ComponentDefinition
-    SyncClientProperties --> ComponentDefinition
+## 单客户端过滤器与拦截器
+
+把过滤器或拦截器声明为 Bean，然后按 Bean 名称或类型引用：
+
+```kotlin
+@Bean
+fun tenantHeaderFilter() = ExchangeFilterFunction { request, next ->
+    next.exchange(ClientRequest.from(request).header("X-Tenant", "acme").build())
+}
 ```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt:24, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt:24, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveClientProperties.kt:22, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/SyncClientProperties.kt:22, spring/src/main/kotlin/me/ahoo/coapi/spring/client/ComponentDefinition.kt:20 -->
 
-自 v3.0.0 起，模式相关的配置拆到了各自的角色接口中：只用同步模式的应用不会在 `ClientProperties` 里看到任何响应式类型。三个接口都是可选 Bean：Spring Boot 下由 `CoApiProperties` 统一实现；不使用 Spring Boot 时，各自回退到 `Empty` 实现。
-
-## 自定义器调用顺序
-
-创建 `WebClient` 或 `RestClient` bean 时，自定义器按严格顺序应用：
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant FB as WebClientFactoryBean
-    participant CTX as ApplicationContext
-    participant Builder as WebClient.Builder
-    participant LB as LoadBalancedWebClientBuilderCustomizer
-    participant Global as WebClientBuilderCustomizer beans
-
-    FB->>CTX: ClientProperties.resolve(definition)
-    CTX-->>FB: 生效的定义
-    FB->>CTX: getBean(WebClient.Builder)
-    CTX-->>Builder: builder instance
-    FB->>Builder: baseUrl(effective.baseUrl)
-    FB->>CTX: ReactiveClientProperties.getFilter(name)
-    FB->>Builder: 应用过滤器（先名称，后类型）
-    opt effective.loadBalanced
-        FB->>LB: customize(effective, builder)
-        LB->>Builder: 未存在时添加 LoadBalancedExchangeFilterFunction
-    end
-    loop 按顺序遍历每个定制器 Bean
-        FB->>Global: customize(effective, builder)
-    end
-    FB->>Builder: build()
-```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:32-45 -->
-
-[WebClientFactoryBean.getObject()](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L32) 中的调用顺序（`RestClientFactoryBean` 与之对称，使用拦截器）：
-
-| 顺序 | 步骤 | 内容 | 是否可配置 |
-|------|------|------|-----------|
-| 1 | 解析生效的定义 | `ClientProperties.resolve(definition)`——`coapi.clients.<name>.*` 覆盖注解 | 通过 YAML |
-| 2 | 获取 Builder | 从 ApplicationContext 获取 `WebClient.Builder` | 否 |
-| 3 | 设置基础 URL | `effective.baseUrl` | 通过 `coapi.clients.<name>.base-url` |
-| 4 | 应用过滤器 | 来自 `ReactiveClientProperties` 的 `ComponentDefinition` | 通过 YAML |
-| 5 | 负载均衡 | 仅当 `effective.loadBalanced` 时 | 自动 |
-| 6 | 定制器 Bean | 所有 `WebClientBuilderCustomizer` Bean，按顺序 | 注册为 Spring Bean |
-
-定制器收到的是**生效的**定义（自 v3.0.0 起）：`coApiDefinition.baseUrl` 和 `coApiDefinition.loadBalanced` 已经反映了 `coapi.clients.<name>.*` 的覆盖配置。
-
-## 自定义器决策流程
-
-```mermaid
-flowchart TD
-    A["FactoryBean.getObject()"] --> A2["Resolve effective definition"]
-    A2 --> B["Get Builder from Context"]
-    B --> C[Set baseUrl]
-    C --> D[Apply per-client filters/interceptors]
-    D --> E{Load balanced?}
-    E -->|Yes| F[Add LB filter/interceptor]
-    E -->|No| H[Apply customizer beans]
-    F --> H
-    H --> I[Build client]
-
-```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt:32-45, spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt:32-50 -->
-
-## 每客户端过滤器配置
-
-过滤器和拦截器通过 YAML 属性按客户端配置；`ReactiveClientProperties` 和 `SyncClientProperties` 提供类型化访问：
-
-**响应式（WebClient）过滤器：**
 ```yaml
 coapi:
   clients:
-    MyApiClient:
+    GitHubApiClient:
       reactive:
         filter:
-          names:
-            - myAuthFilter
-          types:
-            - com.example.LoggingExchangeFilterFunction
-```
-
-**同步（RestClient）拦截器：**
-```yaml
-coapi:
-  clients:
-    MyApiClient:
+          names: [tenantHeaderFilter]
+    PaymentClient:
       sync:
         interceptor:
-          names:
-            - myAuthInterceptor
-          types:
-            - com.example.LoggingInterceptor
+          types: [com.example.PaymentAuthInterceptor]
 ```
 
-[AbstractHttpClientFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/AbstractHttpClientFactoryBean.kt) 中的解析（先全部名称，后全部类型）：
-- **names** → 按名称从 `ApplicationContext` 解析为 bean
-- **types** → 按类类型从 `ApplicationContext` 解析为 bean
+引用了不存在的 Bean 会导致客户端创建失败。`types` 中的条目必须恰好匹配一个 Bean。
 
-## 示例：连接池自定义器
+## Builder 定制器
 
-消费者服务器中的一个真实示例演示了每客户端连接池：
+定制器 Bean 作用于其模式下的所有客户端。它接收客户端的生效定义，因此可以根据 `name`、`baseUrl` 或 `loadBalanced` 区别处理：
 
 ```kotlin
-@Service
-class ConsumerWebClientBuilderCustomizer : WebClientBuilderCustomizer {
-    override fun customize(
-        coApiDefinition: CoApiDefinition,
-        builder: WebClient.Builder
-    ) {
-        val connectionProvider = ConnectionProvider.builder(coApiDefinition.name)
+@Component
+class ConnectionPoolCustomizer : WebClientBuilderCustomizer {
+    override fun customize(coApiDefinition: CoApiDefinition, builder: WebClient.Builder) {
+        val provider = ConnectionProvider.builder(coApiDefinition.name)   // 每个客户端一个连接池
             .maxConnections(500)
             .maxIdleTime(Duration.ofSeconds(20))
-            .maxLifeTime(Duration.ofSeconds(60))
-            .pendingAcquireTimeout(Duration.ofSeconds(60))
-            .evictInBackground(Duration.ofSeconds(120))
             .build()
-        val httpClient = HttpClient.create(connectionProvider)
-        builder.clientConnector(ReactorClientHttpConnector(httpClient))
+        builder.clientConnector(ReactorClientHttpConnector(HttpClient.create(provider)))
     }
 }
 ```
-<!-- Source: example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerWebClientBuilderCustomizer.kt:26-46 -->
-
-关键要点：
-- 注册为 `@Service`，以便 Spring 将其发现为全局自定义器
-- 使用 `coApiDefinition.name` 为每个客户端创建命名连接池
-- 通过 `getBeanProvider().orderedStream()` 应用于所有 `@CoApi` 客户端
-
-## 示例：每客户端认证过滤器
-
-为特定客户端配置过滤器而不影响其他客户端：
-
-```yaml
-coapi:
-  clients:
-    SecureApiClient:
-      base-url: https://api.example.com
-      reactive:
-        filter:
-          types:
-            - com.example.BearerTokenFilter
-```
-
-或按 bean 名称注册过滤器：
-
-```yaml
-coapi:
-  clients:
-    SecureApiClient:
-      reactive:
-        filter:
-          names:
-            - bearerTokenFilter
-```
-
-## 自定义 HttpExchangeAdapterFactory
-
-`HttpExchangeAdapterFactory` 决定如何把 HTTP 客户端 bean（WebClient 或 RestClient）转换为驱动接口代理的 `HttpExchangeAdapter`。你可以用自己的 bean 替换默认工厂——例如为适配器包装指标或链路追踪：
 
 ```kotlin
-@Configuration(proxyBeanMethods = false)
-class MyCoApiConfiguration {
-    @Bean
-    fun customHttpExchangeAdapterFactory(): HttpExchangeAdapterFactory =
-        HttpExchangeAdapterFactory { beanFactory, httpClientName ->
-            val webClient = beanFactory.getBean(httpClientName, WebClient::class.java)
-            MetricsWebClientAdapter.wrap(WebClientAdapter.create(webClient))
-        }
+@Component
+class TimeoutCustomizer : RestClientBuilderCustomizer {
+    override fun customize(coApiDefinition: CoApiDefinition, builder: RestClient.Builder) {
+        if (coApiDefinition.name != "SlowReportClient") return
+        val factory = SimpleClientHttpRequestFactory().apply { setReadTimeout(Duration.ofSeconds(30)) }
+        builder.requestFactory(factory)
+    }
 }
 ```
 
-[CoApiFactoryBean](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) 中的解析顺序（自 v2.1.1 起）：
+只有当前模式的定制器会被调用。如果设置应作用于应用中的所有 Builder（而不仅是 CoApi 的），请使用 Spring Boot 自带的 `WebClientCustomizer` / `RestClientCustomizer`。
 
-| 场景 | 使用的工厂 |
-|----------|--------------|
-| 只有一个 `HttpExchangeAdapterFactory` bean | 该 bean |
-| 多个候选且其中一个标了 `@Primary` | `@Primary` bean |
-| 多个候选且无 primary | 按标准 bean 名 `CoApi.HttpExchangeAdapterFactory` 注册的 bean（注册器默认值） |
+FactoryBean 是 final 的。原本想通过继承实现的逻辑，请放到定制器中。
 
-以标准 bean 名注册自定义工厂可直接整体替换默认工厂；以其他名称注册的自定义工厂只有在它是唯一候选或标了 `@Primary` 时才会生效。在 v2.1.1 之前，多个非 primary 候选会在启动时抛出 `NoUniqueBeanDefinitionException`。
+## 替换 Bean
 
-## YAML 配置参考
+CoApi 只在不存在同名 Bean 定义时才注册 Bean，因此你可以抢先定义：
 
-| 属性 | 类型 | 默认 | 描述 |
-|----------|------|---------|-------------|
-| `coapi.clients.<name>.base-url` | String | `""` | 覆盖注解的 baseUrl |
-| `coapi.clients.<name>.load-balanced` | Boolean | `null` | 覆盖负载均衡（`true` 启用 / `false` 禁用；未设置时回退注解） |
-| `coapi.clients.<name>.reactive.filter.names` | List | `[]` | 过滤器 bean 名称 |
-| `coapi.clients.<name>.reactive.filter.types` | List | `[]` | 过滤器类类型 |
-| `coapi.clients.<name>.sync.interceptor.names` | List | `[]` | 拦截器 bean 名称 |
-| `coapi.clients.<name>.sync.interceptor.types` | List | `[]` | 拦截器类类型 |
+| Bean 名称 | 替换它以便 |
+|-----------|------------|
+| `<name>.HttpClient` | 为某个客户端提供手工构建的 `WebClient` / `RestClient` |
+| `<name>.CoApi` | 提供接口的自定义实现 |
+| `CoApi.HttpExchangeAdapterFactory` | 控制如何从 HTTP 客户端创建 `HttpExchangeAdapter`（作用于所有客户端） |
 
-## 相关页面
+自定义的 `HttpExchangeAdapterFactory` 需以 `CoApi.HttpExchangeAdapterFactory` 为名称注册，或标记为 `@Primary`，才会生效：
 
-- [客户端模式（响应式和同步）](/zh/deep-dive/client-modes.md) — WebClient 与 RestClient 内部原理
-- [负载均衡](/zh/deep-dive/load-balancing.md) — LB 过滤器/拦截器集成
-- [认证](/zh/deep-dive/authentication.md) — BearerTokenFilter 和 JWT 缓存
-- [配置参考](/zh/getting-started/configuration.md) — 所有 YAML 属性
+```kotlin
+@Bean(HttpExchangeAdapterFactory.BEAN_NAME)
+fun httpExchangeAdapterFactory() = HttpExchangeAdapterFactory { beanFactory, httpClientName ->
+    val webClient = beanFactory.getBean(httpClientName, WebClient::class.java)
+    WebClientAdapter.create(webClient).apply { blockTimeout = Duration.ofSeconds(5) }
+}
+```
 
-## 参考资料
-
-1. [HttpClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/HttpClientBuilderCustomizer.kt`
-2. [WebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientBuilderCustomizer.kt`
-3. [RestClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientBuilderCustomizer.kt`
-4. [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt`
-5. [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt`
-6. [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt`
-7. [ConsumerWebClientBuilderCustomizer.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerWebClientBuilderCustomizer.kt) — `example/example-consumer-server/src/main/kotlin/.../ConsumerWebClientBuilderCustomizer.kt`
+只有当你的 Bean 定义在 CoApi 注册器运行之前注册时，替换才会生效。你自己的 `@Configuration` 类中的 Bean 定义满足这一点，因为自动配置在它们之后处理。能用定制器解决时，优先使用定制器。

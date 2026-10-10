@@ -1,143 +1,99 @@
 import { defineConfig } from 'vitepress'
 
-const navbarEn = [
-  { text: 'Getting Started', link: '/getting-started/overview' },
-  { text: 'Deep Dive', link: '/deep-dive/architecture' },
-  { text: 'Onboarding', link: '/onboarding/contributor-guide' }
-]
-
-const sidebarEn = {
-  '/onboarding/': [
+function sidebar(prefix: string, t: Record<string, string>) {
+  return [
     {
-      text: 'Onboarding',
-      collapsed: false,
+      text: t.gettingStarted,
       items: [
-        { text: 'Contributor Guide', link: '/onboarding/contributor-guide' },
-        { text: 'Staff Engineer Guide', link: '/onboarding/staff-engineer-guide' },
-        { text: 'Executive Guide', link: '/onboarding/executive-guide' },
-        { text: 'Product Manager Guide', link: '/onboarding/product-manager-guide' }
+        { text: t.overview, link: `${prefix}/getting-started/overview` },
+        { text: t.installation, link: `${prefix}/getting-started/installation` },
+        { text: t.quickStart, link: `${prefix}/getting-started/quick-start` }
       ]
-    }
-  ],
-  '/getting-started/': [
+    },
     {
-      text: 'Getting Started',
+      text: t.guide,
       items: [
-        { text: 'What is CoApi?', link: '/getting-started/overview' },
-        { text: 'Installation & Setup', link: '/getting-started/installation' },
-        { text: 'Quick Start', link: '/getting-started/quick-start' },
-        { text: 'Configuration Reference', link: '/getting-started/configuration' },
-        { text: 'Migrating to 3.0', link: '/getting-started/migration-v3' }
+        { text: t.annotations, link: `${prefix}/deep-dive/annotations` },
+        { text: t.registering, link: `${prefix}/deep-dive/auto-configuration` },
+        { text: t.clientModes, link: `${prefix}/deep-dive/client-modes` },
+        { text: t.loadBalancing, link: `${prefix}/deep-dive/load-balancing` },
+        { text: t.customization, link: `${prefix}/deep-dive/customization` },
+        { text: t.authentication, link: `${prefix}/deep-dive/authentication` },
+        { text: t.examples, link: `${prefix}/deep-dive/examples` }
       ]
-    }
-  ],
-  '/deep-dive/': [
+    },
     {
-      text: 'Deep Dive',
+      text: t.reference,
       items: [
-        { text: 'Architecture Overview', link: '/deep-dive/architecture' },
-        { text: 'Annotations', link: '/deep-dive/annotations' },
-        { text: 'Client Modes', link: '/deep-dive/client-modes' },
-        { text: 'Load Balancing', link: '/deep-dive/load-balancing' },
-        { text: 'Customization', link: '/deep-dive/customization' },
-        { text: 'Authentication', link: '/deep-dive/authentication' },
-        { text: 'Auto-Configuration', link: '/deep-dive/auto-configuration' },
-        { text: 'Examples & Patterns', link: '/deep-dive/examples' }
+        { text: t.configuration, link: `${prefix}/getting-started/configuration` },
+        { text: t.troubleshooting, link: `${prefix}/getting-started/troubleshooting` },
+        { text: t.migration, link: `${prefix}/getting-started/migration-v3` },
+        { text: t.architecture, link: `${prefix}/deep-dive/architecture` }
       ]
     }
   ]
 }
+
+const en = {
+  gettingStarted: 'Getting Started',
+  overview: 'What is CoApi?',
+  installation: 'Installation',
+  quickStart: 'Quick Start',
+  guide: 'Guide',
+  annotations: 'Defining Clients',
+  registering: 'Registering Clients',
+  clientModes: 'Client Modes',
+  loadBalancing: 'Load Balancing',
+  customization: 'Customization',
+  authentication: 'Authentication',
+  examples: 'Examples',
+  reference: 'Reference',
+  configuration: 'Configuration',
+  troubleshooting: 'Troubleshooting',
+  migration: 'Migrating to 3.0',
+  architecture: 'Architecture'
+}
+
+const zh = {
+  gettingStarted: '开始',
+  overview: '什么是 CoApi？',
+  installation: '安装',
+  quickStart: '快速入门',
+  guide: '指南',
+  annotations: '定义客户端',
+  registering: '注册客户端',
+  clientModes: '客户端模式',
+  loadBalancing: '负载均衡',
+  customization: '自定义',
+  authentication: '认证',
+  examples: '示例',
+  reference: '参考',
+  configuration: '配置参考',
+  troubleshooting: '故障排查',
+  migration: '迁移到 3.0',
+  architecture: '架构'
+}
+
+const navbarEn = [
+  { text: 'Guide', link: '/getting-started/quick-start' },
+  { text: 'Reference', link: '/getting-started/configuration' },
+  { text: 'Releases', link: 'https://github.com/Ahoo-Wang/CoApi/releases' }
+]
 
 const navbarZh = [
-  { text: '快速开始', link: '/zh/getting-started/overview' },
-  { text: '深入了解', link: '/zh/deep-dive/architecture' },
-  { text: '新手指南', link: '/zh/onboarding/contributor-guide' }
+  { text: '指南', link: '/zh/getting-started/quick-start' },
+  { text: '参考', link: '/zh/getting-started/configuration' },
+  { text: '版本发布', link: 'https://github.com/Ahoo-Wang/CoApi/releases' }
 ]
 
-const sidebarZh = {
-  '/zh/onboarding/': [
-    {
-      text: '新手指南',
-      collapsed: false,
-      items: [
-        { text: '贡献者指南', link: '/zh/onboarding/contributor-guide' },
-        { text: '技术专家指南', link: '/zh/onboarding/staff-engineer-guide' },
-        { text: '管理者指南', link: '/zh/onboarding/executive-guide' },
-        { text: '产品经理指南', link: '/zh/onboarding/product-manager-guide' }
-      ]
-    }
-  ],
-  '/zh/getting-started/': [
-    {
-      text: '快速开始',
-      items: [
-        { text: '什么是 CoApi？', link: '/zh/getting-started/overview' },
-        { text: '安装与配置', link: '/zh/getting-started/installation' },
-        { text: '快速入门', link: '/zh/getting-started/quick-start' },
-        { text: '配置参考', link: '/zh/getting-started/configuration' },
-        { text: '迁移到 3.0', link: '/zh/getting-started/migration-v3' }
-      ]
-    }
-  ],
-  '/zh/deep-dive/': [
-    {
-      text: '深入了解',
-      items: [
-        { text: '架构概述', link: '/zh/deep-dive/architecture' },
-        { text: '注解说明', link: '/zh/deep-dive/annotations' },
-        { text: '客户端模式', link: '/zh/deep-dive/client-modes' },
-        { text: '负载均衡', link: '/zh/deep-dive/load-balancing' },
-        { text: '自定义配置', link: '/zh/deep-dive/customization' },
-        { text: '认证授权', link: '/zh/deep-dive/authentication' },
-        { text: '自动配置', link: '/zh/deep-dive/auto-configuration' },
-        { text: '示例与模式', link: '/zh/deep-dive/examples' }
-      ]
-    }
-  ],
-  '/zh/': [
-    {
-      text: '新手指南',
-      collapsed: false,
-      items: [
-        { text: '贡献者指南', link: '/zh/onboarding/contributor-guide' },
-        { text: '技术专家指南', link: '/zh/onboarding/staff-engineer-guide' },
-        { text: '管理者指南', link: '/zh/onboarding/executive-guide' },
-        { text: '产品经理指南', link: '/zh/onboarding/product-manager-guide' }
-      ]
-    },
-    {
-      text: '快速开始',
-      collapsed: true,
-      items: [
-        { text: '什么是 CoApi？', link: '/zh/getting-started/overview' },
-        { text: '安装与配置', link: '/zh/getting-started/installation' },
-        { text: '快速入门', link: '/zh/getting-started/quick-start' },
-        { text: '配置参考', link: '/zh/getting-started/configuration' },
-        { text: '迁移到 3.0', link: '/zh/getting-started/migration-v3' }
-      ]
-    },
-    {
-      text: '深入了解',
-      collapsed: true,
-      items: [
-        { text: '架构概述', link: '/zh/deep-dive/architecture' },
-        { text: '注解说明', link: '/zh/deep-dive/annotations' },
-        { text: '客户端模式', link: '/zh/deep-dive/client-modes' },
-        { text: '负载均衡', link: '/zh/deep-dive/load-balancing' },
-        { text: '自定义配置', link: '/zh/deep-dive/customization' },
-        { text: '认证授权', link: '/zh/deep-dive/authentication' },
-        { text: '自动配置', link: '/zh/deep-dive/auto-configuration' },
-        { text: '示例与模式', link: '/zh/deep-dive/examples' }
-      ]
-    }
-  ]
-}
+const sidebarEn = sidebar('', en)
+const sidebarZh = sidebar('/zh', zh)
 
 export default defineConfig({
   title: 'CoApi Wiki',
-  description: 'Zero-boilerplate HTTP client auto-configuration for Spring 6',
-  ignoreDeadLinks: true,
+  description: 'Zero-boilerplate auto-configuration for Spring HTTP Interface clients, reactive and synchronous',
   cleanUrls: true,
+  srcExclude: ['AGENTS.md', 'CLAUDE.md'],
   sitemap: {
     hostname: 'https://coapi.ahoo.me'
   },
@@ -149,7 +105,6 @@ export default defineConfig({
     ['script', {}, `window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-3WF6RY5MTT');`]
   ],
   themeConfig: {
-    logo: '/logo.svg',
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Ahoo-Wang/CoApi' }
     ],

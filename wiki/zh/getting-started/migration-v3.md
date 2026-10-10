@@ -88,6 +88,7 @@ class OrderApiConfiguration {
 ## 相关页面
 
 - [配置参考](./configuration.md)
-- [自定义配置](../deep-dive/customization.md)
+- [自定义](../deep-dive/customization.md)
 - [负载均衡](../deep-dive/load-balancing.md)
-- [自动配置](../deep-dive/auto-configuration.md)
+- [注册客户端](../deep-dive/auto-configuration.md)
+- [故障排查](./troubleshooting.md)

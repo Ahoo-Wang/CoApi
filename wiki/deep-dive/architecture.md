@@ -1,330 +1,87 @@
 ---
-title: Architecture Overview
-description: Deep dive into CoApi's modular architecture, registration flow, and design patterns
+title: Architecture
+description: CoApi internals for contributors. Covers modules, the registration flow, the per-client bean graph, design rules, and where to change what.
 ---
 
-# Architecture Overview
+# Architecture
 
-CoApi's architecture is designed to provide a seamless, type-safe HTTP client framework that integrates deeply with Spring ecosystem while maintaining flexibility for various deployment scenarios. The architecture addresses the common challenges of REST API client development by providing automatic discovery, configuration management, and support for both reactive and synchronous programming models.
+This page is for people changing CoApi itself. To use CoApi, start with the [Quick Start](../getting-started/quick-start.md).
 
-## Overview
-
-CoApi exists to solve the fundamental problem of creating type-safe HTTP clients in Spring applications without the boilerplate code typically associated with manual HTTP client configuration. By leveraging Spring's auto-configuration capabilities and annotation-driven programming model, CoApi reduces the complexity of integrating with external services while providing enterprise-grade features like load balancing, circuit breaking, and configuration management.
-
-The architecture follows a modular design that separates concerns across three main layers: the API layer (for interface definitions), the Spring integration layer (for dependency injection and lifecycle management), and the Spring Boot integration layer (for auto-configuration and sensible defaults).
-
-## At-a-Glance
-
-| Component | Responsibility | Key Features | Source |
-|----------|---------------|---------------|--------|
-| `@CoApi` | Interface definition and configuration | Type-safe HTTP clients, service discovery, load balancing | [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L61) |
-| `AbstractCoApiRegistrar` | Base registration logic | Client mode inference, factory registration | [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28) |
-| `CoApiRegistrar` | Individual client registration | Bean definition creation, factory bean registration | [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22) |
-| `CoApiFactoryBean` | Proxy creation | JDK proxy generation, service proxy factory | [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21) |
-| `HttpClientFactoryBean` | HTTP client configuration | WebClient/RestClient creation, filter application | [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L30) |
-
-## Module Architecture
+## Modules
 
 ```mermaid
-graph TB
-    subgraph "CoApi Module Architecture"
-        subgraph "API Layer"
-            A["@CoApi Annotation"]
-            B[CoApiDefinition]
-            C[HttpExchangeAdapter]
-        end
-        
-        subgraph "Spring Integration Layer"
-            D[AbstractCoApiRegistrar]
-            E[CoApiRegistrar]
-            F[CoApiFactoryBean]
-            G[WebClientFactoryBean]
-            H[RestClientFactoryBean]
-            I[HttpExchangeAdapterFactory]
-        end
-        
-        subgraph "Spring Boot Integration Layer"
-            J[AutoCoApiRegistrar]
-            K[EnableCoApiRegistrar]
-            L[CoApiProperties]
-            M[ApiClientScanner]
-        end
-        
-        subgraph "Client Adapters"
-            N[ReactiveHttpExchangeAdapterFactory]
-            O[SyncHttpExchangeAdapterFactory]
-        end
-        
-        subgraph "HTTP Clients"
-            P[WebClient]
-            Q[RestClient]
-        end
-    end
-    
-    A --> B
-    B --> C
-    D --> E
-    E --> F
-    F --> G
-    F --> H
-    G --> I
-    H --> I
-    J --> D
-    K --> D
-    L --> J
-    L --> K
-    M --> J
-    M --> K
-    I --> N
-    I --> O
-    N --> P
-    O --> Q
-    
+graph BT
+    api["api<br>@CoApi, @LoadBalanced"]
+    spring["spring<br>registrars, factory beans, client SPI, auth"]
+    starter["spring-boot-starter<br>auto-configuration, CoApiProperties"]
+    spring --> api
+    starter --> spring
 ```
 
-## Registration Flow
+| Module | Depends on | Owns |
+|--------|------------|------|
+| `api` | `spring-context` (compile only) | The annotations. Nothing else, so client modules stay light. |
+| `spring` | `api`, `spring-web` | Everything that works without Spring Boot. Optional feature variants: `reactiveSupport` (WebClient), `lbSupport` (Spring Cloud Commons), `jwtSupport` (java-jwt). |
+| `spring-boot-starter` | `spring`, `spring-boot-starter` | Classpath scanning, `coapi.*` binding, `CoApiDefinition` bean collection. Optional feature variants: `reactiveSupport`, `syncSupport`. |
+| `bom`, `dependencies` | | Published version alignment, and the internal version platform for the build |
 
-The registration process is the heart of CoApi's architecture, automatically discovering and configuring HTTP clients based on annotations and configuration. This sequence diagram illustrates the complete registration flow:
+The optional dependencies in `spring` are why load-balancing and reactive classes are only touched when they are needed. See [design rules](#design-rules).
+
+## Registration flow
 
 ```mermaid
 sequenceDiagram
-    participant U as User Code
-    participant A as CoApi Annotation
-    participant B as AutoCoApiRegistrar
-    participant C as AbstractCoApiRegistrar
-    participant D as CoApiRegistrar
-    participant E as CoApiFactoryBean
-    participant F as WebClientFactoryBean
-    participant G as RestClientFactoryBean
-    participant H as HttpServiceProxyFactory
-    participant I as JDK Proxy
-    
     autonumber
-    
-    U->>A: @CoApi(baseUrl, serviceId, name)
-    A->>B: Interface discovery
-    B->>C: registerBeanDefinitions()
-    C->>C: inferClientMode()
-    C->>C: registerHttpExchangeAdapterFactory()
-    C->>D: CoApiRegistrar(registry, clientMode)
-    D->>D: register(coApiDefinitions)
-    D->>F: registerWebClient() or registerRestClient()
-    D->>E: registerApiClient()
-    F->>G: getObject()
-    E->>H: createClient()
-    H->>I: create JDK Proxy
-    I->>U: Return typed interface
-    
+    participant Boot as Spring (configuration phase)
+    participant R as AutoCoApiRegistrar / EnableCoApiRegistrar
+    participant CR as CoApiRegistrar
+    participant Reg as BeanDefinitionRegistry
+    Boot->>R: registerBeanDefinitions()
+    R->>R: inferClientMode(coapi.mode)
+    R->>R: collect CoApiDefinitions (scan, @EnableCoApi, definition beans)
+    R->>CR: register(definitions)
+    CR->>CR: fail on duplicate names
+    CR->>Reg: CoApi.HttpExchangeAdapterFactory (if absent)
+    loop each definition
+        CR->>Reg: NAME.HttpClient → WebClientFactoryBean / RestClientFactoryBean (if absent)
+        CR->>Reg: NAME.CoApi → CoApiFactoryBean (if absent)
+    end
 ```
 
-<!-- Sources: [AutoCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt#L28), [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L42), [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L27), [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L26), [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L23) -->
+- `AbstractCoApiRegistrar` is a template. Subclasses only decide **which** definitions exist, and `CoApiRegistrar` decides **how** they are registered.
+- `AutoCoApiRegistrar` (starter) scans the auto-configuration packages plus `coapi.base-packages`, loading classes with the application's bean class loader (this matters under DevTools). It also collects static `CoApiDefinition` beans. It binds `coapi.base-packages` directly with `Binder`, because it runs before `CoApiProperties` exists.
+- `EnableCoApiRegistrar` (spring) reads `@EnableCoApi(clients)`.
+- `CoApiDefinition.toCoApiDefinition()` parses the annotation: name, placeholder resolution, `serviceId` → `lb://`, then `normalize()` (`lb://` → `http://` + `loadBalanced`).
 
-## Bean Lifecycle
+## Bean graph per client
 
-The Spring bean lifecycle is carefully managed to ensure proper initialization and dependency injection:
+At runtime, when the proxy is first needed:
 
-```mermaid
-sequenceDiagram
-    participant C as Spring Context
-    participant R as Bean Definition Registry
-    participant F as FactoryBean
-    participant A as Application Context
-    participant L as Load Balancer
-    
-    autonumber
-    
-    C->>R: registerBeanDefinitions()
-    R->>F: Create FactoryBean
-    F->>A: setApplicationContext()
-    F->>A: getObject()
-    F->>A: resolve HttpExchangeAdapterFactory
-    note right of A: unique or @Primary candidate wins;<br/>otherwise the standard-name bean<br/>(mode-specific default registered at startup)
-    A->>F: Return factory
-    F->>F: create(HttpExchangeAdapter)
-    F->>F: build(HttpServiceProxyFactory)
-    F->>F: createClient(apiType)
-    F->>C: Return proxy
-    alt Load Balanced
-        F->>L: Load balance requests
-    end
-    C->>F: Client ready for use
-    
-```
+1. `CoApiFactoryBean` looks up the `HttpExchangeAdapterFactory`: the unique bean, else the `@Primary` one, else the one named `CoApi.HttpExchangeAdapterFactory`.
+2. The adapter factory fetches the `<name>.HttpClient` bean, which triggers `WebClientFactoryBean` / `RestClientFactoryBean`:
+   1. `effectiveDefinition()` = `ClientProperties.resolve(definition)` → `CoApiDefinition.withOverrides()`;
+   2. builder bean → base URL → configured filters/interceptors (by name, then type) → load balancer if `loadBalanced` → ordered `*BuilderCustomizer` beans → `build()`.
+3. The adapter wraps the client, and `HttpServiceProxyFactory` creates the interface proxy.
 
-<!-- Sources: [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L40), [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L52), [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L26) -->
+## Design rules
 
-## Class Diagram
+These rules are deliberate. Keep them when changing code.
 
-The class hierarchy shows the relationships between key components:
+- **Applications can override every bean.** `CoApiRegistrar` never replaces an existing bean definition.
+- **One owner per rule.** URL and load-balancing precedence lives only in `CoApiDefinition` (`normalize`, `withOverrides`). Factory beans and customizers consume the effective definition, and never re-derive it.
+- **Optional dependencies stay optional.** Spring Cloud types are referenced only from the `internal` `LoadBalanced*BuilderCustomizer` classes, which are loaded only for load-balanced clients. Before loading them, `requireLoadBalancerSupport` turns a would-be `NoClassDefFoundError` into an actionable message.
+- **Fail fast at startup** with messages that name the client and the fix: invalid mode, duplicate name, unresolvable placeholder, missing load balancer, non-static `CoApiDefinition` bean.
+- **Extension by composition.** Factory beans are final. Behavior is added through customizer beans and the optional `ClientProperties` / `ReactiveClientProperties` / `SyncClientProperties` roles, each with an `Empty` fallback.
 
-```mermaid
-classDiagram
-    class CoApi {
-        +String baseUrl
-        +String serviceId
-        +String name
-    }
-    
-    class CoApiDefinition {
-        +String name
-        +Class apiType
-        +String baseUrl
-        +boolean loadBalanced
-        +String coApiBeanName
-        +String httpClientBeanName
-        +withOverrides(String, Boolean?) CoApiDefinition
-    }
-    
-    class AbstractCoApiRegistrar {
-        #Environment env
-        #BeanFactory appContext
-        +getCoApiDefinitions(AnnotationMetadata)
-        +registerBeanDefinitions(AnnotationMetadata, registry)
-    }
-    
-    class CoApiRegistrar {
-        -BeanDefinitionRegistry registry
-        -ClientMode clientMode
-        +register(Set~CoApiDefinition~)
-        +register(CoApiDefinition)
-    }
-    
-    class CoApiFactoryBean {
-        -CoApiDefinition coApiDefinition
-        +getObject()
-        +getObjectType()
-    }
-    
-    class WebClientFactoryBean {
-        +getObject()
-        +effectiveDefinition() CoApiDefinition
-    }
-    
-    class RestClientFactoryBean {
-        +getObject()
-        +effectiveDefinition() CoApiDefinition
-    }
-    
-    class HttpServiceProxyFactory {
-        +createClient(Class)
-    }
-    
-    class ReactiveHttpExchangeAdapterFactory {
-        +create(BeanFactory, String)
-    }
-    
-    class SyncHttpExchangeAdapterFactory {
-        +create(BeanFactory, String)
-    }
-    
-    CoApi --> CoApiDefinition : creates
-    AbstractCoApiRegistrar --> CoApiDefinition : uses
-    AbstractCoApiRegistrar --> CoApiRegistrar : creates
-    CoApiRegistrar --> WebClientFactoryBean : registers
-    CoApiRegistrar --> RestClientFactoryBean : registers
-    CoApiRegistrar --> CoApiFactoryBean : registers
-    CoApiFactoryBean --> HttpServiceProxyFactory : uses
-    CoApiFactoryBean --> ReactiveHttpExchangeAdapterFactory : gets
-    CoApiFactoryBean --> SyncHttpExchangeAdapterFactory : gets
-    WebClientFactoryBean --> ReactiveHttpExchangeAdapterFactory : uses
-    RestClientFactoryBean --> SyncHttpExchangeAdapterFactory : uses
-    
-```
+## Where to change what
 
-<!-- Sources: [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L63), [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt), [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L28), [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L22), [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt#L21), [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt#L30), [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt#L30) -->
+| Change | Files | Tests |
+|--------|-------|-------|
+| URL / load-balancing precedence | `spring/.../CoApiDefinition.kt` | `CoApiDefinitionTest`, `ClientPropertiesTest` |
+| Client build pipeline | `spring/.../client/reactive/WebClientFactoryBean.kt`, `spring/.../client/sync/RestClientFactoryBean.kt`, `AbstractHttpClientFactoryBean.kt` | `WebClientFactoryBeanTest`, `RestClientFactoryBeanTest` |
+| Mode selection | `spring/.../ClientMode.kt` | `ClientModeTest` |
+| Bean registration | `spring/.../CoApiRegistrar.kt` | `CoApiRegistrarTest`, `CoApiContextTest` |
+| Scanning / Boot properties | `spring-boot-starter/.../AutoCoApiRegistrar.kt`, `CoApiProperties.kt` | `CoApiAutoConfigurationTest`, `CoApiPropertiesTest` |
+| Auth filters | `spring/.../client/reactive/auth/` | `auth/*Test` |
 
-## Layered Architecture
-
-The architecture follows a clean layered approach with clear separation of concerns:
-
-```mermaid
-graph TD
-    subgraph "Application Layer"
-        A[User Interface]
-        B[Business Logic]
-        C[CoApi Clients]
-    end
-    
-    subgraph "Service Layer"
-        D[Service Interfaces]
-        E[Service Implementations]
-        F[Domain Services]
-    end
-    
-    subgraph "Infrastructure Layer"
-        G[CoApi Framework]
-        H[HTTP Clients]
-        I[Load Balancers]
-        J[Configuration]
-    end
-    
-    subgraph "Framework Layer"
-        K[Spring Framework]
-        L[Spring Boot]
-        M[Spring Cloud]
-    end
-    
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-    G --> H
-    H --> I
-    I --> J
-    J --> K
-    K --> L
-    L --> M
-    
-```
-
-<!-- Sources: [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt#L14), [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt#L14), [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt#L14) -->
-
-## Key Design Patterns
-
-CoApi's architecture implements several design patterns to ensure maintainability and extensibility:
-
-### 1. Factory Pattern
-Factory beans are used to create complex objects like HTTP clients and proxies with proper configuration.
-
-### 2. Strategy Pattern
-Different client modes (reactive vs sync) are handled using the Strategy pattern with different factory implementations.
-
-### 3. Template Method Pattern
-Abstract factory classes provide common functionality while allowing specific implementations.
-
-### 4. Proxy Pattern
-JDK proxies are used to create type-safe interfaces that delegate to HTTP clients.
-
-### 5. Builder Pattern
-HttpServiceProxyFactory and client builders use the Builder pattern for fluent configuration.
-
-## Cross-References
-
-- [Getting Started](../getting-started/index.md) - Introduction to CoApi basics
-- [Configuration Reference](../getting-started/configuration.md) - Complete configuration guide
-- [Client Modes](
-- [Spring Boot Integration](.md) - Spring Boot specific patterns
-- [Annotations](./annotations/annotations.md) - Annotation-based configuration
-
-## References
-
-### Source Files
-
-- [CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) - Main annotation interface
-- [AutoCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt) - Auto-configuration registration
-- [EnableCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApiRegistrar.kt) - Manual registration
-- [AbstractCoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt) - Base registration logic
-- [CoApiRegistrar.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt) - Individual client registration
-- [CoApiFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt) - Proxy creation factory
-- [WebClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/WebClientFactoryBean.kt) - Reactive HTTP client factory
-- [RestClientFactoryBean.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/sync/RestClientFactoryBean.kt) - Synchronous HTTP client factory
-
-### Related Pages
-
-- [Module Architecture](
-- [Registration Process](
-- [Bean Lifecycle](
-- [Design Patterns](
-- [Performance Considerations](.md) - Performance optimization guidelines
+Process, CI gates and release steps are in [CONTRIBUTING.md](https://github.com/Ahoo-Wang/CoApi/blob/main/CONTRIBUTING.md).

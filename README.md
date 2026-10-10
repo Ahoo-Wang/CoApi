@@ -1,8 +1,8 @@
-# CoApi - HTTP Client that supports both reactive programming and synchronous programming models
+# CoApi
 
-> [中文文档](https://coapi.ahoo.me/zh/) | [English Document](https://coapi.ahoo.me/)
+> [Documentation](https://coapi.ahoo.me/) | [中文文档](https://coapi.ahoo.me/zh/) | [中文 README](./README.zh-CN.md)
 
-[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://github.com/Ahoo-Wang/CoApi/blob/mvp/LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://github.com/Ahoo-Wang/CoApi/blob/main/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/Ahoo-Wang/CoApi.svg)](https://github.com/Ahoo-Wang/CoApi/releases)
 [![Maven Central Version](https://img.shields.io/maven-central/v/me.ahoo.coapi/coapi-api)](https://central.sonatype.com/artifact/me.ahoo.coapi/coapi-api)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/709bea2aec1d4cfd85991edf66b5ccbc)](https://app.codacy.com/gh/Ahoo-Wang/CoApi/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
@@ -10,212 +10,82 @@
 [![Integration Test Status](https://github.com/Ahoo-Wang/CoApi/actions/workflows/integration-test.yml/badge.svg)](https://github.com/Ahoo-Wang/CoApi)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ahoo-Wang/CoApi)
 
-In Spring Framework 6, a new HTTP
-client, [Spring6 HTTP Interface](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-http-interface),
-has been introduced. This interface allows developers to define HTTP services as Java interfaces using the
-`@HttpExchange` annotation.
+**Zero-boilerplate Spring HTTP Interface clients, reactive or synchronous.**
 
-However, the current *Spring* ecosystem does not yet provide support for automatic configuration, and developers need to
-implement the configuration themselves.
+Spring's [HTTP Interface](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-http-interface) lets you declare an HTTP API as an `@HttpExchange` interface. You still have to build a client, an adapter and a proxy, and register a bean, for every interface. CoApi does that for you: annotate the interface with `@CoApi` and inject it.
 
-While the *Spring* ecosystem already
-has [Spring Cloud OpenFeign](https://github.com/spring-cloud/spring-cloud-openfeign), it lacks support for the reactive
-programming model. To address this, *Spring Cloud OpenFeign* recommends an alternative
-solution, [feign-reactive](https://github.com/PlaytikaOSS/feign-reactive). However, this alternative is currently not
-actively maintained and does not support Spring Boot 3.2.x.
+- **Reactive or sync**: backed by `WebClient` or `RestClient`, chosen by `coapi.mode` or inferred from the classpath.
+- **Client-side load balancing**: `serviceId`, `lb://` or `@LoadBalanced`, via Spring Cloud LoadBalancer.
+- **Configurable per client**: override base URLs, load balancing, filters and interceptors with `coapi.clients.<name>.*`.
+- **Extensible**: builder customizer beans, replaceable beans, and a refreshing bearer-token filter.
 
-**CoApi** is here to help with zero-boilerplate code auto-configuration similar to *Spring Cloud OpenFeign*, as well as
-support for both reactive and synchronous programming models. Developers only need to define the interface, and it is
-easy to use.
+## Compatibility
 
-## Spring Boot Version Compatibility
+| CoApi | Spring Boot | Spring Framework | JDK |
+|-------|-------------|------------------|-----|
+| 3.x | 4.x | 7.x | 17+ |
+| 2.x | 4.x | 7.x | 17+ |
+| 1.x | 3.2.x | 6.1.x | 17+ |
 
-> **CoApi 1.x** supports Spring Boot 3.2.x
-> 
-> **CoApi 2.x** supports Spring Boot 4.x
+Upgrading from 2.x: [Migrating to 3.0](https://coapi.ahoo.me/getting-started/migration-v3).
 
 ## Installation
 
-> Use *Gradle(Kotlin)* to install dependencies
-
 ```kotlin
-implementation("me.ahoo.coapi:coapi-spring-boot-starter")
+implementation("me.ahoo.coapi:coapi-spring-boot-starter:<version>")
+// plus the builder for your client mode (Spring Boot 4):
+implementation("org.springframework.boot:spring-boot-starter-webclient")   // reactive
+// implementation("org.springframework.boot:spring-boot-starter-restclient") // sync
+// optional, for serviceId / lb:// clients:
+// implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 ```
 
-> Use *Gradle(Groovy)* to install dependencies
-
-```groovy
-implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
-```
-
-> Use *Maven* to install dependencies
-
-```xml
-
-<dependency>
-    <groupId>me.ahoo.coapi</groupId>
-    <artifactId>coapi-spring-boot-starter</artifactId>
-    <version>${coapi.version}</version>
-</dependency>
-```
+Maven, the BOM and optional dependencies: [Installation](https://coapi.ahoo.me/getting-started/installation).
 
 ## Usage
 
-### Define `CoApi` - a third-party interface
+Declare the client in or below your `@SpringBootApplication` package:
 
-> `baseUrl` : Define the base address of the request, which can be obtained from the configuration file, for example:
-`baseUrl = "${github.url}"`, `github.url` is the configuration item in the configuration file
-
-```java
-
-@CoApi(baseUrl = "${github.url}")
-public interface GitHubApiClient {
-
+```kotlin
+@CoApi(baseUrl = "\${github.url}")
+interface GitHubApiClient {
     @GetExchange("repos/{owner}/{repo}/issues")
-    Flux<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
+    fun getIssues(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
 }
 ```
-
-> Configuration：
 
 ```yaml
 github:
   url: https://api.github.com
 ```
 
-### Define `CoApi` - Client Load Balancing
-
-When using client load balancing, you need to introduce dependencies first:
-
-```kotlin
-implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
-```
-
-1. Use the `serviceId` parameter definition:
-
-```java
-
-@CoApi(serviceId = "github-service")
-public interface ServiceApiClient {
-
-    @GetExchange("repos/{owner}/{repo}/issues")
-    Flux<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
-}
-```
-
-2. Client load balancing protocol (`lb://`) definition via `baseUrl` parameter:
-
-```java
-
-@CoApi(baseUrl = "lb://github-service")
-public interface ServiceApiClient {
-
-}
-```
-
-### Using `CoApi`
+Inject and call it:
 
 ```kotlin
 @RestController
-class GithubController(
-    private val gitHubApiClient: GitHubApiClient,
-    private val serviceApiClient: ServiceApiClient
-) {
-
-    @GetMapping("/baseUrl")
-    fun baseUrl(): Flux<Issue> {
-        return gitHubApiClient.getIssue("Ahoo-Wang", "CoApi")
-    }
-
-    @GetMapping("/serviceId")
-    fun serviceId(): Flux<Issue> {
-        return serviceApiClient.getIssue("Ahoo-Wang", "CoApi")
-    }
+class IssueController(private val gitHubApiClient: GitHubApiClient) {
+    @GetMapping("/issues")
+    fun issues(): Flux<Issue> = gitHubApiClient.getIssues("Ahoo-Wang", "CoApi")
 }
 ```
 
-## Case Reference
+To call a discovered service instead, use `@CoApi(serviceId = "order-service")`. Synchronous clients use plain return types such as `List<Issue>`.
 
-[Example](./example)
+## Documentation
 
-### Service Provider
+| | |
+|-|-|
+| [Quick Start](https://coapi.ahoo.me/getting-started/quick-start) | Reactive and sync clients step by step |
+| [Configuration](https://coapi.ahoo.me/getting-started/configuration) | All `coapi.*` properties and override rules |
+| [Load Balancing](https://coapi.ahoo.me/deep-dive/load-balancing) | `serviceId`, `lb://`, per-environment overrides |
+| [Customization](https://coapi.ahoo.me/deep-dive/customization) | Filters, interceptors, builder customizers |
+| [Troubleshooting](https://coapi.ahoo.me/getting-started/troubleshooting) | Startup errors and their fixes |
+| [Examples](./example) | Runnable provider/consumer and sync applications |
 
-[Example-Provider](./example/example-provider-server)
+## Contributing
 
-```mermaid
-classDiagram
-direction BT
-class TodoApi {
-<<Interface>>
+See [CONTRIBUTING.md](./CONTRIBUTING.md). Security issues: [SECURITY.md](./SECURITY.md).
 
-}
-class TodoClient {
-<<Interface>>
+## License
 
-}
-class TodoController
-
-TodoClient  -->  TodoApi 
-TodoController  ..>  TodoApi
-```
-
-- `TodoApi` : A common contract between the client consumer and the service provider is defined to prevent the risk of
-  duplicate redundant definitions and to eliminate inconsistencies between the service provider implementation and the
-  client SDK.
-- `TodoClient` :The client consumer accesses the service provider's API via `TodoClient`.
-- `TodoController` : The service provider is responsible for implementing the `TodoApi` interface.
-
-#### Define API
-
-```kotlin
-@HttpExchange("todo")
-interface TodoApi {
-
-    @GetExchange
-    fun getTodo(): Flux<Todo>
-}
-```
-
-#### Define Client
-
-```kotlin
-@CoApi(serviceId = "provider-service")
-interface TodoClient : TodoApi
-```
-
-#### Implement API
-
-```kotlin
-@RestController
-class TodoController : TodoApi {
-    override fun getTodo(): Flux<Todo> {
-        return Flux.range(1, 10)
-            .map {
-                Todo("todo-$it")
-            }
-    }
-}
-```
-
-### Service Consumer
-
-[Example-Consumer](./example/example-consumer-server)
-
-The service consumer turns on the automatic configuration of the `CoApi` via the `@EnableCoApi` annotation.
-
-```kotlin
-@EnableCoApi(clients = [TodoClient::class])
-@SpringBootApplication
-class ConsumerServer
-```
-
-```kotlin
-@RestController
-class TodoController(private val todoClient: TodoClient) {
-
-    @GetExchange
-    fun getProviderTodo(): Flux<Todo> {
-        return todoClient.getTodo()
-    }
-}
-```
+[Apache License 2.0](./LICENSE)

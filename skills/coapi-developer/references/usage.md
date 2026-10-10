@@ -15,7 +15,7 @@ load-balanced examples.
 - [Client Mode](#client-mode)
 - [Per-Client Base URL Override](#per-client-base-url-override)
 - [Per-Client Load-Balanced Override](#per-client-load-balanced-override)
-- [Per-Client Load-Balancer Wiring](#per-client-load-balancer-wiring)
+- [Per-Client Filters And Interceptors](#per-client-filters-and-interceptors)
 - [Explicit Registration](#explicit-registration)
 - [Dynamic URI](#dynamic-uri)
 
@@ -27,6 +27,15 @@ implementation("me.ahoo.coapi:coapi-spring-boot-starter")
 
 Use the published artifact `coapi-spring-boot-starter`; the repository module is named
 `spring-boot-starter`, but artifacts are published with the `coapi-` prefix.
+
+The starter does not bring a client builder. Add the one for the client mode (Spring Boot 4):
+
+```kotlin
+implementation("org.springframework.boot:spring-boot-starter-webclient")  // REACTIVE (WebClient.Builder)
+implementation("org.springframework.boot:spring-boot-starter-restclient") // SYNC (RestClient.Builder)
+```
+
+Without it, client creation fails with `NoSuchBeanDefinitionException` for the builder.
 
 ## Define The API Contract
 
@@ -182,8 +191,8 @@ coapi:
 
 `coapi.clients.<name>.load-balanced` is a three-state override: `true` forces load-balanced wiring,
 `false` forces a direct connection (disable load balancing for a `serviceId`/`lb://` client in a
-specific environment), and unset falls back to the annotation. A non-blank `base-url` property also
-forces non-load-balanced wiring.
+specific environment), and unset follows a configured `base-url` (load balanced only if it is `lb://`),
+else the annotation.
 
 ```yaml
 coapi:
@@ -193,7 +202,11 @@ coapi:
       base-url: http://user-service.prod.internal:8080
 ```
 
-## Per-Client Load-Balancer Wiring
+## Per-Client Filters And Interceptors
+
+Reference `ExchangeFilterFunction` (reactive) or `ClientHttpRequestInterceptor` (sync) beans by bean name
+or type. Only the list for the active mode is used. Load-balanced clients get the Spring Cloud
+load-balancer filter/interceptor automatically, so do not add it here.
 
 ```yaml
 coapi:
@@ -202,11 +215,11 @@ coapi:
       reactive:
         filter:
           names:
-            - loadBalancerExchangeFilterFunction
+            - userAuthFilter
       sync:
         interceptor:
-          names:
-            - loadBalancerInterceptor
+          types:
+            - com.example.UserAuthInterceptor
 ```
 
 ## Explicit Registration
