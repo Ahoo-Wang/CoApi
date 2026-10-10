@@ -1,262 +1,86 @@
 ---
 title: Configuration Reference
-description: Complete reference for CoApi configuration properties, resolution order, and advanced patterns
+description: Every coapi.* property, and the rules for how per-client properties override what the @CoApi annotation declares.
 ---
 
 # Configuration Reference
 
-CoApi's configuration system is designed to provide maximum flexibility while maintaining sensible defaults and clear precedence rules. The configuration follows a hierarchical approach that allows both global settings and client-specific overrides, enabling developers to customize behavior across their entire API client ecosystem or for individual services.
+All properties live under the `coapi` prefix and are bound by the Spring Boot starter ([`CoApiProperties`](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt)).
 
-## Overview
+## Global properties
 
-CoApi's configuration architecture balances declarative convenience with programmatic control. By supporting both annotation-driven and property-based configuration, it accommodates different development styles and deployment scenarios. The system prioritizes explicit property declarations while providing annotation fallbacks for backward compatibility and rapid prototyping.
+| Property | Default | Description |
+|----------|---------|-------------|
+| `coapi.enabled` | `true` | `false` turns off Spring Boot auto-configuration (classpath scanning and `coapi.*` binding). Clients listed in `@EnableCoApi` are still registered. |
+| `coapi.mode` | `AUTO` | `REACTIVE` (`WebClient`), `SYNC` (`RestClient`) or `AUTO` (inferred from the classpath). Case-insensitive; an invalid value fails startup. See [Client Modes](../deep-dive/client-modes.md). |
+| `coapi.base-packages` | empty | Extra packages to scan for `@CoApi` interfaces, in addition to the `@SpringBootApplication` package. Accepts a comma-separated string or a YAML list. |
 
-## Configuration Properties
+## Per-client properties
 
-### Global Properties
+`<name>` is the client name: `@CoApi(name)` if set, otherwise the interface's simple name (`GitHubApiClient`). Renaming the client changes its configuration key.
 
-| Property | Type | Default | Description | Source |
-|----------|------|---------|-------------|--------|
-| `coapi.enabled` | `Boolean` | `true` | Enable/disable CoApi functionality | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L1) |
-| `coapi.mode` | `ClientMode` | `AUTO` | Global client mode (AUTO, REACTIVE, SYNC) | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L2) |
-| `coapi.base-packages` | `List<String>` | `[]` | Base packages for client discovery | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L3) |
+| Property | Default | Description |
+|----------|---------|-------------|
+| `coapi.clients.<name>.base-url` | unset | Replaces the annotation's base URL. An `lb://` URL enables load balancing. |
+| `coapi.clients.<name>.load-balanced` | unset | `true` or `false` forces load balancing on or off. |
+| `coapi.clients.<name>.reactive.filter.names` | empty | Bean names of `ExchangeFilterFunction`s to add (reactive mode). |
+| `coapi.clients.<name>.reactive.filter.types` | empty | Bean types (fully qualified class names) of `ExchangeFilterFunction`s to add. |
+| `coapi.clients.<name>.sync.interceptor.names` | empty | Bean names of `ClientHttpRequestInterceptor`s to add (sync mode). |
+| `coapi.clients.<name>.sync.interceptor.types` | empty | Bean types of `ClientHttpRequestInterceptor`s to add. |
 
-### Client Properties
+Filters and interceptors must be beans. They are applied by name first, then by type, each in the configured order. A type must resolve to exactly one bean. Only the list for the active mode is used: `reactive.*` in reactive mode, `sync.*` in sync mode.
 
-| Property | Type | Default | Description | Source |
-|----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.base-url` | `String` | `""` | Base URL for the client; overrides the annotation. An `lb://` URL is rewritten to `http://` and enables load balancing (since v2.3.0) | [CoApiDefinition.kt:156](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L156) |
-| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | Override load balancing (`true` enables, `false` disables; unset follows `base-url`, else the annotation) | [CoApiDefinition.kt:156](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L156) |
+## Override rules
 
-::: info
-The `<name>` in `coapi.clients.<name>.*` is the `@CoApi` `name` attribute — or the interface simple name when no `name` is set. Setting a custom `name` on the annotation changes the configuration key.
+The annotation defines a client. Per-client properties override it when the HTTP client is built. The result is the client's **effective definition**, which is also what [builder customizers](../deep-dive/customization.md) receive.
 
-Since v2.2.0, `${...}` placeholders in `@CoApi` `baseUrl`/`serviceId` must resolve in the active environment: an unresolvable placeholder (without a `${name:default}` fallback) fails startup with `Could not resolve placeholder ...` instead of leaking a literal `${...}` into the client base URL and breaking requests at runtime. Duplicate client names also fail startup with the conflicting types listed.
-:::
+**Base URL**
 
-### Reactive Client Properties
+1. `coapi.clients.<name>.base-url`, if not blank.
+2. Otherwise `@CoApi(baseUrl)`, with placeholders resolved.
+3. Otherwise `lb://` + `@CoApi(serviceId)`.
+4. Otherwise empty. The client must then pass a full `URI` per request (see [Defining Clients](../deep-dive/annotations.md#no-base-url)).
 
-| Property | Type | Default | Description | Source |
-|----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | `List<String>` | `[]` | `ExchangeFilterFunction` bean names | [CoApiProperties.kt:64](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
-| `coapi.clients.<name>.reactive.filter.types` | `List<String>` | `[]` | `ExchangeFilterFunction` bean types (FQCN) | [CoApiProperties.kt:64](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
+An `lb://` scheme (case-insensitive) is always rewritten to `http://` and marks the client load balanced.
 
-### Sync Client Properties
+**Load balancing**
 
-| Property | Type | Default | Description | Source |
-|----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.sync.interceptor.names` | `List<String>` | `[]` | `ClientHttpRequestInterceptor` bean names | [CoApiProperties.kt:68](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
-| `coapi.clients.<name>.sync.interceptor.types` | `List<String>` | `[]` | `ClientHttpRequestInterceptor` bean types (FQCN) | [CoApiProperties.kt:68](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
+| `load-balanced` | `base-url` | Load balanced? |
+|-----------------|------------|----------------|
+| `true` / `false` | any | the configured value |
+| unset | set | only if it is an `lb://` URL |
+| unset | unset | as the annotation says: `serviceId`, an `lb://` `baseUrl`, or `@LoadBalanced` |
 
-## Configuration Resolution Flow
+These rules are implemented in one place, `CoApiDefinition.withOverrides()`, and covered by `CoApiDefinitionTest`.
 
-The configuration system follows a strict precedence order to ensure predictable behavior:
-
-```mermaid
-flowchart TD
-    A[Start Configuration Resolution] --> B{"coapi.clients.<name>.base-url set?"}
-    B -->|Yes| C["Use properties baseUrl (lb:// rewritten to http://)"]
-    B -->|No| D{"@CoApi baseUrl / serviceId set?"}
-    D -->|Yes| E["Use annotation baseUrl (lb:// rewritten to http://)"]
-    D -->|No| F[Empty baseUrl - client uses absolute URIs per request]
-
-    A --> G{"coapi.clients.<name>.load-balanced set?"}
-    G -->|Yes| H[Use configured value]
-    G -->|No| I{"coapi.clients.<name>.base-url set?"}
-    I -->|Yes| J["Load balanced only if it is an lb:// URL"]
-    I -->|No| K["Annotation: @LoadBalanced, lb://, or serviceId"]
-
-    C --> L[Effective CoApiDefinition]
-    E --> L
-    F --> L
-    H --> L
-    J --> L
-    K --> L
-```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt:144-166 -->
-
-## Property Hierarchy
-
-The configuration hierarchy determines how different configuration sources are merged and prioritized:
-
-```mermaid
-graph TD
-    subgraph "Global Level"
-        A[coapi.enabled]
-        B[coapi.mode]
-        C[coapi.base-packages]
-    end
-    
-    subgraph "Client Level"
-        D[coapi.clients.<name>.base-url]
-        E[coapi.clients.<name>.load-balanced]
-    end
-    
-    subgraph "Client Sub-Level"
-        F[coapi.clients.<name>.reactive.filter.*]
-        G[coapi.clients.<name>.sync.interceptor.*]
-    end
-    
-    subgraph "Annotation Level"
-        H["@CoApi(baseUrl)"]
-        I["@LoadBalanced"]
-    end
-    
-    A --> D
-    B --> D
-    C --> D
-    D --> F
-    D --> G
-    E --> F
-    E --> G
-    H --> D
-    I --> E
-    
-```
-
-## Client Configuration Example
-
-A complete client configuration example showing all available options:
-
-```mermaid
-graph TB
-    subgraph "Application.yml"
-        A["coapi:"]
-    end
-    
-    subgraph "Global Settings"
-        B["enabled: true"]
-        C["mode: AUTO"]
-        D["base-packages:"]
-        E[ - com.example.clients]
-    end
-    
-    subgraph "Client Definitions"
-        F["clients:"]
-        G["GitHubApiClient:"]
-        H["base-url: https://api.github.com"]
-        I["ServiceApiClient:"]
-        J["load-balanced: true"]
-        K["reactive:"]
-        L["filter:"]
-        M["names:"]
-        N[ - loadBalancerExchangeFilterFunction]
-        O["types:"]
-        P[" - org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction"]
-        Q["sync:"]
-        R["interceptor:"]
-        S["names:"]
-        T[ - loadBalancerInterceptor]
-    end
-    
-    A --> B
-    A --> C
-    A --> D
-    D --> E
-    A --> F
-    F --> G
-    G --> H
-    F --> I
-    I --> J
-    I --> K
-    K --> L
-    L --> M
-    M --> N
-    L --> O
-    O --> P
-    I --> Q
-    Q --> R
-    R --> S
-    S --> T
-    
-```
-
-## Configuration Resolution Sequence
-
-The resolution process follows a well-defined sequence to ensure predictable behavior:
-
-```mermaid
-sequenceDiagram
-    participant P as Properties File
-    participant A as Annotations
-    participant F as FactoryBean
-    participant C as Client Instance
-    
-    autonumber
-    
-    F->>P: Check coapi.clients.<name>.base-url
-    alt Has property
-        P-->>F: Return baseUrl from properties
-    else No property
-        F->>A: Check @CoApi annotation
-        alt Has annotation
-            A-->>F: Return baseUrl from annotation
-        else No annotation
-            F-->>F: Use empty baseUrl (client must use absolute URIs per request)
-        end
-    end
-    
-    F->>P: Check coapi.clients.<name>.load-balanced
-    alt Has property
-        P-->>F: Return loadBalanced from properties
-    else No property
-        F->>A: Check @LoadBalanced annotation
-        alt Has annotation
-            A-->>F: Return loadBalanced from annotation
-        else No annotation
-            F-->>F: Use default behavior
-        end
-    end
-    
-    F->>F: Build ClientDefinition
-    F-->>C: Return configured client
-```
-
-## YAML Configuration Example
+## Example
 
 ```yaml
 coapi:
-  enabled: true
-  mode: AUTO  # AUTO, REACTIVE, SYNC
+  mode: SYNC
   base-packages:
-    - com.example.clients
+    - com.example.partner.clients
   clients:
-    GitHubApiClient:
-      base-url: https://api.github.com
-    ServiceApiClient:
-      load-balanced: true
-      reactive:
-        filter:
-          names:
-            - loadBalancerExchangeFilterFunction
-          types:
-            - org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
+    # Point a load-balanced client at a fixed host in this environment
+    OrderClient:
+      base-url: http://orders.staging.internal:8080
+    # Supply the URL of a client declared as plain @CoApi
+    PaymentClient:
+      base-url: https://payments.example.com
       sync:
         interceptor:
           names:
-            - loadBalancerInterceptor
+            - paymentAuthInterceptor
 ```
 
-## Cross-References
+## Without Spring Boot
 
-- [Client Mode](../deep-dive/client-modes.md) - Details about different client operation modes
-- [Annotation Configuration](../deep-dive/annotations.md) - Using annotations for configuration
-- [Auto Configuration](../deep-dive/auto-configuration.md) - Spring Boot auto configuration patterns
-- [Load Balancing](../deep-dive/load-balancing.md) - Load balancing configuration and behavior
+The `coapi.clients.*` properties are a Spring Boot feature. In plain Spring, the same settings come from optional beans that you implement:
 
-## References
+| Bean | Provides |
+|------|----------|
+| `ClientProperties` | `getBaseUri(name)`, `getLoadBalanced(name)` |
+| `ReactiveClientProperties` | `getFilter(name)` |
+| `SyncClientProperties` | `getInterceptor(name)` |
 
-### Source Files
-
-- [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt) - Main configuration properties class
-- [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) - Configuration override rules (`withOverrides`)
-- [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) - Client configuration SPI (`ClientProperties`, `ReactiveClientProperties`, `SyncClientProperties`)
-- [ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) - Client mode enumeration
-- [ConditionalOnCoApiEnabled.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/ConditionalOnCoApiEnabled.kt) - Conditional configuration
-
-### Related Pages
-
-- [Getting Started](./overview.md) - Introduction to CoApi basics
-- [Installation](./installation.md) - Installation and setup guide
-- [Client Mode](../deep-dive/client-modes.md) - Understanding client operation modes
-- [Auto Configuration](../deep-dive/auto-configuration.md) - Spring Boot auto configuration
+Each one is optional: if it is missing, the client keeps exactly what its annotation declares. With Spring Boot, `CoApiProperties` implements all three. `coapi.mode` is read from the `Environment` in both cases.

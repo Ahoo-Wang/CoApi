@@ -1,300 +1,113 @@
 ---
-title: Annotations
-description: Deep dive into CoApi annotations including @CoApi, @LoadBalanced, and configuration parsing
+title: 定义客户端
+description: '@CoApi 与 @LoadBalanced 注解、base URL 解析、客户端命名，以及共享契约和动态 URI 的用法。'
 ---
 
-# 注解
+# 定义客户端
 
-## 概述
+CoApi 客户端是一个带有 Spring `@HttpExchange` 方法、并标注了 `@CoApi` 的**接口**。请求本身（路径、方法、请求头、请求体）完全使用标准的 Spring [HTTP Interface](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-http-interface)。CoApi 只负责请求发往哪里，以及客户端如何装配。
 
-CoApi 提供了一套完善的基于注解的配置系统，简化了分布式服务客户端的集成。这些注解使开发者能够以最少的样板代码定义服务端点、配置负载均衡和管理服务发现。注解系统设计直观，同时为各种部署场景提供了强大的配置选项。
+## `@CoApi`
 
-## 概览一览
-
-| 注解 | 目标 | 用途 | 关键参数 | 默认行为 |
-|------------|--------|---------|---------------|-----------------|
-| `@CoApi` | 类 | 定义服务客户端 | `baseUrl`、`serviceId`、`name` | 自动注册为 @Component |
-| `@LoadBalanced` | 类 | 标记接口为负载均衡 | （无） | 需要显式注解或 `lb://` 前缀 |
-
-## 核心注解
-
-### @CoApi 注解
-
-`@CoApi` 注解是 CoApi 配置系统的基石。它将类标记为服务客户端，并提供必要的配置参数。
+| 属性 | 默认值 | 含义 |
+|------|--------|------|
+| `baseUrl` | `""` | 目标的 base URL，如 `https://api.github.com`、`${github.url}` 或 `lb://order-service`。占位符在启动时解析，且必须存在。 |
+| `serviceId` | `""` | 服务发现 ID。仅在 `baseUrl` 为空时使用，等价于 `lb://<serviceId>`。支持占位符。 |
+| `name` | 接口简单类名 | 客户端名称：用于 Bean 名，也作为 `coapi.clients.<name>` 配置键。必须唯一。 |
 
 ```kotlin
-@Target(AnnotationTarget.CLASS)
-@Component
-annotation class CoApi(
-    val baseUrl: String = "",
-    val serviceId: String = "",
-    val name: String = ""
-)
+@CoApi(baseUrl = "\${github.url}")            // 来自配置的固定地址
+interface GitHubApiClient
+
+@CoApi(serviceId = "order-service")           // 服务发现，负载均衡
+interface OrderClient
+
+@CoApi(baseUrl = "lb://order-service")        // 与 serviceId 等价
+interface OrderClientViaUrl
+
+@CoApi(name = "GitHubApi", serviceId = "github-service")  // 自定义名称
+interface ServiceApiClient
 ```
 
-**关键特性：**
-- **自动组件注册**：`@Component` 元注解确保 Spring 在组件扫描时能够识别被注解的类
-- **灵活的 URL 配置**：支持多种 URL 解析策略
-- **占位符支持**：使用 `${...}` 语法实现环境变量替换
-- **协议支持**：同时处理 `lb://`（负载均衡）和 `http://`（直连）协议
+`baseUrl` 和 `serviceId` 只设置其一。两者都设置时，`baseUrl` 优先。
 
-**使用示例：**
+## Base URL 解析
+
+1. 使用非空的 `baseUrl`，并解析占位符。
+2. 否则，非空的 `serviceId` 转为 `lb://<serviceId>`。
+3. 否则 base URL 为空。
+
+随后，如果 URL 以 `lb://` 开头（不区分大小写），CoApi 会把它改写为 `http://` 并把客户端标记为**负载均衡**。之后由 Spring Cloud LoadBalancer 把主机名替换为真实实例。见[负载均衡](./load-balancing.md)。
+
+`coapi.clients.<name>.base-url` 和 `.load-balanced` 可以按环境覆盖以上所有内容。见[覆盖规则](../getting-started/configuration.md#覆盖规则)。
+
+## `@LoadBalanced`
+
+`me.ahoo.coapi.api.LoadBalanced`（不是 Spring Cloud 的同名注解）在保留普通 URL 的同时把客户端标记为负载均衡：
 
 ```kotlin
-// Direct HTTP connection
-@CoApi(baseUrl = "https://api.github.com")
-interface GitHubApiClient {
-    @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
-}
-
-// Load-balanced service with placeholder
-@CoApi(baseUrl = "${github.url}")
-interface GitHubApiClient {
-    // ...
-}
-
-// Service-based load balancing
-@CoApi(serviceId = "github-service")
-interface GitHubApiClient {
-    // ...
-}
-
-// Custom naming
-@CoApi(name = "CustomApi", baseUrl = "lb://github-service")
-interface CustomApiClient {
-    // ...
-}
-```
-
-### @LoadBalanced 注解
-
-`@LoadBalanced` 注解提供显式的负载均衡配置：
-
-```kotlin
-@Target(AnnotationTarget.CLASS)
-annotation class LoadBalanced
-```
-
-**用途：**
-- 即使未使用 `lb://` 协议，也能将接口标记为负载均衡
-- 优先于基于 URL 的负载均衡判断
-- 适用于需要负载均衡但使用直连 HTTP 连接的服务
-
-## URL 解析流程
-
-CoApi 系统采用一套精密的 URL 解析算法，根据注解配置确定最终的服务端点：
-
-```mermaid
-graph TD
-    A[Start Class Processing] --> B{"Has @CoApi Annotation?"}
-    B -->|No| C[Throw IllegalArgumentException]
-    B -->|Yes| D[Resolve Base URL Logic]
-    
-    D --> E{baseUrl isNotBlank?}
-    E -->|Yes| F[Resolve Placeholders]
-    E -->|No| G{serviceId isNotBlank?}
-    G -->|Yes| H["Construct lb:// + serviceId"]
-    G -->|No| I[Empty URL]
-    
-    F --> J[Determine Load Balanced]
-    H --> J
-    I --> J
-    
-    J --> K{Load Balanced Check}
-    K --> L["@LoadBalanced annotation present?"]
-    K --> M{URL starts with lb://?}
-    
-    L -->|Yes| N[loadBalanced = true]
-    M -->|Yes| N
-    L -->|No| O[loadBalanced = false]
-    M -->|No| O
-    
-    N --> P[Strip lb:// prefix]
-    O --> Q[Keep original URL]
-    
-    P --> R[Construct CoApiDefinition]
-    Q --> R
-    
-    R --> S[Generate Bean Names]
-    S --> T[End]
-```
-
-::: info
-自 v2.2.0 起，`baseUrl`/`serviceId` 中的占位符使用 `resolveRequiredPlaceholders` 解析：无法解析的 `${...}`（属性未定义且无 `${name:default}` 兜底）会在启动期抛出 `Could not resolve placeholder ...`，而不是把字面量 `${...}` 泄入客户端 baseUrl——其中的 `{...}` 会被当作 URI 模板变量，错误推迟到请求期才暴露。
-:::
-
-## 类层次结构与关系
-
-注解系统创建了一个清晰的组件层次结构，各组件协同工作以提供服务客户端功能：
-
-```mermaid
-classDiagram
-    class CoApiAnnotation {
-        +String baseUrl
-        +String serviceId
-        +String name
-    }
-    
-    class LoadBalancedAnnotation {
-        <<annotation>>
-    }
-    
-    class CoApiDefinition {
-        +String name
-        +Class apiType
-        +String baseUrl
-        +Boolean loadBalanced
-        +String httpClientBeanName
-        +String coApiBeanName
-    }
-    
-    class Environment {
-        +String resolveRequiredPlaceholders(String)
-    }
-    
-    class Class {
-        +toCoApiDefinition(Environment)
-        +resolveClientName(CoApi)
-        +getAnnotation(Class)
-    }
-    
-    CoApiAnnotation --> Class : annotates
-    LoadBalancedAnnotation --> Class : annotates
-    Class --> CoApiDefinition : creates
-    Environment --> CoApiDefinition : resolves placeholders
-    CoApiDefinition --> Environment : uses
-```
-
-## 参数流转与处理
-
-注解处理遵循系统化的流程，将声明式配置转换为运行时就绪的服务定义：
-
-```mermaid
-sequenceDiagram
-    participant C as Class
-    participant E as Environment
-    participant CAD as CoApiDefinition
-
-    C->>C: getAnnotation(CoApi.class)
-    alt No @CoApi annotation
-        C->>CAD: throw IllegalArgumentException
-    else Has @CoApi annotation
-        C->>C: resolveClientName(coApi)
-        C->>C: resolveBaseUrl(environment)
-
-        alt baseUrl isNotBlank
-            C->>E: resolveRequiredPlaceholders(baseUrl)
-        else serviceId isNotBlank
-            C->>E: resolveRequiredPlaceholders(serviceId)
-            C->>C: construct lb:// + serviceId
-        else both blank
-            C->>C: return empty string
-        end
-
-        C->>C: determine loadBalanced
-        C->>C: check @LoadBalanced annotation
-        C->>C: check baseUrl starts with lb://
-        C->>C: loadBalanced = annotationPresent or protocolBased
-
-        C->>C: adjust baseUrl if loadBalanced
-        alt baseUrl starts with lb://
-            C->>C: strip lb:// prefix
-        end
-
-        C->>CAD: CoApiDefinition(name, apiType, baseUrl, loadBalanced)
-    end
-```
-
-## 配置示例
-
-### 测试用例分析
-
-CoApi 系统包含全面的测试用例，演示了各种配置场景：
-
-```kotlin
-// Test Case 1: lb:// protocol
-@CoApi(baseUrl = "lb://order-service")
-interface LBMockApi
-
-// Result: loadBalanced=true, baseUrl="http://order-service"
-
-// Test Case 2: serviceId configuration
-@CoApi(serviceId = "order-service")
-interface MockServiceApi
-
-// Result: loadBalanced=true, baseUrl="http://order-service"
-
-// Test Case 3: Empty configuration with @LoadBalanced
-@CoApi
+@CoApi(baseUrl = "http://order-service")
 @LoadBalanced
-interface MockEmptyApi
-
-// Result: loadBalanced=true, baseUrl=""
+interface OrderClient
 ```
 
-### 实际使用示例
+它与 `@CoApi(serviceId = "order-service")` 等价。当 URL 来自不应包含 `lb://` 的占位符时很有用。
 
-**带环境配置的 GitHub API 客户端：**
+## 客户端名称与 Bean
+
+每个客户端会得到两个以其名称命名的 Bean：
+
+| Bean | 类型 | 用途 |
+|------|------|------|
+| `<name>.HttpClient` | `WebClient` 或 `RestClient` | 底层 HTTP 客户端 |
+| `<name>.CoApi` | 你的接口 | 你注入的代理 |
+
+按类型注入接口即可。只有在需要直接使用同一目标的原始客户端时，才按名称获取 `WebClient`/`RestClient` Bean。
+
+两个客户端名称相同会导致启动失败（`Duplicate CoApi name`）。当不同包中的接口简单类名相同时就会发生，给其中一个设置 `name` 即可。
+
+## 没有 base URL
+
+没有 base URL 的客户端仍然可用：每次请求时通过 `URI` 或 `UriBuilderFactory` 参数传入目标地址，Spring HTTP Interface 原生支持这种方式。
+
 ```kotlin
-@CoApi(baseUrl = "${github.url}", name = "GitHubApi")
-interface GitHubApiClient {
-    @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+@CoApi
+interface UriApiClient {
+    @GetExchange
+    fun getIssueByUri(uri: URI): Flux<Issue>
+
+    @GetExchange
+    fun getIssue(
+        uriBuilderFactory: UriBuilderFactory,
+        @PathVariable owner: String,
+        @PathVariable repo: String,
+    ): Flux<Issue>
 }
 ```
 
-**带服务发现的服务 API 客户端：**
+也可以不在代码里写 URL，而是通过 `coapi.clients.UriApiClient.base-url` 提供。
+
+## 共享契约
+
+服务提供方和消费方可以共享同一个接口，使服务端实现与客户端不会出现偏差：
+
 ```kotlin
-@CoApi(serviceId = "github-service")
-interface ServiceApiClient {
-    @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+// provider-api 模块：普通的 Spring HTTP Interface
+@HttpExchange("todo")
+interface TodoApi {
+    @GetExchange
+    fun getTodo(): Flux<Todo>
+}
+
+// provider-api 模块：客户端，只依赖 coapi-api
+@CoApi(serviceId = "provider-service")
+interface TodoClient : TodoApi
+
+// 服务提供方：实现契约
+@RestController
+class TodoController : TodoApi {
+    override fun getTodo(): Flux<Todo> = Flux.range(1, 10).map { Todo("todo-$it") }
 }
 ```
 
-## Bean 生成
-
-注解系统根据配置自动生成 Spring Bean 名称：
-
-```mermaid
-graph LR
-    A[CoApi Configuration] --> B[Name Resolution]
-    B --> C{Custom Name Provided?}
-    C -->|Yes| D[Use custom name]
-    C -->|No| E[Use class simple name]
-    D --> F[Generate Bean Names]
-    E --> F
-    
-    F --> G["name + \".HttpClient\""]
-    F --> H["name + \".CoApi\""]
-    
-    G --> I[HttpClient Bean]
-    H --> J[CoApi Bean]
-```
-
-客户端名称必须唯一：该名称同时也是 `coapi.clients.<name>.*` 配置的键。自 v2.2.0 起，两个 `@CoApi` 接口解析到同一名称（自定义 `name` 相同，或不同包下的接口简单类名相同）会在启动期抛出 `IllegalStateException` 并列出冲突类型——在 v2.2.0 之前，后注册的定义会被静默忽略。通过设置唯一的 `@CoApi(name = "...")` 解决冲突。
-
-## 最佳实践
-
-1. **使用描述性名称**：在处理多个服务时，始终提供有意义的 `name` 参数
-2. **利用环境变量**：对在不同环境间变化的配置使用 `${...}` 占位符
-3. **显式负载均衡**：对需要负载均衡的服务使用 `@LoadBalanced`，无论协议如何
-4. **协议选择**：使用 `lb://` 进行基于服务发现的负载均衡，使用 `http://` 进行直连
-5. **错误处理**：始终确保服务客户端接口上存在 `@CoApi` 注解
-
-## 参考文献
-
-### 源代码文件
-- [api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) - 主 CoApi 注解定义
-- [api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/LoadBalanced.kt) - 负载均衡注解
-- [spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) - 配置解析逻辑
-- [spring/src/test/kotlin/me/ahoo/coapi/spring/CoApiDefinitionTest.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/test/kotlin/me/ahoo/coapi/spring/CoApiDefinitionTest.kt) - 测试用例
-- [example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) - 示例实现
-- [example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/ServiceApiClient.kt) - 服务发现示例
-
-### 相关页面
-- [配置](/zh/getting-started/configuration.md) - 详细配置指南
-- [服务发现](/zh/deep-dive/load-balancing.md) - 负载均衡与服务发现
-- [测试](/zh/deep-dive/annotations.md) - CoApi 客户端测试策略
-- [示例](/zh/deep-dive/examples.md) - 完整使用示例
+消费方依赖 API 模块并注入 `TodoClient`。由于该客户端位于服务提供方的包中，消费方需要显式注册它：使用 `@EnableCoApi(clients = [TodoClient::class])` 或 `coapi.base-packages`。见[注册客户端](./auto-configuration.md)。

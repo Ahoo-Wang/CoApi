@@ -1,8 +1,8 @@
-# CoApi - 同时支持响应式编程和同步编程模型的 HTTP 客户端
+# CoApi
 
-> [中文文档](https://coapi.ahoo.me/zh/) | [English Document](https://coapi.ahoo.me/)
+> [中文文档](https://coapi.ahoo.me/zh/) | [Documentation](https://coapi.ahoo.me/) | [English README](./README.md)
 
-[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://github.com/Ahoo-Wang/CoApi/blob/mvp/LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://github.com/Ahoo-Wang/CoApi/blob/main/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/Ahoo-Wang/CoApi.svg)](https://github.com/Ahoo-Wang/CoApi/releases)
 [![Maven Central Version](https://img.shields.io/maven-central/v/me.ahoo.coapi/coapi-api)](https://central.sonatype.com/artifact/me.ahoo.coapi/coapi-api)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/709bea2aec1d4cfd85991edf66b5ccbc)](https://app.codacy.com/gh/Ahoo-Wang/CoApi/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
@@ -10,205 +10,82 @@
 [![Integration Test Status](https://github.com/Ahoo-Wang/CoApi/actions/workflows/integration-test.yml/badge.svg)](https://github.com/Ahoo-Wang/CoApi)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ahoo-Wang/CoApi)
 
-在 Spring Framework 6 中，引入了全新的 HTTP
-客户端 - [Spring6 HTTP Interface](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-http-interface)。
-该接口允许开发者通过使用 `@HttpExchange` 注解将 HTTP 服务定义为 Java 接口。
+**零样板代码的 Spring HTTP Interface 客户端，支持响应式与同步。**
 
-然而，当前 *Spring* 生态尚未提供自动配置的支持，需要开发者自己实现配置。
+Spring 的 [HTTP Interface](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-http-interface) 允许用 `@HttpExchange` 接口声明 HTTP API，但你仍需为每个接口构建客户端、适配器和代理并注册 Bean。CoApi 替你完成这些：给接口标注 `@CoApi`，然后直接注入。
 
-虽然 *Spring* 生态中已经存在 [Spring Cloud OpenFeign](https://github.com/spring-cloud/spring-cloud-openfeign)
-，但它并未支持响应式编程模型。
-为解决这个问题，*Spring Cloud OpenFeign* 推荐了替代方案 [feign-reactive](https://github.com/PlaytikaOSS/feign-reactive)
-。然而，这个替代方案目前已处于不积极维护状态，并且不支持 Spring Boot `3.2.x`。
+- **响应式或同步**：底层使用 `WebClient` 或 `RestClient`，由 `coapi.mode` 指定或根据 classpath 推断。
+- **客户端负载均衡**：通过 Spring Cloud LoadBalancer 支持 `serviceId`、`lb://` 或 `@LoadBalanced`。
+- **单客户端配置**：用 `coapi.clients.<name>.*` 覆盖 base URL、负载均衡、过滤器和拦截器。
+- **可扩展**：Builder 定制器 Bean、可替换的 Bean，以及可自动刷新的 Bearer 令牌过滤器。
 
-**CoApi** 应运而生，它提供了类似于 *Spring Cloud OpenFeign* 的零样板代码自动配置的支持，同时支持响应式编程模型和同步编程模型。开发者只需定义接口，即可轻松使用。
+## 兼容性
 
-## Spring Boot 版本兼容性
+| CoApi | Spring Boot | Spring Framework | JDK |
+|-------|-------------|------------------|-----|
+| 3.x | 4.x | 7.x | 17+ |
+| 2.x | 4.x | 7.x | 17+ |
+| 1.x | 3.2.x | 6.1.x | 17+ |
 
-> **CoApi 1.x** 支持 Spring Boot 3.2.x
->
-> **CoApi 2.x** 支持 Spring Boot 4.x
+从 2.x 升级：[迁移到 3.0](https://coapi.ahoo.me/zh/getting-started/migration-v3)。
 
 ## 安装
 
-> 使用 *Gradle(Kotlin)* 安装依赖
-
 ```kotlin
-implementation("me.ahoo.coapi:coapi-spring-boot-starter")
+implementation("me.ahoo.coapi:coapi-spring-boot-starter:<version>")
+// 以及与客户端模式匹配的 Builder（Spring Boot 4）：
+implementation("org.springframework.boot:spring-boot-starter-webclient")   // 响应式
+// implementation("org.springframework.boot:spring-boot-starter-restclient") // 同步
+// 可选，用于 serviceId / lb:// 客户端：
+// implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 ```
 
-> 使用 *Gradle(Groovy)* 安装依赖
-
-```groovy
-implementation 'me.ahoo.coapi:coapi-spring-boot-starter'
-```
-
-> 使用 *Maven* 安装依赖
-
-```xml
-
-<dependency>
-    <groupId>me.ahoo.coapi</groupId>
-    <artifactId>coapi-spring-boot-starter</artifactId>
-    <version>${coapi.version}</version>
-</dependency>
-```
+Maven、BOM 及可选依赖见[安装](https://coapi.ahoo.me/zh/getting-started/installation)。
 
 ## 使用
 
-### 定义 `CoApi` - 第三方接口
+在 `@SpringBootApplication` 所在包或其子包中声明客户端：
 
-> `baseUrl` ： 定义请求的基础地址，该参数可以从配置文件中获取，如：`baseUrl = "${github.url}"`，`github.url` 是配置文件中的配置项
-
-```java
-
-@CoApi(baseUrl = "${github.url}")
-public interface GitHubApiClient {
-
+```kotlin
+@CoApi(baseUrl = "\${github.url}")
+interface GitHubApiClient {
     @GetExchange("repos/{owner}/{repo}/issues")
-    Flux<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
+    fun getIssues(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
 }
 ```
-
-> 配置文件：
 
 ```yaml
 github:
   url: https://api.github.com
 ```
 
-### 定义 `CoApi` - 客户端负载均衡
-
-当使用客户端负载均衡时，需要先引入依赖：
-
-```kotlin
-implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
-```
-
-1. 使用 `serviceId` 参数定义：
-
-```java
-
-@CoApi(serviceId = "github-service")
-public interface ServiceApiClient {
-
-    @GetExchange("repos/{owner}/{repo}/issues")
-    Flux<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
-}
-```
-
-2. 通过`baseUrl`参数的客户端负载均衡协议（`lb://`）定义：
-
-```java
-
-@CoApi(baseUrl = "lb://github-service")
-public interface ServiceApiClient {
-
-}
-```
-
-### 使用 `CoApi`
+注入并调用：
 
 ```kotlin
 @RestController
-class GithubController(
-    private val gitHubApiClient: GitHubApiClient,
-    private val serviceApiClient: ServiceApiClient
-) {
-
-    @GetMapping("/baseUrl")
-    fun baseUrl(): Flux<Issue> {
-        return gitHubApiClient.getIssue("Ahoo-Wang", "CoApi")
-    }
-
-    @GetMapping("/serviceId")
-    fun serviceId(): Flux<Issue> {
-        return serviceApiClient.getIssue("Ahoo-Wang", "CoApi")
-    }
+class IssueController(private val gitHubApiClient: GitHubApiClient) {
+    @GetMapping("/issues")
+    fun issues(): Flux<Issue> = gitHubApiClient.getIssues("Ahoo-Wang", "CoApi")
 }
 ```
 
-## 案例参考
+要调用服务发现中的服务，改用 `@CoApi(serviceId = "order-service")`。同步客户端使用 `List<Issue>` 等普通返回类型。
 
-[Example](./example)
+## 文档
 
-### 服务提供者
+| | |
+|-|-|
+| [快速入门](https://coapi.ahoo.me/zh/getting-started/quick-start) | 逐步创建响应式和同步客户端 |
+| [配置参考](https://coapi.ahoo.me/zh/getting-started/configuration) | 全部 `coapi.*` 属性与覆盖规则 |
+| [负载均衡](https://coapi.ahoo.me/zh/deep-dive/load-balancing) | `serviceId`、`lb://`、按环境覆盖 |
+| [自定义](https://coapi.ahoo.me/zh/deep-dive/customization) | 过滤器、拦截器、Builder 定制器 |
+| [故障排查](https://coapi.ahoo.me/zh/getting-started/troubleshooting) | 启动错误及解决方法 |
+| [示例](./example) | 可运行的提供方/消费方及同步应用 |
 
-[Example-Provider](./example/example-provider-server)
+## 参与贡献
 
-```mermaid
-classDiagram
-direction BT
-class TodoApi {
-<<Interface>>
+见 [CONTRIBUTING.md](./CONTRIBUTING.md)。安全问题见 [SECURITY.md](./SECURITY.md)。
 
-}
-class TodoClient {
-<<Interface>>
+## 许可证
 
-}
-class TodoController
-
-TodoClient  -->  TodoApi 
-TodoController  ..>  TodoApi
-```
-
-- `TodoApi` : 规定了客户端消费方与服务提供者之间的共同契约，旨在防范重复冗余定义的风险，同时消除了服务提供者实现与客户端
-  SDK 的不一致性。
-- `TodoClient` : 客户端消费方通过 `TodoClient` 访问服务提供者的API。
-- `TodoController` : 服务提供者负责实现 `TodoApi` 接口。
-
-#### 定义 API
-
-```kotlin
-@HttpExchange("todo")
-interface TodoApi {
-
-    @GetExchange
-    fun getTodo(): Flux<Todo>
-}
-```
-
-#### 定义 Client
-
-```kotlin
-@CoApi(serviceId = "provider-service")
-interface TodoClient : TodoApi
-```
-
-#### 实现 API
-
-```kotlin
-@RestController
-class TodoController : TodoApi {
-    override fun getTodo(): Flux<Todo> {
-        return Flux.range(1, 10)
-            .map {
-                Todo("todo-$it")
-            }
-    }
-}
-```
-
-### 服务消费者
-
-[Example-Consumer](./example/example-consumer-server)
-
-服务消费者通过 `@EnableCoApi` 注解开启 `CoApi` 的自动配置。
-
-```kotlin
-@EnableCoApi(clients = [TodoClient::class])
-@SpringBootApplication
-class ConsumerServer
-```
-
-```kotlin
-@RestController
-class TodoController(private val todoClient: TodoClient) {
-
-    @GetExchange
-    fun getProviderTodo(): Flux<Todo> {
-        return todoClient.getTodo()
-    }
-}
-```
+[Apache License 2.0](./LICENSE)

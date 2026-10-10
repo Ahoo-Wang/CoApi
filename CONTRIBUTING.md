@@ -49,7 +49,8 @@ Every PR must pass:
 - Add or update tests with every behavior change, and reproduce a bug with a failing test first.
 - Use JUnit 5, `me.ahoo.test.asserts.assert` (fluent-assert) and MockK; use `ApplicationContextRunner` for Spring context tests.
 - Tests must not depend on external services; use a local stand-in (see `ConsumerServerTest`).
-- User-visible changes update the wiki in **both** English (`wiki/`) and Chinese (`wiki/zh/`). Breaking changes extend the migration guide.
+- Read [Architecture](wiki/deep-dive/architecture.md) before changing core behavior: it lists the design rules and where each concern lives.
+- User-visible changes update the wiki in **both** English (`wiki/`) and Chinese (`wiki/zh/`). Breaking changes extend the migration guide. Writing rules for the wiki are in [wiki/AGENTS.md](wiki/AGENTS.md).
 
 ## Releases
 

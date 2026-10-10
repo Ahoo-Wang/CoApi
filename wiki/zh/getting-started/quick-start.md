@@ -1,229 +1,102 @@
 ---
-title: 快速开始
-description: 在几分钟内开始使用 CoApi — 定义一个接口，添加注解，配置 URL，然后开始发送 HTTP 请求。
+title: 快速入门
+description: 定义 CoApi 客户端接口、配置 base URL 并注入使用，支持响应式（WebClient）和同步（RestClient）两种风格。
 ---
 
-# 快速开始
+# 快速入门
 
-## 概述
+本页假设你有一个已[安装依赖](./installation.md)的 Spring Boot 应用。
 
-CoApi 将 HTTP 客户端设置精简到极致：用 `@HttpExchange` 方法定义一个 Java 或 Kotlin 接口，用 `@CoApi` 注解标记接口，Spring Boot 自动配置处理其余一切。无需手动构建 `WebClient` 或 `RestClient`，无需设置代理工厂，无需样板代码。
+## 1. 声明客户端
 
-## 一览
+用 Spring 的 `@HttpExchange` 系列注解编写接口，并标注 `@CoApi`。把它放在 `@SpringBootApplication` 类所在的包或其子包中，这样它会被自动发现。
 
-| 步骤 | 操作 | 关键文件 | 源码 |
-|------|------|----------|--------|
-| 1. 添加依赖 | `coapi-spring-boot-starter` | [spring-boot-starter/build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts) | [build.gradle.kts](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/build.gradle.kts#L29) |
-| 2. 定义接口 | `@CoApi` + `@GetExchange` | [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) | [GitHubApiClient.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt#L21) |
-| 3. 配置 URL | `application.yaml` | [application.yaml](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml) | [application.yaml](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml#L3) |
-| 4. 注入并使用 | 构造函数注入 | [GithubController.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt) | [GithubController.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt#L32) |
+::: code-group
 
-## 步骤 1：添加依赖
-
-**Gradle（Kotlin DSL）：**
-```kotlin
-implementation("me.ahoo.coapi:coapi-spring-boot-starter")
-```
-
-**Maven：**
-```xml
-<dependency>
-    <groupId>me.ahoo.coapi</groupId>
-    <artifactId>coapi-spring-boot-starter</artifactId>
-    <version>2.0.1</version>
-</dependency>
-```
-
-如需负载均衡，还需添加：
-```kotlin
-implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
-```
-
-## 步骤 2：定义接口
-
-```kotlin
+```kotlin [响应式 (Kotlin)]
 @CoApi(baseUrl = "\${github.url}")
 interface GitHubApiClient {
-
     @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+    fun getIssues(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
 }
 
 data class Issue(val url: String)
 ```
 
-`@CoApi` 注解完成三件事：
-1. 将此接口标记为 HTTP 客户端（也充当 `@Component`）
-2. 定义基础 URL（支持 `${...}` 属性占位符）
-3. 触发自动配置以注册 bean
+```java [同步 (Java)]
+@CoApi(baseUrl = "${github.url}")
+public interface GitHubApiClient {
+    @GetExchange("repos/{owner}/{repo}/issues")
+    List<Issue> getIssues(@PathVariable String owner, @PathVariable String repo);
+}
 
-## 步骤 3：配置 URL
+public record Issue(String url) {}
+```
+
+:::
+
+在 Kotlin 中，占位符需要写成 `\${...}`，以免被当作字符串模板。
+
+## 2. 配置 base URL
 
 ```yaml
-# application.yaml
 github:
   url: https://api.github.com
 ```
 
-`@CoApi(baseUrl)` 中的 `${github.url}` 占位符会针对 Spring 的 `Environment` 进行解析。
+占位符必须能被解析，否则启动会以 `Could not resolve placeholder 'github.url'` 失败。可以用 `${github.url:https://api.github.com}` 提供默认值。
 
-## 步骤 4：启用并使用
+## 3. 注入并调用
 
-**Spring Boot（自动配置）**：无需其他操作。CoApi 会自动发现应用程序基础包中的 `@CoApi` 接口。
+::: code-group
 
-**非 Boot / 显式模式**：添加 `@EnableCoApi`：
-```kotlin
-@EnableCoApi(clients = [GitHubApiClient::class])
-@SpringBootApplication
-class MyApplication
+```kotlin [响应式 (Kotlin)]
+@RestController
+class IssueController(private val gitHubApiClient: GitHubApiClient) {
+    @GetMapping("/issues")
+    fun issues(): Flux<Issue> = gitHubApiClient.getIssues("Ahoo-Wang", "CoApi")
+}
 ```
 
-**注入到任何组件中：**
-```kotlin
+```java [同步 (Java)]
 @RestController
-class GithubController(private val gitHubApiClient: GitHubApiClient) {
+public class IssueController {
+    private final GitHubApiClient gitHubApiClient;
+
+    public IssueController(GitHubApiClient gitHubApiClient) {
+        this.gitHubApiClient = gitHubApiClient;
+    }
 
     @GetMapping("/issues")
-    fun getIssues(): Flux<Issue> {
-        return gitHubApiClient.getIssue("Ahoo-Wang", "CoApi")
+    public List<Issue> issues() {
+        return gitHubApiClient.getIssues("Ahoo-Wang", "CoApi");
     }
 }
 ```
 
-## 设置流程
+:::
 
-```mermaid
-flowchart TD
-    A["Add coapi-spring-boot-starter"] --> B["Define CoApi interface"]
-    B --> C["Configure URL in YAML"]
-    C --> D{"Spring Boot?"}
-    D -->|Yes| E["Auto-discovery via AutoCoApiRegistrar"]
-    D -->|No| F["EnableCoApi(clients=[...])"]
-    E --> G["CoApiRegistrar registers beans"]
-    F --> G
-    G --> H["Inject interface and call methods"]
+完成。CoApi 注册了 `GitHubApiClient.HttpClient` Bean（`WebClient` 或 `RestClient`）和 `GitHubApiClient.CoApi` Bean（你注入的代理）。
 
-```
-<!-- Sources: example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt:21, spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApi.kt:21, spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt:30 -->
+## 调用服务发现中的服务
 
-## 请求流程
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Controller as GithubController
-    participant Proxy as GitHubApiClient Proxy
-    participant Adapter as WebClientAdapter
-    participant Client as WebClient
-    participant API as api.github.com
-
-    Controller->>Proxy: getIssue("Ahoo-Wang", "CoApi")
-    Proxy->>Adapter: exchange(request)
-    Adapter->>Client: GET /repos/Ahoo-Wang/CoApi/issues
-    Client->>API: HTTP GET request
-    API-->>Client: JSON response
-    Client-->>Adapter: Flux<Issue>
-    Adapter-->>Proxy: Flux<Issue>
-    Proxy-->>Controller: Flux<Issue>
-```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiFactoryBean.kt:26-34, spring/src/main/kotlin/me/ahoo/coapi/spring/client/reactive/ReactiveHttpExchangeAdapterFactory.kt:20-26 -->
-
-## Bean 注册
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Boot as Spring Boot
-    participant Auto as AutoCoApiRegistrar
-    participant Reg as CoApiRegistrar
-    participant Registry as BeanDefinitionRegistry
-
-    Boot->>Auto: registerBeanDefinitions()
-    Auto->>Auto: inferClientMode()
-    Auto->>Registry: register HttpExchangeAdapterFactory
-    Auto->>Auto: scan classpath for @CoApi interfaces
-    Auto->>Reg: register(definitions)
-    loop For each @CoApi interface
-        Reg->>Registry: register name.HttpClient (WebClient/RestClient)
-        Reg->>Registry: register name.CoApi (CoApiFactoryBean proxy)
-    end
-```
-<!-- Sources: spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/AutoCoApiRegistrar.kt:47-56, spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiRegistrar.kt:27-87, spring/src/main/kotlin/me/ahoo/coapi/spring/AbstractCoApiRegistrar.kt:42-50 -->
-
-## 常见变体
-
-### 负载均衡客户端
+要调用注册在服务发现中的服务，用 `serviceId` 代替 `baseUrl`，并添加 `spring-cloud-starter-loadbalancer`：
 
 ```kotlin
-@CoApi(serviceId = "github-service")
-interface ServiceApiClient {
-    @GetExchange("repos/{owner}/{repo}/issues")
-    fun getIssue(@PathVariable owner: String, @PathVariable repo: String): Flux<Issue>
+@CoApi(serviceId = "order-service")
+interface OrderClient {
+    @GetExchange("orders/{id}")
+    fun getOrder(@PathVariable id: String): Mono<Order>
 }
 ```
 
-配置服务实例：
-```yaml
-spring:
-  cloud:
-    discovery:
-      client:
-        simple:
-          instances:
-            github-service:
-              - host: api.github.com
-                secure: true
-                port: 443
-```
+见[负载均衡](../deep-dive/load-balancing.md)。
 
-### 同步客户端（Java）
+## 接下来
 
-```java
-@CoApi(baseUrl = "${github.url}")
-public interface GitHubSyncClient {
-    @GetExchange("repos/{owner}/{repo}/issues")
-    List<Issue> getIssue(@PathVariable String owner, @PathVariable String repo);
-}
-```
-
-设置 `coapi.mode=SYNC` 以切换到基于 `RestClient` 的模式。返回 `List<T>` 而不是 `Flux<T>`。
-
-### 共享 API 契约模式
-
-定义提供者和消费者都依赖的共享 API 接口：
-
-```kotlin
-// Shared module: example-provider-api
-@HttpExchange("todo")
-interface TodoApi {
-    @GetExchange
-    fun getTodo(): Flux<Todo>
-}
-
-// Consumer module
-@CoApi(serviceId = "provider-service")
-interface TodoClient : TodoApi
-
-// Provider module
-@RestController
-class TodoController : TodoApi {
-    override fun getTodo(): Flux<Todo> = Flux.just(Todo("Hello"))
-}
-```
-
-## 相关页面
-
-- [什么是 CoApi？](./overview.md) — CoApi 存在的原因
-- [安装与设置](./installation.md) — 详细的依赖管理
-- [配置参考](./configuration.md) — 所有属性
-- [架构概述](/zh/deep-dive/architecture.md) — 内部注册工作原理
-- [示例与模式](/zh/deep-dive/examples.md) — 完整的示例演练
-
-## 参考资料
-
-1. [GitHubApiClient 示例](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-client/src/main/kotlin/me/ahoo/coapi/example/consumer/client/GitHubApiClient.kt) — `example/example-consumer-client/src/main/kotlin/.../GitHubApiClient.kt`
-2. [ConsumerServer](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/ConsumerServer.kt) — `example/example-consumer-server/src/main/kotlin/.../ConsumerServer.kt`
-3. [GithubController](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/kotlin/me/ahoo/coapi/example/consumer/GithubController.kt) — `example/example-consumer-server/src/main/kotlin/.../GithubController.kt`
-4. [Consumer application.yaml](https://github.com/Ahoo-Wang/CoApi/blob/main/example/example-consumer-server/src/main/resources/application.yaml) — `example/example-consumer-server/src/main/resources/application.yaml`
-5. [CoApi 注解](https://github.com/Ahoo-Wang/CoApi/blob/main/api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt) — `api/src/main/kotlin/me/ahoo/coapi/api/CoApi.kt`
-6. [EnableCoApi 注解](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApi.kt) — `spring/src/main/kotlin/me/ahoo/coapi/spring/EnableCoApi.kt`
+| 我想要…… | 阅读 |
+|----------|------|
+| 注册其他包或 JAR 中的客户端 | [注册客户端](../deep-dive/auto-configuration.md) |
+| 按环境覆盖 URL | [配置参考](./configuration.md) |
+| 添加请求头、认证、超时或连接池 | [自定义](../deep-dive/customization.md)、[认证](../deep-dive/authentication.md) |
+| 理解启动错误 | [故障排查](./troubleshooting.md) |

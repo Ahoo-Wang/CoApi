@@ -88,6 +88,7 @@ class OrderApiConfiguration {
 ## Related Pages
 
 - [Configuration Reference](./configuration.md)
-- [Customization & Extensibility](../deep-dive/customization.md)
+- [Customization](../deep-dive/customization.md)
 - [Load Balancing](../deep-dive/load-balancing.md)
-- [Auto-Configuration](../deep-dive/auto-configuration.md)
+- [Troubleshooting](./troubleshooting.md)
+- [Registering Clients](../deep-dive/auto-configuration.md)

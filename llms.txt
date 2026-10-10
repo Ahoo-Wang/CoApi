@@ -1,28 +1,33 @@
 # CoApi
 
-> Zero-boilerplate HTTP client auto-configuration for Spring HTTP Interface clients (Spring Boot 4.x / Spring Framework 7.x). Supports both reactive (WebClient) and synchronous (RestClient) programming models with optional client-side load balancing.
+> Zero-boilerplate auto-configuration for Spring HTTP Interface (@HttpExchange) clients on Spring Boot 4.x / Spring Framework 7.x. Annotate an interface with @CoApi and inject it; CoApi backs it with WebClient (reactive) or RestClient (sync), with optional Spring Cloud LoadBalancer support.
 
-## Onboarding
-
-- [Contributor Guide](wiki/onboarding/contributor-guide.md) — Setup, architecture, testing, and contributing
-- [Staff Engineer Guide](wiki/onboarding/staff-engineer-guide.md) — Architectural insights and design tradeoffs
-- [Executive Guide](wiki/onboarding/executive-guide.md) — Technology investment thesis for engineering leaders
-- [Product Manager Guide](wiki/onboarding/product-manager-guide.md) — Feature map and user journey
+Published docs: https://coapi.ahoo.me (Chinese: https://coapi.ahoo.me/zh/). Agent guidance for this repository: AGENTS.md.
 
 ## Getting Started
 
-- [What is CoApi?](wiki/getting-started/overview.md) — Why CoApi exists, comparison with OpenFeign
-- [Installation & Setup](wiki/getting-started/installation.md) — Gradle/Maven dependencies, module structure
-- [Quick Start](wiki/getting-started/quick-start.md) — Define your first HTTP client in 4 steps
-- [Configuration Reference](wiki/getting-started/configuration.md) — All YAML properties and resolution order
+- [What is CoApi?](wiki/getting-started/overview.md): purpose, capabilities, when to use it, version compatibility
+- [Installation](wiki/getting-started/installation.md): starter, required WebClient/RestClient builder starter, optional load balancer and java-jwt, artifacts
+- [Quick Start](wiki/getting-started/quick-start.md): define, configure and inject a reactive or sync client
 
-## Deep Dive
+## Guide
 
-- [Architecture Overview](wiki/deep-dive/architecture.md) — Registration flow, bean lifecycle, module responsibilities
-- [Annotations](wiki/deep-dive/annotations.md) — @CoApi, @LoadBalanced, URL resolution, bean naming
-- [Client Modes](wiki/deep-dive/client-modes.md) — REACTIVE/SYNC/AUTO, WebClient vs RestClient internals
-- [Load Balancing](wiki/deep-dive/load-balancing.md) — lb:// protocol, Spring Cloud LoadBalancer integration
-- [Customization](wiki/deep-dive/customization.md) — Builder customizer SPI, filter/interceptor chains
-- [Authentication](wiki/deep-dive/authentication.md) — BearerTokenFilter, JWT caching, HeaderSetFilter
-- [Auto-Configuration](wiki/deep-dive/auto-configuration.md) — Boot auto-config vs @EnableCoApi, classpath scanning
-- [Examples & Patterns](wiki/deep-dive/examples.md) — Provider-consumer pattern, sync Java, URI clients
+- [Defining Clients](wiki/deep-dive/annotations.md): @CoApi attributes, base URL resolution, @LoadBalanced, naming, URI-per-request clients, shared contracts
+- [Registering Clients](wiki/deep-dive/auto-configuration.md): classpath scanning, coapi.base-packages, @EnableCoApi, CoApiDefinition beans, use without Spring Boot
+- [Client Modes](wiki/deep-dive/client-modes.md): REACTIVE / SYNC / AUTO, return types, builder beans
+- [Load Balancing](wiki/deep-dive/load-balancing.md): serviceId, lb://, Spring Cloud LoadBalancer wiring, per-environment overrides
+- [Customization](wiki/deep-dive/customization.md): per-client filters/interceptors, builder customizers, replacing beans
+- [Authentication](wiki/deep-dive/authentication.md): HeaderSetFilter, BearerTokenFilter, CachedExpirableTokenProvider
+- [Examples](wiki/deep-dive/examples.md): the runnable example modules
+
+## Reference
+
+- [Configuration](wiki/getting-started/configuration.md): every coapi.* property and the override rules
+- [Troubleshooting](wiki/getting-started/troubleshooting.md): startup error messages, causes and fixes
+- [Migrating to 3.0](wiki/getting-started/migration-v3.md): breaking SPI changes from 2.x
+- [Architecture](wiki/deep-dive/architecture.md): internals, design rules, where to change what
+
+## Optional
+
+- [CONTRIBUTING.md](CONTRIBUTING.md): workflow, CI gates, releases
+- [skills/coapi-developer](skills/coapi-developer/SKILL.md): agent skill for applications using CoApi

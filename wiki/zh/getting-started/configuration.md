@@ -1,258 +1,86 @@
 ---
-title: Configuration Reference
-description: Complete reference for CoApi configuration properties, resolution order, and advanced patterns
+title: 配置参考
+description: 全部 coapi.* 属性，以及单客户端属性如何覆盖 @CoApi 注解声明的规则。
 ---
 
 # 配置参考
 
-CoApi 的配置系统旨在提供最大的灵活性，同时保持合理的默认值和清晰的优先级规则。配置采用分层方法，允许全局设置和特定于客户端的覆盖，使开发人员能够跨整个 API 客户端生态系统或针对各个服务自定义行为。
+所有属性都位于 `coapi` 前缀下，由 Spring Boot starter 绑定（[`CoApiProperties`](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt)）。
 
-## 概述
+## 全局属性
 
-CoApi 的配置架构在声明式便利性和程序化控制之间取得平衡。通过支持注解驱动和基于属性的配置，它适应不同的开发风格和部署场景。系统优先考虑显式属性声明，同时为向后兼容性和快速原型设计提供注解回退。
+| 属性 | 默认值 | 说明 |
+|------|--------|------|
+| `coapi.enabled` | `true` | 设为 `false` 会关闭 Spring Boot 自动配置（classpath 扫描和 `coapi.*` 绑定）。`@EnableCoApi` 中列出的客户端仍会注册。 |
+| `coapi.mode` | `AUTO` | `REACTIVE`（`WebClient`）、`SYNC`（`RestClient`）或 `AUTO`（根据 classpath 推断）。不区分大小写；非法值会导致启动失败。见[客户端模式](../deep-dive/client-modes.md)。 |
+| `coapi.base-packages` | 空 | 在 `@SpringBootApplication` 所在包之外，额外扫描 `@CoApi` 接口的包。支持逗号分隔的字符串或 YAML 列表。 |
 
-## 配置属性
+## 单客户端属性
 
-### 全局属性
+`<name>` 是客户端名称：设置了 `@CoApi(name)` 时取该值，否则取接口的简单类名（如 `GitHubApiClient`）。重命名客户端会改变它的配置键。
 
-| 属性 | 类型 | 默认 | 描述 | 来源 |
-|----------|------|---------|-------------|--------|
-| `coapi.enabled` | `Boolean` | `true` | 启用/禁用 CoApi 功能 | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L1) |
-| `coapi.mode` | `ClientMode` | `AUTO` | 全局客户端模式（AUTO、REACTIVE、SYNC） | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L2) |
-| `coapi.base-packages` | `List<String>` | `[]` | 客户端发现的基础包 | [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L3) |
+| 属性 | 默认值 | 说明 |
+|------|--------|------|
+| `coapi.clients.<name>.base-url` | 未设置 | 替换注解中的 base URL。`lb://` URL 会启用负载均衡。 |
+| `coapi.clients.<name>.load-balanced` | 未设置 | `true` 或 `false`，强制开启或关闭负载均衡。 |
+| `coapi.clients.<name>.reactive.filter.names` | 空 | 要添加的 `ExchangeFilterFunction` 的 Bean 名称（响应式模式）。 |
+| `coapi.clients.<name>.reactive.filter.types` | 空 | 要添加的 `ExchangeFilterFunction` 的 Bean 类型（全限定类名）。 |
+| `coapi.clients.<name>.sync.interceptor.names` | 空 | 要添加的 `ClientHttpRequestInterceptor` 的 Bean 名称（同步模式）。 |
+| `coapi.clients.<name>.sync.interceptor.types` | 空 | 要添加的 `ClientHttpRequestInterceptor` 的 Bean 类型。 |
 
-### 客户端属性
+过滤器和拦截器必须是 Bean。它们先按名称、再按类型应用，各自保持配置顺序。按类型引用时必须恰好匹配一个 Bean。只有当前模式对应的列表会生效：响应式模式用 `reactive.*`，同步模式用 `sync.*`。
 
-| 属性 | 类型 | 默认 | 描述 | 来源 |
-|----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.base-url` | `String` | `""` | 客户端的基础 URL，覆盖注解。`lb://` URL 会被改写为 `http://` 并启用负载均衡（自 v2.3.0 起） | [CoApiDefinition.kt:156](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L156) |
-| `coapi.clients.<name>.load-balanced` | `Boolean?` | `null` | 覆盖负载均衡（`true` 启用 / `false` 禁用；未设置时跟随 `base-url`，再回退注解） | [CoApiDefinition.kt:156](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt#L156) |
+## 覆盖规则
 
-::: info
-配置键 `coapi.clients.<name>.*` 中的 `<name>` 是 `@CoApi` 的 `name` 属性——未设置时为接口的简单类名。在注解上设置自定义 `name` 会改变配置键。
+注解定义客户端，单客户端属性在构建 HTTP 客户端时覆盖它。得到的结果称为客户端的**生效定义**（effective definition），[Builder 定制器](../deep-dive/customization.md)接收的也是它。
 
-自 v2.2.0 起，`@CoApi` `baseUrl`/`serviceId` 中的 `${...}` 占位符必须在当前环境中可解析：无法解析的占位符（且无 `${name:default}` 兜底）会在启动期抛出 `Could not resolve placeholder ...`，而不是把字面量 `${...}` 泄入客户端 baseUrl 并在运行期破坏请求。同名客户端冲突同样会在启动期报错并列出冲突类型。
-:::
+**Base URL**
 
-### 响应式客户端属性
+1. `coapi.clients.<name>.base-url`（非空时）。
+2. 否则取 `@CoApi(baseUrl)`，并解析占位符。
+3. 否则取 `lb://` + `@CoApi(serviceId)`。
+4. 否则为空。此时客户端必须在每次请求时传入完整的 `URI`（见[定义客户端](../deep-dive/annotations.md#没有-base-url)）。
 
-| 属性 | 类型 | 默认 | 描述 | 来源 |
-|----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.reactive.filter.names` | `List<String>` | `[]` | `ExchangeFilterFunction` Bean 名称 | [CoApiProperties.kt:64](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
-| `coapi.clients.<name>.reactive.filter.types` | `List<String>` | `[]` | `ExchangeFilterFunction` Bean 类型（全限定类名） | [CoApiProperties.kt:64](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L64) |
+`lb://` 协议（不区分大小写）总会被改写为 `http://`，并把客户端标记为负载均衡。
 
-### 同步客户端属性
+**负载均衡**
 
-| 属性 | 类型 | 默认 | 描述 | 来源 |
-|----------|------|---------|-------------|--------|
-| `coapi.clients.<name>.sync.interceptor.names` | `List<String>` | `[]` | `ClientHttpRequestInterceptor` Bean 名称 | [CoApiProperties.kt:68](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
-| `coapi.clients.<name>.sync.interceptor.types` | `List<String>` | `[]` | `ClientHttpRequestInterceptor` Bean 类型（全限定类名） | [CoApiProperties.kt:68](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt#L68) |
+| `load-balanced` | `base-url` | 是否负载均衡 |
+|-----------------|------------|--------------|
+| `true` / `false` | 任意 | 取配置值 |
+| 未设置 | 已设置 | 仅当它是 `lb://` URL 时 |
+| 未设置 | 未设置 | 取决于注解：`serviceId`、`lb://` 形式的 `baseUrl`，或 `@LoadBalanced` |
 
-## 配置解析流程
+这些规则集中实现在 `CoApiDefinition.withOverrides()` 中，并由 `CoApiDefinitionTest` 覆盖测试。
 
-配置系统遵循严格的优先级顺序以确保可预测的行为：
-
-```mermaid
-flowchart TD
-    A[Start Configuration Resolution] --> B{"coapi.clients.<name>.base-url set?"}
-    B -->|Yes| C["Use properties baseUrl (lb:// rewritten to http://)"]
-    B -->|No| D{"@CoApi baseUrl / serviceId set?"}
-    D -->|Yes| E["Use annotation baseUrl (lb:// rewritten to http://)"]
-    D -->|No| F[Empty baseUrl - client uses absolute URIs per request]
-
-    A --> G{"coapi.clients.<name>.load-balanced set?"}
-    G -->|Yes| H[Use configured value]
-    G -->|No| I{"coapi.clients.<name>.base-url set?"}
-    I -->|Yes| J["Load balanced only if it is an lb:// URL"]
-    I -->|No| K["Annotation: @LoadBalanced, lb://, or serviceId"]
-
-    C --> L[Effective CoApiDefinition]
-    E --> L
-    F --> L
-    H --> L
-    J --> L
-    K --> L
-```
-<!-- Sources: spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt:144-166 -->
-
-## 属性层次结构
-
-配置层次结构决定了不同配置源的合并和优先级：
-
-```mermaid
-graph TD
-    subgraph "Global Level"
-        A[coapi.enabled]
-        B[coapi.mode]
-        C[coapi.base-packages]
-    end
-
-    subgraph "Client Level"
-        D[coapi.clients.<name>.base-url]
-        E[coapi.clients.<name>.load-balanced]
-    end
-
-    subgraph "Client Sub-Level"
-        F[coapi.clients.<name>.reactive.filter.*]
-        G[coapi.clients.<name>.sync.interceptor.*]
-    end
-
-    subgraph "Annotation Level"
-        H["@CoApi(baseUrl)"]
-        I["@LoadBalanced"]
-    end
-
-    A --> D
-    B --> D
-    C --> D
-    D --> F
-    D --> G
-    E --> F
-    E --> G
-    H --> D
-    I --> E
-
-```
-
-## 客户端配置示例
-
-一个完整的客户端配置示例，显示所有可用选项：
-
-```mermaid
-graph TB
-    subgraph "Application.yml"
-        A["coapi:"]
-    end
-
-    subgraph "Global Settings"
-        B["enabled: true"]
-        C["mode: AUTO"]
-        D["base-packages:"]
-        E[ - com.example.clients]
-    end
-
-    subgraph "Client Definitions"
-        F["clients:"]
-        G["GitHubApiClient:"]
-        H["base-url: https://api.github.com"]
-        I["ServiceApiClient:"]
-        J["load-balanced: true"]
-        K["reactive:"]
-        L["filter:"]
-        M["names:"]
-        N[ - loadBalancerExchangeFilterFunction]
-        O["types:"]
-        P[" - org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction"]
-        Q["sync:"]
-        R["interceptor:"]
-        S["names:"]
-        T[ - loadBalancerInterceptor]
-    end
-
-    A --> B
-    A --> C
-    A --> D
-    D --> E
-    A --> F
-    F --> G
-    G --> H
-    F --> I
-    I --> J
-    I --> K
-    K --> L
-    L --> M
-    M --> N
-    L --> O
-    O --> P
-    I --> Q
-    Q --> R
-    R --> S
-    S --> T
-
-```
-
-## 配置解析序列
-
-解析过程遵循明确定义的序列以确保可预测的行为：
-
-```mermaid
-sequenceDiagram
-    participant P as Properties File
-    participant A as Annotations
-    participant F as FactoryBean
-    participant C as Client Instance
-
-    autonumber
-
-    F->>P: Check coapi.clients.<name>.base-url
-    alt Has property
-        P-->>F: Return baseUrl from properties
-    else No property
-        F->>A: Check @CoApi annotation
-        alt Has annotation
-            A-->>F: Return baseUrl from annotation
-        else No annotation
-            F-->>F: Use empty baseUrl (client must use absolute URIs per request)
-        end
-    end
-
-    F->>P: Check coapi.clients.<name>.load-balanced
-    alt Has property
-        P-->>F: Return loadBalanced from properties
-    else No property
-        F->>A: Check @LoadBalanced annotation
-        alt Has annotation
-            A-->>F: Return loadBalanced from annotation
-        else No annotation
-            F-->>F: Use default behavior
-        end
-    end
-
-    F->>F: Build ClientDefinition
-    F-->>C: Return configured client
-```
-
-## YAML 配置示例
+## 示例
 
 ```yaml
 coapi:
-  enabled: true
-  mode: AUTO  # AUTO, REACTIVE, SYNC
+  mode: SYNC
   base-packages:
-    - com.example.clients
+    - com.example.partner.clients
   clients:
-    GitHubApiClient:
-      base-url: https://api.github.com
-    ServiceApiClient:
-      load-balanced: true
-      reactive:
-        filter:
-          names:
-            - loadBalancerExchangeFilterFunction
-          types:
-            - org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction
+    # 在当前环境中让负载均衡客户端指向固定主机
+    OrderClient:
+      base-url: http://orders.staging.internal:8080
+    # 为声明为纯 @CoApi 的客户端提供 URL
+    PaymentClient:
+      base-url: https://payments.example.com
       sync:
         interceptor:
           names:
-            - loadBalancerInterceptor
+            - paymentAuthInterceptor
 ```
 
-## 交叉引用
+## 不使用 Spring Boot
 
-- [客户端模式](/zh/getting-started/overview.md) - 不同客户端操作模式的详细信息
-- [架构概述](/zh/deep-dive/architecture.md) - 深入了解注册流程
+`coapi.clients.*` 属性是 Spring Boot 的功能。在纯 Spring 中，同样的设置由你实现的可选 Bean 提供：
 
-## 参考资料
+| Bean | 提供 |
+|------|------|
+| `ClientProperties` | `getBaseUri(name)`、`getLoadBalanced(name)` |
+| `ReactiveClientProperties` | `getFilter(name)` |
+| `SyncClientProperties` | `getInterceptor(name)` |
 
-### 源文件
-
-- [CoApiProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/CoApiProperties.kt) - 主配置属性类
-- [CoApiDefinition.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/CoApiDefinition.kt) - 配置覆盖规则（`withOverrides`）
-- [ClientProperties.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/client/ClientProperties.kt) - 客户端配置 SPI（`ClientProperties`、`ReactiveClientProperties`、`SyncClientProperties`）
-- [ClientMode.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring/src/main/kotlin/me/ahoo/coapi/spring/ClientMode.kt) - 客户端模式枚举
-- [ConditionalOnCoApiEnabled.kt](https://github.com/Ahoo-Wang/CoApi/blob/main/spring-boot-starter/src/main/kotlin/me/ahoo/coapi/spring/boot/starter/ConditionalOnCoApiEnabled.kt) - 条件配置
-
-### 相关页面
-
-- [概述](/zh/getting-started/overview.md) - CoApi 基础介绍
-- [配置参考](/zh/getting-started/configuration.md) - 完整配置指南
+它们都是可选的：缺失时，客户端完全按注解声明工作。使用 Spring Boot 时，`CoApiProperties` 同时实现了这三个接口。两种情况下 `coapi.mode` 都从 `Environment` 读取。

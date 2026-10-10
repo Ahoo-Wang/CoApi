@@ -30,7 +30,9 @@ synchronous `RestClient` proxies.
 
 ## Essential Facts
 
-- Dependency: `implementation("me.ahoo.coapi:coapi-spring-boot-starter")`.
+- Dependency: `implementation("me.ahoo.coapi:coapi-spring-boot-starter")`, plus the builder for the client mode: `spring-boot-starter-webclient` (reactive) or `spring-boot-starter-restclient` (sync). The starter does not bring either.
+- `AUTO` mode picks `REACTIVE` whenever Spring WebFlux is on the classpath (a classpath check, not the web application type); set `coapi.mode` explicitly when that is wrong.
+- Docs: https://coapi.ahoo.me (troubleshooting: `/getting-started/troubleshooting`).
 - Main annotations:
   - `@CoApi(baseUrl = "...", serviceId = "...", name = "...")` marks an interface as a CoApi client.
   - `@LoadBalanced` explicitly enables load-balanced client wiring.
