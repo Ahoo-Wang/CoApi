@@ -5,7 +5,7 @@ description: The runnable example applications in the CoApi repository and the p
 
 # Examples
 
-The [`example/`](https://github.com/Ahoo-Wang/CoApi/tree/main/example) directory has runnable applications. Every pattern in this wiki appears in one of them.
+The [`example/`](https://github.com/Ahoo-Wang/CoApi/tree/main/example) directory has runnable applications. They cover client definition, registration, client modes, load balancing and customization. Authentication is not covered; see [Authentication](./authentication.md) for its samples.
 
 | Module | Demonstrates |
 |--------|--------------|

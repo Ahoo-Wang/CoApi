@@ -64,7 +64,7 @@ Each client gets two beans named after it:
 
 Inject the interface by type. Use the `WebClient`/`RestClient` bean by name only when you need the raw client for the same target.
 
-Two clients with the same name fail startup (`Duplicate CoApi name`). This happens when interfaces in different packages share a simple name; give one a `name`.
+Names must be unique. This usually breaks when interfaces in different packages share a simple name; give one a `name`. If both come in through the same registration path (scanning plus `CoApiDefinition` beans, or one `@EnableCoApi`), startup fails with `Duplicate CoApi name`. If they come in through different paths (one scanned, one in `@EnableCoApi`), the second is skipped with only a `WARN` log, so check for `already exists - Ignore` lines.
 
 ## No base URL
 

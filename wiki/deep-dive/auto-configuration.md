@@ -45,7 +45,7 @@ class ConsumerApplication
 
 `@EnableCoApi` lives in `coapi-spring` and works without Spring Boot. It does not depend on `coapi.enabled`.
 
-Registering the same interface by more than one way is harmless. The first registration wins, and later ones are skipped with a `WARN` log line.
+Registering the same interface by more than one way is harmless: the first registration wins, and later ones are skipped with a `WARN` log line. The same skip applies to two *different* interfaces that share a name across registration paths, so give clients unique names.
 
 ## `CoApiDefinition` beans
 
@@ -71,7 +71,7 @@ Rules:
 
 - The `@Bean` method must be **static** (Kotlin: `@JvmStatic` in a `companion object`). CoApi reads these beans before bean post-processing. A non-static method would create its configuration class too early, so startup fails instead.
 - Placeholders and `lb://` in `baseUrl` are resolved just like on the annotation.
-- Names must be unique across scanned, listed and definition clients.
+- Names must be unique. A clash with a scanned client fails startup; a clash with an `@EnableCoApi` client is skipped with a `WARN` log.
 - Only Spring Boot auto-configuration collects these beans. `@EnableCoApi` alone does not.
 
 ## Without Spring Boot

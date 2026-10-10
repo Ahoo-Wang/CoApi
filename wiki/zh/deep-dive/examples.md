@@ -5,7 +5,7 @@ description: CoApi 仓库中可运行的示例应用，以及每个示例展示�
 
 # 示例
 
-[`example/`](https://github.com/Ahoo-Wang/CoApi/tree/main/example) 目录包含可运行的应用。本文档中的每种用法都能在其中找到。
+[`example/`](https://github.com/Ahoo-Wang/CoApi/tree/main/example) 目录包含可运行的应用。它们涵盖客户端定义、注册、客户端模式、负载均衡和自定义，但不包含认证，认证示例见[认证](./authentication.md)。
 
 | 模块 | 展示内容 |
 |------|----------|

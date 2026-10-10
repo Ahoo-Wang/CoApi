@@ -64,7 +64,7 @@ interface OrderClient
 
 按类型注入接口即可。只有在需要直接使用同一目标的原始客户端时，才按名称获取 `WebClient`/`RestClient` Bean。
 
-两个客户端名称相同会导致启动失败（`Duplicate CoApi name`）。当不同包中的接口简单类名相同时就会发生，给其中一个设置 `name` 即可。
+名称必须唯一。最常见的冲突是不同包中的接口简单类名相同，给其中一个设置 `name` 即可。如果两者来自同一注册途径（扫描加 `CoApiDefinition` Bean，或同一个 `@EnableCoApi`），启动会以 `Duplicate CoApi name` 失败；如果来自不同途径（一个被扫描、一个列在 `@EnableCoApi` 中），后注册的会被跳过，只输出一条 `WARN` 日志，请留意 `already exists - Ignore` 日志。
 
 ## 没有 base URL
 

@@ -45,7 +45,7 @@ class ConsumerApplication
 
 `@EnableCoApi` 位于 `coapi-spring` 中，不依赖 Spring Boot，也不受 `coapi.enabled` 影响。
 
-通过多种方式注册同一个接口是无害的。先注册的生效，后续注册会被跳过并输出一条 `WARN` 日志。
+通过多种方式注册同一个接口是无害的：先注册的生效，后续注册会被跳过并输出一条 `WARN` 日志。跨注册途径的两个*不同*接口如果同名，也会这样被跳过，因此请保证客户端名称唯一。
 
 ## `CoApiDefinition` Bean
 
@@ -71,7 +71,7 @@ class OrderApiConfiguration {
 
 - `@Bean` 方法必须是**静态**的（Kotlin：放在 `companion object` 中并加 `@JvmStatic`）。CoApi 在 Bean 后处理之前读取这些 Bean。非静态方法会过早创建它所在的配置类，因此启动会直接失败。
 - `baseUrl` 中的占位符和 `lb://` 与注解中的处理方式相同。
-- 名称在扫描、显式列出和定义 Bean 的所有客户端之间必须唯一。
+- 名称必须唯一。与扫描到的客户端重名会导致启动失败；与 `@EnableCoApi` 中的客户端重名则会被跳过，只输出一条 `WARN` 日志。
 - 只有 Spring Boot 自动配置会收集这些 Bean。仅使用 `@EnableCoApi` 时不会收集。
 
 ## 不使用 Spring Boot
