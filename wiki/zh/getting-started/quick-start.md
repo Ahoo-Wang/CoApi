@@ -30,7 +30,7 @@ public interface GitHubApiClient {
     List<Issue> getIssues(@PathVariable String owner, @PathVariable String repo);
 }
 
-public record Issue(String url) {}
+record Issue(String url) {} // 包级可见，两个类型可放在同一文件中
 ```
 
 :::

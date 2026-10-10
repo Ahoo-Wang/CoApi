@@ -30,7 +30,7 @@ public interface GitHubApiClient {
     List<Issue> getIssues(@PathVariable String owner, @PathVariable String repo);
 }
 
-public record Issue(String url) {}
+record Issue(String url) {} // package-private, so both types fit in one file
 ```
 
 :::

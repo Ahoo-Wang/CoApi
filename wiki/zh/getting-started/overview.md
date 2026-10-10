@@ -24,7 +24,7 @@ class IssueController(private val gitHubApiClient: GitHubApiClient)
 
 | 能力 | 实现方式 |
 |------|----------|
-| 每个接口一个 Bean，无需工厂代码 | `@CoApi` + Spring Boot 自动配置，或 `@EnableCoApi` |
+| 每个接口一个可注入的代理，无需工厂代码 | `@CoApi` + Spring Boot 自动配置，或 `@EnableCoApi` |
 | 响应式或阻塞式 | `WebClient` 或 `RestClient`，由 `coapi.mode` 指定或根据 classpath 推断 |
 | 客户端负载均衡 | `serviceId`、`lb://` 或 `@LoadBalanced`，基于 Spring Cloud LoadBalancer |
 | 无需代码的单客户端配置 | `coapi.clients.<name>.*` 覆盖 base URL、负载均衡、过滤器和拦截器 |

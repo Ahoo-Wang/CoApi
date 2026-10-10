@@ -24,7 +24,7 @@ class IssueController(private val gitHubApiClient: GitHubApiClient)
 
 | Capability | How |
 |------------|-----|
-| One bean per interface, no factory code | `@CoApi` + Spring Boot auto-configuration, or `@EnableCoApi` |
+| One injectable proxy per interface, no factory code | `@CoApi` + Spring Boot auto-configuration, or `@EnableCoApi` |
 | Reactive or blocking | `WebClient` or `RestClient`, chosen by `coapi.mode` or inferred from the classpath |
 | Client-side load balancing | `serviceId`, `lb://` or `@LoadBalanced`, via Spring Cloud LoadBalancer |
 | Per-client settings without code | `coapi.clients.<name>.*` overrides base URL, load balancing, filters and interceptors |

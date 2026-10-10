@@ -11,7 +11,7 @@ A CoApi application needs three things on the classpath:
 2. **An HTTP client builder** for the [client mode](../deep-dive/client-modes.md): `WebClient` (reactive) or `RestClient` (sync).
 3. **Optional extras**: Spring Cloud LoadBalancer for `serviceId`/`lb://` clients, and `java-jwt` for JWT token parsing.
 
-Replace `<version>` with the [latest release](https://github.com/Ahoo-Wang/CoApi/releases/latest) (see [version compatibility](./overview.md#version-compatibility)).
+Replace `<version>` (Maven: the `coapi.version` property) with the [latest release](https://github.com/Ahoo-Wang/CoApi/releases/latest) (see [version compatibility](./overview.md#version-compatibility)).
 
 ## CoApi starter
 
@@ -29,7 +29,7 @@ implementation 'me.ahoo.coapi:coapi-spring-boot-starter:<version>'
 <dependency>
     <groupId>me.ahoo.coapi</groupId>
     <artifactId>coapi-spring-boot-starter</artifactId>
-    <version><version></version>
+    <version>${coapi.version}</version>
 </dependency>
 ```
 
@@ -50,7 +50,7 @@ implementation("me.ahoo.coapi:coapi-spring-boot-starter")
         <dependency>
             <groupId>me.ahoo.coapi</groupId>
             <artifactId>coapi-bom</artifactId>
-            <version><version></version>
+            <version>${coapi.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>

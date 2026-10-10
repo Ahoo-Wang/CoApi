@@ -11,7 +11,7 @@ description: 添加 CoApi starter、与客户端模式匹配的 HTTP 客户端 s
 2. **HTTP 客户端 Builder**，与[客户端模式](../deep-dive/client-modes.md)匹配：`WebClient`（响应式）或 `RestClient`（同步）。
 3. **可选依赖**：`serviceId`/`lb://` 客户端需要 Spring Cloud LoadBalancer，解析 JWT 需要 `java-jwt`。
 
-将 `<version>` 替换为[最新版本](https://github.com/Ahoo-Wang/CoApi/releases/latest)（见[版本兼容性](./overview.md#版本兼容性)）。
+将 `<version>`（Maven 中为 `coapi.version` 属性）替换为[最新版本](https://github.com/Ahoo-Wang/CoApi/releases/latest)（见[版本兼容性](./overview.md#版本兼容性)）。
 
 ## CoApi starter
 
@@ -29,7 +29,7 @@ implementation 'me.ahoo.coapi:coapi-spring-boot-starter:<version>'
 <dependency>
     <groupId>me.ahoo.coapi</groupId>
     <artifactId>coapi-spring-boot-starter</artifactId>
-    <version><version></version>
+    <version>${coapi.version}</version>
 </dependency>
 ```
 
@@ -50,7 +50,7 @@ implementation("me.ahoo.coapi:coapi-spring-boot-starter")
         <dependency>
             <groupId>me.ahoo.coapi</groupId>
             <artifactId>coapi-bom</artifactId>
-            <version><version></version>
+            <version>${coapi.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
