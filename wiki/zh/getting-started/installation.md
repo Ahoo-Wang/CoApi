@@ -87,7 +87,7 @@ implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 **JWT 过期时间解析**（`String.jwtToExpirableToken()`，见[认证](../deep-dive/authentication.md)）需要 `com.auth0:java-jwt`：
 
 ```kotlin
-implementation("com.auth0:java-jwt:<version>")
+implementation("com.auth0:java-jwt:<java-jwt-version>")
 ```
 
 ## 构件

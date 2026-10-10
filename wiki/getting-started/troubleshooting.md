@@ -47,7 +47,7 @@ The application defines more than one builder, for example a Spring Cloud `@Load
 
 1. It is an **interface** annotated with `@CoApi`. Classes are ignored.
 2. It is in the `@SpringBootApplication` package or below, or in a package listed in `coapi.base-packages`, or listed in `@EnableCoApi(clients = [...])`.
-3. `coapi.enabled` is not `false`, which turns off scanning.
+3. If it relies on scanning (points 1–2 without `@EnableCoApi`), `coapi.enabled` is not `false`. That setting turns off scanning, but not clients listed in `@EnableCoApi`.
 
 ## Runtime surprises
 

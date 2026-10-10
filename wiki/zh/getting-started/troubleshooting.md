@@ -47,7 +47,7 @@ CoApi 在启动时检查配置，出错时给出包含客户端名称和解决�
 
 1. 它是标注了 `@CoApi` 的**接口**。类会被忽略。
 2. 它位于 `@SpringBootApplication` 所在包或其子包中、位于 `coapi.base-packages` 列出的包中，或已列在 `@EnableCoApi(clients = [...])` 中。
-3. `coapi.enabled` 没有被设为 `false`（那会关闭扫描）。
+3. 如果依赖扫描注册（未使用 `@EnableCoApi`），确认 `coapi.enabled` 没有被设为 `false`。该设置会关闭扫描，但不影响 `@EnableCoApi` 中列出的客户端。
 
 ## 运行时意外
 

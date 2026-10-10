@@ -87,7 +87,7 @@ implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 **JWT expiry parsing** (`String.jwtToExpirableToken()`, see [Authentication](../deep-dive/authentication.md)) needs `com.auth0:java-jwt`:
 
 ```kotlin
-implementation("com.auth0:java-jwt:<version>")
+implementation("com.auth0:java-jwt:<java-jwt-version>")
 ```
 
 ## Artifacts
