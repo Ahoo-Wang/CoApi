@@ -1,66 +1,69 @@
 # AGENTS.md
 
-Guidance for coding agents working in this repository. `CLAUDE.md` imports this file, and this file is the only place to update.
+Instructions for coding agents in this repository. `CLAUDE.md` only imports this file: edit here.
 
-## Project
+CoApi is a Kotlin library: annotate a Spring HTTP Interface (`@HttpExchange`) with `@CoApi` and it becomes an injectable bean backed by `WebClient` (reactive) or `RestClient` (sync), optionally load-balanced through Spring Cloud. Kotlin on a JVM 17 toolchain, Spring Boot 4 / Spring Framework 7. Versions: `gradle.properties` (project), `gradle/libs.versions.toml` (dependencies).
 
-CoApi is a Kotlin library that turns Spring HTTP Interface (`@HttpExchange`) interfaces annotated with `@CoApi` into injectable beans backed by `WebClient` (reactive) or `RestClient` (sync), with optional Spring Cloud LoadBalancer support.
+## Read before you change
 
-- Group `me.ahoo.coapi`, artifacts `coapi-<module>`. Version in `gradle.properties`.
-- Kotlin, JVM 17 toolchain (tests also run on 21 and 25 in CI). Spring Boot 4.x / Spring Framework 7.x. Versions in `gradle/libs.versions.toml`.
-
-## Where things are documented
-
-| Topic | Source of truth |
-|-------|-----------------|
-| User docs (EN) | `wiki/` (VitePress, published at https://coapi.ahoo.me). See `wiki/AGENTS.md` |
-| User docs (zh) | `wiki/zh/`, a page-for-page mirror of `wiki/` |
-| Internals, design rules, "where to change what" | `wiki/deep-dive/architecture.md` |
-| Contribution process, CI gates, releases | `CONTRIBUTING.md` |
-| Agent skill for CoApi *users* | `skills/coapi-developer/` |
-
-Do not duplicate content from these places here. Link to them.
+| You are about to… | Read first |
+|---|---|
+| Change anything in `spring/` or `spring-boot-starter/` | `wiki/deep-dive/architecture.md`: registration flow, per-client bean graph, design rules, and a "where to change what" table mapping each concern to its files and tests |
+| Edit anything under `wiki/` | `wiki/AGENTS.md`: layout, sidebar, writing rules |
+| Open a PR or cut a release | `CONTRIBUTING.md` |
+| Answer how to *use* CoApi | `skills/coapi-developer/` and the user docs in `wiki/` |
 
 ## Commands
 
 ```bash
-./gradlew build                                   # compile, test, detekt, coverage gate
-./gradlew :spring:test                            # one module
-./gradlew :spring:test --tests "me.ahoo.coapi.spring.CoApiDefinitionTest"
-./gradlew :spring:test -PtestJavaVersion=21       # tests on another JDK
-./gradlew detekt                                  # autocorrects formatting locally, fails in CI
-./gradlew codeCoverageReport codeCoverageVerification   # ≥95% line / ≥90% branch, aggregated
-./gradlew :example-consumer-server:test :example-sync:test
+./gradlew build                                   # everything CI gates: compile, tests, detekt, coverage
+./gradlew :spring:test --tests "me.ahoo.coapi.spring.CoApiDefinitionTest"   # one class (add .method for one test)
+./gradlew :spring-boot-starter:test               # one module
+./gradlew :spring:test -PtestJavaVersion=21       # run tests on another JDK (CI: 17, 21, 25)
+./gradlew detekt                                  # lint; autocorrects formatting locally only
+./gradlew codeCoverageReport codeCoverageVerification   # aggregated gate: ≥95% line, ≥90% branch
+./gradlew :example-provider-server:check :example-consumer-server:check :example-sync:check
+cd wiki && pnpm install && pnpm build             # docs; fails on dead internal links
 ```
 
-## Modules
+## Design rules
 
-| Module | Role | Notes |
-|--------|------|-------|
-| `api` | `@CoApi`, `@LoadBalanced` | Annotations only, `spring-context` compile-only. Changing existing attributes is a breaking change. |
-| `spring` | Registrars, `CoApiDefinition`, factory beans, client SPI, reactive auth filters | Optional feature variants: `reactiveSupport`, `lbSupport`, `jwtSupport` |
-| `spring-boot-starter` | `CoApiAutoConfiguration`, `AutoCoApiRegistrar`, `CoApiProperties` | Feature variants `reactiveSupport`, `syncSupport`; kapt for configuration metadata |
-| `bom` / `dependencies` | Published BOM / internal version platform | `dependencies` affects every module |
-| `example/*` | Runnable examples, also integration-tested in CI | Do not remove: referenced by docs and CI |
-| `code-coverage-report` | Aggregated JaCoCo report and coverage gate | |
+They protect users, so do not break them. `architecture.md` explains why.
 
-## Invariants (keep them)
+1. **One owner for precedence.** Base URL and load-balancing precedence are computed only in `CoApiDefinition.normalize()` / `withOverrides()`. Everything else consumes `effectiveDefinition()` and never re-derives it.
+2. **Users can override every bean.** `CoApiRegistrar` registers a definition only if it is absent.
+3. **Optional dependencies stay optional.** `spring` has feature variants (`reactiveSupport`, `lbSupport`, `jwtSupport`). Spring Cloud types appear only in the `internal` `LoadBalanced*BuilderCustomizer` classes, loaded only for load-balanced clients after `requireLoadBalancerSupport` checks the classpath.
+4. **Extend by composition.** `WebClientFactoryBean` / `RestClientFactoryBean` are final. New behavior goes through customizer beans or the `ClientProperties` / `ReactiveClientProperties` / `SyncClientProperties` roles.
+5. **Fail fast.** Misconfiguration throws at startup with a message naming the client and the fix, and `wiki/getting-started/troubleshooting.md` lists that message.
+6. **Public API is a contract.** `api/` annotations, `coapi.*` properties and the SPI in `spring/` follow SemVer. A breaking change needs a `!` in the PR title and a migration guide entry.
 
-- URL and load-balancing precedence live only in `CoApiDefinition.normalize()` / `withOverrides()`. Everything else consumes `effectiveDefinition()`.
-- `CoApiRegistrar` never replaces existing bean definitions, so applications can override any bean.
-- Spring Cloud types are referenced only from the `internal` `LoadBalanced*BuilderCustomizer` classes, which are loaded only for load-balanced clients.
-- `WebClientFactoryBean` / `RestClientFactoryBean` are final. Extension goes through customizer beans and the optional `ClientProperties` / `ReactiveClientProperties` / `SyncClientProperties` roles.
-- Misconfiguration fails at startup with a message naming the client and the fix.
+## Non-obvious facts
 
-## Conventions
+- **Kotlin warnings are errors** in library modules (`api`, `spring`, `spring-boot-starter`), not in examples.
+- **detekt behaves differently in CI.** Locally it rewrites formatting in place. In CI (`CI` env set) the same issues fail the build. Run `./gradlew detekt` and keep its changes.
+- **License header.** Every source file starts with `config/detekt/license.template`, and detekt enforces it.
+- **Flaky tests fail.** In CI, test-retry reruns failed tests, but `failOnPassedAfterRetry = true` still fails the build.
+- **Examples are test fixtures.** `spring` and `spring-boot-starter` tests depend on `:example-provider-api` and `:example-consumer-client`, so editing those modules can break library tests. CI and the docs also reference every module under `example/`.
+- **Coverage is aggregated** across library modules in `code-coverage-report`, and `check` enforces it. New code without tests can fail `build` even when every test passes.
+- **`mavenLocal()` is resolved first.** A stale `~/.m2` artifact can shadow the real dependency.
+- Configuration metadata for `CoApiProperties` comes from kapt (`spring-boot-configuration-processor`), so don't hand-write it. Auto-configuration is registered in `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`.
 
-- Tests: JUnit 5, MockK, assertions with `me.ahoo.test.asserts.assert` (fluent-assert), not AssertJ's `assertThat`. Exception: `ApplicationContextRunner` context assertions use `AssertionsForInterfaceTypes.assertThat(context)` as existing tests do. Tests must not call external services.
-- Compiler: `-Xjsr305=strict`, `-jvm-default=enable`, `-parameters`, warnings are errors in library modules.
-- Detekt config: `config/detekt/detekt.yml` (max line length 300). Every source file starts with the Apache 2.0 header (`config/detekt/license.template`).
-- PR titles follow Conventional Commits (PRs are squash-merged).
+## Tests
 
-## Documentation rules
+- JUnit 5 + MockK. Assert with fluent-assert (`me.ahoo.test.asserts.assert`, `assertThrownBy`), not AssertJ `assertThat`. One exception: `ApplicationContextRunner` checks use `AssertionsForInterfaceTypes.assertThat(context)`, as in `CoApiAutoConfigurationTest`.
+- No network calls to external services. Use a local stand-in, as `ConsumerServerTest` does.
+- For a bug, write a failing test first.
 
-- A user-visible behavior or configuration change updates the affected `wiki/` page **and** its `wiki/zh/` mirror in the same PR. A breaking change also extends `wiki/getting-started/migration-v3.md` (or the next major's guide).
-- Update `README.md` / `README.zh-CN.md` only for the pitch, compatibility table, installation and the minimal example. Details belong in the wiki.
-- If the change affects facts in `skills/coapi-developer/`, update them there too.
+## A change is done when
+
+- [ ] `./gradlew build` passes (plus the affected `example-*:check` if you touched examples or wiring).
+- [ ] User-visible behavior or configuration is documented in the affected `wiki/` page **and** its `wiki/zh/` mirror.
+- [ ] Adding, renaming or removing a wiki page also updates `wiki/.vitepress/config.mts` (`sidebar()`) and `llms.txt`.
+- [ ] A breaking change extends `wiki/getting-started/migration-v3.md` (or the current major's guide).
+- [ ] Facts that changed are updated in `skills/coapi-developer/` too.
+- [ ] `README.md` / `README.zh-CN.md` change only for the pitch, compatibility table, installation or the minimal example.
+- [ ] The PR title follows Conventional Commits (it becomes the squash commit), e.g. `fix(spring): …`, `feat(starter)!: …`.
+
+## Maintaining this file
+
+Keep it short. Add a line only if it changes what an agent does and can't be learned quickly from the code. Link to the source of truth (`architecture.md`, `CONTRIBUTING.md`, `wiki/AGENTS.md`) instead of copying it, and check every command before writing it down.
